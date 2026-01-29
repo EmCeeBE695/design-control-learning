@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Mapping Mastery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            left: 260px;
+            top: 20px;
+            background: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+
+        .sidebar-toggle.collapsed {
+            left: 10px;
+        }
+
+        .sidebar h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .main-content {
+            margin-left: 270px;
+            padding: 40px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 20px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .landing {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .landing h1 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .landing p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .game-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .game-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .game-card p {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-header h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .score-item .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .streak-glow {
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+            to { box-shadow: 0 0 20px rgba(255,255,255,1); }
+        }
+
+        .conveyor {
+            position: relative;
+            height: 150px;
+            background: linear-gradient(to bottom, #e0e0e0, #f5f5f5);
+            border: 3px solid #999;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .variable-card {
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-size: 1.1em;
+            font-weight: 500;
+            animation: moveLeft 7s linear;
+            white-space: nowrap;
+            max-width: 80%;
+        }
+
+        @keyframes moveLeft {
+            from { left: 100%; }
+            to { left: -50%; }
+        }
+
+        .variable-card.explode {
+            animation: explode 0.5s ease;
+        }
+
+        @keyframes explode {
+            0% { transform: translateY(-50%) scale(1); opacity: 1; }
+            50% { transform: translateY(-50%) scale(1.5) rotate(10deg); opacity: 0.5; background: #ff4444; }
+            100% { transform: translateY(-50%) scale(0); opacity: 0; }
+        }
+
+        .variable-card.success {
+            animation: success 0.5s ease;
+        }
+
+        @keyframes success {
+            0% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.2); }
+            100% { transform: translateY(-50%) scale(0); opacity: 0; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            max-width: 200px;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn.left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .control-btn.right {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .feedback-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 2000;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .feedback-modal.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .feedback-modal.correct {
+            border: 5px solid #4CAF50;
+        }
+
+        .feedback-modal.incorrect {
+            border: 5px solid #ff4444;
+        }
+
+        .feedback-modal h3 {
+            margin-bottom: 15px;
+        }
+
+        .feedback-modal.correct h3 {
+            color: #4CAF50;
+        }
+
+        .feedback-modal.incorrect h3 {
+            color: #ff4444;
+        }
+
+        .round-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .assembly-area {
+            margin-bottom: 30px;
+        }
+
+        .assembly-preview {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 10px;
+            min-height: 120px;
+            border: 3px dashed #ccc;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .assembly-preview.filled {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .tile-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .tile-column {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .tile-column h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .tile {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.95em;
+        }
+
+        .tile:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .tile.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tile.correct {
+            background: #4CAF50;
+            color: white;
+            animation: pulse 0.5s ease;
+        }
+
+        .tile.incorrect {
+            background: #ff4444;
+            color: white;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .result-screen {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .result-screen h2 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .result-screen .final-score {
+            font-size: 4em;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 30px 0;
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            margin: 10px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .instruction-text {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .device-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 220px;
+            }
+            .game-cards {
+                grid-template-columns: 1fr;
+            }
+            .tile-columns {
+                grid-template-columns: 1fr;
+            }
+            .landing h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <h2>Product Mapping Mastery</h2>
+        <button class="nav-btn" onclick="navigateHome()">🏠 Home</button>
+        <button class="nav-btn" onclick="navigateToGame('game1')">🎮 Game 1: Control Tower</button>
+        <button class="nav-btn" onclick="navigateToGame('game2')">🧩 Game 2: Output Assembly</button>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+
+    <div class="main-content" id="mainContent">
+
+        <div class="screen active" id="landing">
+            <div class="landing">
+                <h1>🎯 Product Mapping Mastery</h1>
+                <p>Master the essential skills for medical device development through interactive gameplay</p>
+
+                <div class="game-cards">
+                    <div class="game-card" onclick="startGame1()">
+                        <h3>🎮 Control Tower</h3>
+                        <p>Classify input variables as Control or Noise at lightning speed. Build your streak and become an expert!</p>
+                        <p style="margin-top: 15px;"><strong>15 Variables • 7 Minutes</strong></p>
+                    </div>
+
+                    <div class="game-card" onclick="startGame2()">
+                        <h3>🧩 Output Assembly</h3>
+                        <p>Build perfect output statements by selecting the right components. Learn to write requirements like a pro!</p>
+                        <p style="margin-top: 15px;"><strong>8 Rounds • 10 Minutes</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="game1">
+            <div class="game-container">
+                <div class="game-header">
+                    <h2>🎮 Control Tower</h2>
+                    <p>Classify variables as Control (C) or Noise (N) before they disappear!</p>
+                </div>
+
+                <div class="score-board" id="scoreBoard">
+                    <div class="score-item">
+                        <div class="label">Score</div>
+                        <div class="value" id="score">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Streak</div>
+                        <div class="value" id="streak">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Progress</div>
+                        <div class="value" id="progress">0/15</div>
+                    </div>
+                </div>
+
+                <div class="instruction-text">
+                    <strong>Instructions:</strong> Click LEFT for Control (design specifications you own) or RIGHT for Noise (external factors you design around). Use keyboard: Arrow keys or C/N keys.
+                </div>
+
+                <div class="conveyor" id="conveyor"></div>
+
+                <div class="controls">
+                    <button class="control-btn left" onclick="classify('C')">
+                        ← CONTROL (C)
+                    </button>
+                    <button class="control-btn right" onclick="classify('N')">
+                        NOISE (N) →
+                    </button>
+                </div>
+
+                <div id="game1Result" style="display: none;">
+                    <div class="result-screen">
+                        <h2>Game Complete! 🎉</h2>
+                        <div class="final-score" id="finalScore1">0</div>
+                        <div id="achievements"></div>
+                        <button class="next-btn" onclick="showScreen('landing')">Back to Home</button>
+                        <button class="next-btn" onclick="startGame1()">Play Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="game2">
+            <div class="game-container">
+                <div class="game-header">
+                    <h2>🧩 Output Assembly Line</h2>
+                </div>
+
+                <div class="round-header" id="roundHeader">
+                    <h3>Round 1 of 8</h3>
+                    <p id="roundStep">Step: Loading...</p>
+                </div>
+
+                <div class="score-board">
+                    <div class="score-item">
+                        <div class="label">Round Score</div>
+                        <div class="value" id="roundScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Total Score</div>
+                        <div class="value" id="totalScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Perfect Rounds</div>
+                        <div class="value" id="perfectRounds">0</div>
+                    </div>
+                </div>
+
+                <div class="instruction-text">
+                    <strong>Instructions:</strong> Select ONE tile from each column to build the perfect output statement
+                </div>
+
+                <div class="assembly-area">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Your Output Statement:</h4>
+                    <div class="assembly-preview" id="assemblyPreview">
+                        Select components from each column below...
+                    </div>
+                </div>
+
+                <div class="tile-columns" id="tileColumns"></div>
+
+                <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>
+                    Check Answer
+                </button>
+
+                <div id="game2Result" style="display: none;">
+                    <div class="result-screen">
+                        <h2>All Rounds Complete! 🎉</h2>
+                        <div class="final-score" id="finalScore2">0</div>
+                        <p id="perfectionMessage" style="font-size: 1.5em; margin: 20px 0;"></p>
+                        <div id="achievements2"></div>
+                        <button class="next-btn" onclick="showScreen('landing')">Back to Home</button>
+                        <button class="next-btn" onclick="startGame2()">Play Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="feedback-modal" id="feedbackModal">
+        <h3 id="feedbackTitle">Feedback</h3>
+        <p id="feedbackText" style="white-space: pre-line; line-height: 1.6;"></p>
+        <button class="next-btn" onclick="closeFeedback()">Continue</button>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+
+        const VARIABLES = [
+  {id: 1, device: "Arthroscopic Trocar", variable: "Trocar material (stainless steel vs titanium)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies material selection. This becomes a design requirement with properties to test (yield strength, corrosion resistance, etc.)."},
+  {id: 2, device: "Arthroscopic Trocar", variable: "Trocar tip sharpness", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies tip geometry and hardness (e.g., 42 Rockwell). This is a testable design specification."},
+  {id: 3, device: "Arthroscopic Trocar", variable: "Surgeon hand size", answer: "N", difficulty: "easy", explanation: "NOISE: Cannot control which surgeon operates. Must design ergonomics for 5th-95th percentile range. This informs testing strategy, not specs."},
+  {id: 4, device: "Arthroscopic Trocar", variable: "Soft tissue density/quality", answer: "N", difficulty: "easy", explanation: "NOISE: Patient anatomy varies (age, health, scarring). Your device must be robust across this range. This is a Noise factor requiring design robustness."},
+  {id: 5, device: "Arthroscopic Trocar", variable: "Sheath inner diameter", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies dimension with tolerance (e.g., 5.0mm ±0.1mm). This is directly controllable and verifiable."},
+  {id: 6, device: "Arthroscopic Trocar", variable: "Blood/fluid on surgical gloves", answer: "N", difficulty: "medium", explanation: "NOISE: Environmental condition during surgery. Cannot eliminate. Design must accommodate slippery handling (e.g., textured grips, larger contact areas)."},
+  {id: 7, device: "Arthroscopic Trocar", variable: "Locking mechanism design (bayonet, thread, snap)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team chooses locking type and specifies engagement force, retention strength, and cycles to failure."},
+  {id: 8, device: "Arthroscopic Trocar", variable: "Joint abnormalities (osteophytes, scarring)", answer: "N", difficulty: "medium", explanation: "NOISE: Patient anatomical variation from prior injury or arthritis. Cannot control. Design must navigate varied joint conditions."},
+  {id: 9, device: "Arthroscopic Trocar", variable: "Surgeon experience level", answer: "N", difficulty: "medium", explanation: "NOISE: User skill varies from novice to expert. Good design minimizes dependency on expert technique through intuitive features."},
+  {id: 10, device: "Arthroscopic Trocar", variable: "Sheath rigidity (flexural modulus)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies material and wall thickness to achieve target rigidity. This is tested and documented in design outputs."},
+  {id: 11, device: "Spinal Implant", variable: "Implant material (PEEK vs titanium)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies material and properties (modulus, strength, biocompatibility). Major design decision with regulatory implications."},
+  {id: 12, device: "Spinal Implant", variable: "Implant outer dimensions (length, width, height)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies dimensions with tolerances. These are design outputs directly controllable through manufacturing."},
+  {id: 13, device: "Spinal Implant", variable: "Patient bone quality/density", answer: "N", difficulty: "easy", explanation: "NOISE: Patient variation - osteoporotic vs healthy bone. Cannot control. Implant tooth design must achieve fixation across this range."},
+  {id: 14, device: "Spinal Implant", variable: "Implant radiographic markers (size, location)", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies marker material (tantalum, etc.), size, and position for fluoroscopic visualization."},
+  {id: 15, device: "Spinal Implant", variable: "Surgeon preference for graft type", answer: "N", difficulty: "medium", explanation: "NOISE: Surgeon chooses autograft vs allograft vs synthetic. Implant window and containment features must accommodate all options."},
+  {id: 16, device: "Spinal Implant", variable: "Inserter handle grip texture and geometry", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies surface finish, grip diameter, and ergonomic features. These are design requirements for usability."},
+  {id: 17, device: "Spinal Implant", variable: "Quality of prior discectomy", answer: "N", difficulty: "hard", explanation: "NOISE: Your device arrives AFTER this step. Cannot control surgeon's technique. Implant must tolerate range of preparation quality (uneven endplates, incomplete removal)."},
+  {id: 18, device: "Spinal Implant", variable: "Implant/inserter interface geometry", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies mating features, tolerances, and retention force. Critical interface documented in design outputs."},
+  {id: 19, device: "Spinal Implant", variable: "Implant tooth design (height, angle, sharpness)", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies tooth geometry for endplate engagement. These dimensions are design outputs tested for fixation strength."},
+  {id: 20, device: "Spinal Implant", variable: "Distraction of interbody space", answer: "N", difficulty: "medium", explanation: "NOISE: Surgeon controls distraction based on anatomy and approach. Implant must insert across range of space heights. Cannot dictate surgical technique."},
+  {id: 21, device: "Surgical Catheter", variable: "Catheter material flexibility (durometer)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies polymer durometer and flexural modulus (e.g., 72 Shore A). Directly controllable material property."},
+  {id: 22, device: "Surgical Catheter", variable: "Catheter outer diameter", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies dimension with tolerance (e.g., 6Fr ±0.1mm). Fundamental design output."},
+  {id: 23, device: "Surgical Catheter", variable: "Patient vessel tortuosity", answer: "N", difficulty: "medium", explanation: "NOISE: Anatomical variation - vessels can be straight or highly tortuous. Catheter flexibility must accommodate this range."},
+  {id: 24, device: "Surgical Catheter", variable: "Catheter coating (hydrophilic vs hydrophobic)", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies coating type, thickness, and lubricity properties. Critical for deliverability and safety."},
+  {id: 25, device: "Surgical Catheter", variable: "Blood viscosity/coagulation status", answer: "N", difficulty: "medium", explanation: "NOISE: Patient hematologic variation affected by medications (anticoagulants), disease state. Cannot control but design must function across range."},
+  {id: 26, device: "Surgical Catheter", variable: "Tip radiopacity (marker band material, size)", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies marker band material (platinum-iridium), dimensions, and radiopaque density for fluoroscopic visibility."},
+  {id: 27, device: "Surgical Catheter", variable: "Physician insertion force/technique", answer: "N", difficulty: "hard", explanation: "NOISE: User behavior varies. Design must tolerate range of insertion forces without kinking or vessel damage. This informs pushability/trackability testing."},
+  {id: 28, device: "Endoscope System", variable: "Lens optical clarity/resolution", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies glass quality, coating, and resolution (line pairs/mm). Optical performance is a design requirement."},
+  {id: 29, device: "Endoscope System", variable: "Ambient lighting in OR", answer: "N", difficulty: "easy", explanation: "NOISE: Environmental condition - OR lights vary by hospital and room. Camera system must function across lighting ranges."},
+  {id: 30, device: "Endoscope System", variable: "Camera sensor resolution (4K vs HD)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies sensor type and pixel count (3840x2160 for 4K). Major design decision with cost and performance trade-offs."},
+  {id: 31, device: "Endoscope System", variable: "Fluid clarity (blood/debris in surgical field)", answer: "N", difficulty: "medium", explanation: "NOISE: Surgical condition - tissue bleeding creates turbidity. Cannot control. Optics and lighting must provide adequate visualization despite this."},
+  {id: 32, device: "Endoscope System", variable: "Scope shaft diameter and rigidity", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies shaft outer diameter and flexural properties. These determine which anatomies the scope can access."},
+  {id: 33, device: "Endoscope System", variable: "Temperature differential (room temp scope entering body)", answer: "N", difficulty: "hard", explanation: "NOISE: Scope at 20°C entering 37°C body causes lens fogging. Cannot eliminate temperature difference. Mitigation: anti-fog coating (Control), warming scope (user behavior/Noise)."},
+  {id: 34, device: "Endoscope System", variable: "Anti-fog coating specification", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies coating type and durability (cycles before degradation). This is a design response to temperature Noise factor."},
+  {id: 35, device: "Insulin Pen", variable: "Injection needle gauge (diameter)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies needle gauge and wall thickness (e.g., 31G). Affects pain and insulin flow rate."},
+  {id: 36, device: "Insulin Pen", variable: "Patient skin thickness", answer: "N", difficulty: "easy", explanation: "NOISE: Anatomical variation - pediatric vs adult vs obese patients. Needle length must accommodate this range for proper subcutaneous delivery."},
+  {id: 37, device: "Insulin Pen", variable: "Dose display window size and font contrast", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies window dimensions and font size for readability. Human factors requirement for accurate dose setting."},
+  {id: 38, device: "Insulin Pen", variable: "Patient hand dexterity/arthritis severity", answer: "N", difficulty: "medium", explanation: "NOISE: User capability varies - elderly patients may have reduced grip strength. Pen must be operable across range of dexterity levels."},
+  {id: 39, device: "Insulin Pen", variable: "Injection button actuation force", answer: "C", difficulty: "medium", explanation: "CONTROL: Design team specifies actuation force (e.g., 15N ±3N). Must balance ease of use vs. accidental actuation prevention."},
+  {id: 40, device: "Insulin Pen", variable: "Actual patient storage conditions (temperature extremes)", answer: "N", difficulty: "hard", explanation: "NOISE: Patient behavior varies - device left in hot car, direct sunlight, freezer. Your SPECIFICATION defines tolerance range (Control: 'must function after storage at -20°C to 50°C'), but ACTUAL exposure is Noise."}
+];
+
+        const ROUNDS = [
+  {round: 1, difficulty: "easy", step: "Attach trocar to sheath", 
+   column1_tiles: [
+     {text: "Trocar attached to sheath securely", correct: false, feedback: "Restates the action but doesn't define the functional result. What KIND of attachment? What properties does it have?"},
+     {text: "Rigid construct assembly created", correct: false, feedback: "Close, but 'construct' is vague. What components? Missing the specific elements being joined."},
+     {text: "Trocar and sheath locked as rigid construct", correct: true, feedback: "Specific functional result - identifies BOTH components AND the critical property (rigidity)."}
+   ], 
+   column2_tiles: [
+     {text: "that maintains position during use", correct: false, feedback: "Position maintenance is a symptom, not the mechanical performance. Doesn't specify the loading condition."},
+     {text: "able to withstand insertion forces without separation", correct: true, feedback: "Specific mechanical performance - defines the LOADING condition and what must not happen under that load."},
+     {text: "that remains connected throughout procedure", correct: false, feedback: "Time-based description ('throughout procedure') rather than performance under specific loads."}
+   ], 
+   column3_tiles: [
+     {text: "to enable device functionality in surgery", correct: false, feedback: "Too generic - doesn't specify WHAT function this particular assembly enables."},
+     {text: "for surgeon convenience and efficiency", correct: false, feedback: "User benefit, not the biomechanical purpose. This is HOW surgeons feel about it, not WHAT it does."},
+     {text: "to enable tissue penetration during insertion", correct: true, feedback: "Specific clinical purpose - defines the exact biomechanical function requiring this rigid assembly."}
+   ]
+  },
+  {round: 2, difficulty: "easy", step: "Clean device for reuse", 
+   column1_tiles: [
+     {text: "Device reprocessed per protocol", correct: false, feedback: "Process compliance statement. Doesn't define WHAT state is achieved, just that a protocol was followed."},
+     {text: "Device reprocessed to validated cleanliness", correct: true, feedback: "Specifies achievement of a validated standard - this is measurable and testable against acceptance criteria."},
+     {text: "Device surface cleaning completed", correct: false, feedback: "Describes completion of an action, not the RESULT. What level of cleanliness? How is it verified?"}
+   ], 
+   column2_tiles: [
+     {text: "that passes visual inspection criteria", correct: false, feedback: "Visual inspection is a verification METHOD, not the cleanliness state. Contaminants can exist invisibly."},
+     {text: "without visible residue or contamination", correct: false, feedback: "'Without visible' is subjective and incomplete - biological contaminants may not be visible."},
+     {text: "free of biological contaminants and debris", correct: true, feedback: "Specific performance standard - defines WHAT is absent measurably, not just appearance."}
+   ], 
+   column3_tiles: [
+     {text: "to meet hospital reprocessing standards", correct: false, feedback: "Compliance goal, not functional purpose. Design controls define DEVICE requirements, not hospital policies."},
+     {text: "for cost savings through reuse", correct: false, feedback: "Business/economic consideration - design controls NEVER include financial motivations."},
+     {text: "ready for sterile use in next procedure", correct: true, feedback: "Functional purpose - defines the preparation state enabling subsequent clinical use."}
+   ]
+  },
+  {round: 3, difficulty: "medium", step: "Insert implant into disc space", 
+   column1_tiles: [
+     {text: "Implant inserted into disc space", correct: false, feedback: "Restates action. WHERE in disc space? How far? Initial or final position?"},
+     {text: "Implant placed in anatomical position", correct: false, feedback: "'Anatomical position' is ambiguous - could mean initial placement or final seating. Lacks precision."},
+     {text: "Implant initiated into prepared disc space", correct: true, feedback: "Specific - 'initiated' clearly signals START of insertion. 'Prepared disc space' identifies the anatomical target."},
+     {text: "Surgical placement step performed", correct: false, feedback: "Process description with no functional information. Could mean any phase of implantation."}
+   ], 
+   column2_tiles: [
+     {text: "without exceeding force limits", correct: false, feedback: "Negative constraint (what doesn't happen). Doesn't positively specify WHERE the implant must be."},
+     {text: "positioned within anatomical boundaries", correct: true, feedback: "Specific spatial requirement - defines safe zones (avoiding anterior vessels, posterior neural elements)."},
+     {text: "that aligns with fluoroscopic landmarks", correct: false, feedback: "Verification method (imaging), not the actual spatial requirement. Describes HOW you check, not WHAT you require."},
+     {text: "meeting placement specifications", correct: false, feedback: "Circular reasoning - doesn't define WHICH specifications. Meaningless without referencing specific requirements."}
+   ], 
+   column3_tiles: [
+     {text: "to achieve surgical objectives safely", correct: false, feedback: "Generic safety statement. Doesn't specify WHAT biomechanical outcome is needed."},
+     {text: "to facilitate spinal stabilization", correct: false, feedback: "Long-term outcome, but not the IMMEDIATE biomechanical function of insertion step."},
+     {text: "to restore disc height and support fusion", correct: true, feedback: "Specific biomechanical outcomes - defines BOTH structural (height) and biological (fusion) functions."},
+     {text: "as intended by surgical plan", correct: false, feedback: "References external plan, doesn't define the device's functional purpose independently."}
+   ]
+  },
+  {round: 4, difficulty: "medium", step: "Attach endoscope to camera coupler", 
+   column1_tiles: [
+     {text: "Hermetically sealed optical connection", correct: true, feedback: "Specific - defines sealing property (hermetic = fluid-tight) AND function (optical connection)."},
+     {text: "Secure mechanical and optical interface", correct: false, feedback: "Uses generic terms 'secure' and 'interface' without defining the SEALING requirement critical for endoscopy."},
+     {text: "Endoscope coupled to camera system", correct: false, feedback: "Describes components being joined but not the critical properties (sealing, optical alignment)."},
+     {text: "Connection established between devices", correct: false, feedback: "Extremely generic - could apply to any connection. No functional detail about sealing or optics."}
+   ], 
+   column2_tiles: [
+     {text: "with proper alignment and seal integrity", correct: false, feedback: "'Proper' is subjective. Doesn't specify WHAT the seal prevents or what alignment achieves."},
+     {text: "preventing fluid ingress and maintaining focus", correct: true, feedback: "Dual specific performance - seal function (fluid exclusion) AND optical function (focus maintenance)."},
+     {text: "that meets coupling specifications", correct: false, feedback: "Circular and uninformative - doesn't state WHAT the specifications require functionally."},
+     {text: "ensuring reliable optical transmission", correct: false, feedback: "'Reliable' is vague quality statement. Missing the critical SEALING function. Focus on optics only."}
+   ], 
+   column3_tiles: [
+     {text: "for consistent image quality during procedures", correct: false, feedback: "Generic quality outcome. Doesn't specify the PATHWAY from lens to sensor."},
+     {text: "so camera can capture surgical field", correct: false, feedback: "Ultimate goal but doesn't define the MECHANISM - what must the connection physically do?"},
+     {text: "to transmit clear image from lens to camera sensor", correct: true, feedback: "Specific optical function - defines complete light path from input (lens) to output (sensor)."},
+     {text: "for visualization during surgery", correct: false, feedback: "Generic use case. Doesn't specify this connection's specific role in the imaging pathway."}
+   ]
+  },
+  {round: 5, difficulty: "medium-hard", step: "Impact implant into final position", 
+   column1_tiles: [
+     {text: "Implant fully seated in position", correct: false, feedback: "Describes LOCATION but not ENGAGEMENT state. 'Fully seated' could still lack bone purchase."},
+     {text: "Implant positioned at target depth with endplate engagement", correct: true, feedback: "Specific - combines spatial position (target depth) with mechanical state (endplate engagement)."},
+     {text: "Final implant placement achieved", correct: false, feedback: "Generic completion statement. 'Final placement' doesn't specify depth, orientation, or fixation."},
+     {text: "Impaction completed per technique", correct: false, feedback: "Process compliance, not functional state. Doesn't describe the resulting position or engagement."}
+   ], 
+   column2_tiles: [
+     {text: "without structural failure occurring", correct: false, feedback: "Negative framing (what didn't break). Doesn't positively specify the engagement achieved."},
+     {text: "that provides stable construct", correct: false, feedback: "'Stable construct' is outcome, not the MECHANISM. Doesn't specify HOW stability is achieved."},
+     {text: "with teeth engaged in bone", correct: true, feedback: "Specific mechanism - identifies the interfacial engagement providing immediate fixation."},
+     {text: "per biomechanical requirements", correct: false, feedback: "References requirements without stating WHAT they are. Circular and uninformative."}
+   ], 
+   column3_tiles: [
+     {text: "to complete implant insertion safely", correct: false, feedback: "Process completion + generic safety. Doesn't specify the biomechanical function."},
+     {text: "to achieve immediate fixation and load distribution", correct: true, feedback: "Specific biomechanical functions - defines BOTH fixation (resistance to motion) AND mechanical function (load transfer)."},
+     {text: "to support long-term fusion success", correct: false, feedback: "Long-term biological goal, not the IMMEDIATE mechanical function of this step."},
+     {text: "for optimal patient outcomes", correct: false, feedback: "Ultimate clinical goal - too distant from the specific biomechanical function of impaction."}
+   ]
+  },
+  {round: 6, difficulty: "hard", step: "Focus image with coupler adjustment ring", 
+   column1_tiles: [
+     {text: "Image brought into sharp focus", correct: false, feedback: "Describes RESULT but not the MECHANISM - how is focus achieved mechanically?"},
+     {text: "Optimized optical alignment between lens and camera sensor", correct: true, feedback: "Specific mechanism - focus results from precise ALIGNMENT of optical elements."},
+     {text: "Coupler adjusted to optimal setting", correct: false, feedback: "Action + vague outcome. 'Optimal setting' doesn't explain WHAT changed mechanically."},
+     {text: "Focus adjustment completed successfully", correct: false, feedback: "Process completion statement. 'Successfully' is subjective without defining the achieved state."}
+   ], 
+   column2_tiles: [
+     {text: "meeting surgeon preference for clarity", correct: false, feedback: "Subjective user preference - not a measurable design specification."},
+     {text: "better than previous generation devices", correct: false, feedback: "Comparative statement. Design controls require absolute specifications, not relative performance."},
+     {text: "achieving maximum sharpness across entire field of view", correct: true, feedback: "Specific optical performance - defines both the metric (sharpness) AND spatial requirement (entire FOV)."},
+     {text: "consistent with industry standards", correct: false, feedback: "External reference without defining WHAT the output IS functionally. Doesn't specify the optical performance."}
+   ], 
+   column3_tiles: [
+     {text: "so surgeon can perform procedure", correct: false, feedback: "Ultimate goal but too generic. Doesn't specify WHAT must be visualized."},
+     {text: "to improve image quality overall", correct: false, feedback: "Generic quality improvement. 'Overall' is vague - doesn't specify what anatomical elements need visualization."},
+     {text: "to enable visualization of anatomical detail at working distance", correct: true, feedback: "Specific clinical function - defines WHAT (anatomical detail) and WHERE (working distance)."},
+     {text: "for adequate procedural documentation", correct: false, feedback: "Secondary purpose (recording). Primary function is real-time surgical guidance."}
+   ]
+  },
+  {round: 7, difficulty: "hard", step: "Lock camera coupling into sheath", 
+   column1_tiles: [
+     {text: "Camera and sheath firmly connected", correct: false, feedback: "'Firmly connected' is subjective. Doesn't specify rigidity or angular relationship."},
+     {text: "Rigid fixed-angle assembly of camera and sheath", correct: true, feedback: "Specific mechanical state - defines BOTH rigidity AND the critical fixed angular relationship."},
+     {text: "Locking mechanism engaged completely", correct: false, feedback: "Process completion. 'Completely' doesn't define the resulting mechanical properties."},
+     {text: "Components securely joined together", correct: false, feedback: "Generic joining description. 'Securely' is subjective without defining mechanical constraints."}
+   ], 
+   column2_tiles: [
+     {text: "tight enough for clinical use", correct: false, feedback: "Subjective threshold ('tight enough'). Not quantifiable or testable."},
+     {text: "without visible looseness or movement", correct: false, feedback: "'Visible' and 'without' are negative/subjective. Doesn't positively specify the mechanical constraints."},
+     {text: "eliminating axial and rotational slop", correct: true, feedback: "Specific mechanical performance - defines constraints in BOTH linear (axial) and rotational degrees of freedom."},
+     {text: "per assembly procedure requirements", correct: false, feedback: "Process compliance. Doesn't specify WHAT mechanical state is achieved."}
+   ], 
+   column3_tiles: [
+     {text: "for system stability during surgery", correct: false, feedback: "Generic stability benefit. Doesn't specify WHAT clinical functions require this mechanical constraint."},
+     {text: "to enable precise instrument control and prevent image shift during manipulation", correct: true, feedback: "Specific clinical functions - instrument control (mechanical stability) AND image stability (no FOV shift)."},
+     {text: "to complete system assembly process", correct: false, feedback: "Process milestone. Doesn't explain the clinical purpose of this mechanical connection."},
+     {text: "so equipment functions as designed", correct: false, feedback: "Circular logic. 'As designed' doesn't independently define functional purpose."}
+   ]
+  },
+  {round: 8, difficulty: "boss", step: "Remove implant from sterile packaging", 
+   column1_tiles: [
+     {text: "Implant removed from package successfully", correct: false, feedback: "Action + generic outcome. 'Successfully' is subjective. Doesn't define the critical STATE (sterility)."},
+     {text: "Sterile implant accessible on sterile field", correct: true, feedback: "Defines BOTH the sterility state (critical for use) AND spatial location (sterile field)."},
+     {text: "Package opened and implant retrieved", correct: false, feedback: "Process description. Focuses on package/action, not the implant's resulting state."},
+     {text: "Implant extracted and ready", correct: false, feedback: "'Ready' is vague. Ready for what? Missing critical sterility specification."}
+   ], 
+   column2_tiles: [
+     {text: "using aseptic handling techniques", correct: false, feedback: "Describes user BEHAVIOR (process), not the functional OUTPUT state achieved."},
+     {text: "without compromising package integrity", correct: false, feedback: "Package-focused, not implant-focused. Also negative framing (what didn't happen)."},
+     {text: "maintaining sterility throughout transfer", correct: true, feedback: "Positive specification of critical performance - sterility maintained during the transition state."},
+     {text: "according to IFU protocol", correct: false, feedback: "Process compliance reference. Doesn't define WHAT functional state is achieved."}
+   ], 
+   column3_tiles: [
+     {text: "to prepare for use in patient", correct: false, feedback: "Generic preparation. Doesn't specify what NEXT steps this enables or what state is required."},
+     {text: "to prevent surgical site infection", correct: false, feedback: "Risk being mitigated (ultimate goal), not the immediate functional purpose of THIS step."},
+     {text: "ready for aseptic assembly and implantation", correct: true, feedback: "Specific preparation state - defines what SUBSEQUENT steps this output enables."},
+     {text: "for the scheduled surgical procedure", correct: false, feedback: "Process/scheduling context. Doesn't define functional readiness state."}
+   ]
+  }
+];
+
+
+        // ==================== GAME STATE ====================
+
+        let gameState = {
+            game1: {
+                score: 0,
+                streak: 0,
+                maxStreak: 0,
+                current: 0,
+                total: 15,
+                variables: [],
+                currentVariable: null,
+                animating: false,
+                timer: null
+            },
+            game2: {
+                currentRound: 0,
+                roundScore: 0,
+                totalScore: 0,
+                perfectRounds: 0,
+                selected: {col1: null, col2: null, col3: null},
+                submitted: false
+            }
+        };
+
+        // ==================== NAVIGATION ====================
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebarToggle');
+            const content = document.getElementById('mainContent');
+
+            sidebar.classList.toggle('collapsed');
+            toggle.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function navigateHome() {
+            if (gameState.game1.animating) {
+                if (confirm('Exit current game? Your progress will be lost.')) {
+                    abortGame1();
+                    showScreen('landing');
+                }
+            } else {
+                showScreen('landing');
+            }
+        }
+
+        function navigateToGame(gameId) {
+            const currentGame1Active = document.getElementById('game1').classList.contains('active');
+            const currentGame2Active = document.getElementById('game2').classList.contains('active');
+
+            if (gameId === 'game1') {
+                if (currentGame2Active && !gameState.game2.submitted) {
+                    if (confirm('Exit current game? Your progress will be lost.')) {
+                        startGame1();
+                    }
+                } else {
+                    startGame1();
+                }
+            } else if (gameId === 'game2') {
+                if (currentGame1Active && gameState.game1.animating) {
+                    if (confirm('Exit current game? Your progress will be lost.')) {
+                        abortGame1();
+                        startGame2();
+                    }
+                } else {
+                    startGame2();
+                }
+            }
+        }
+
+        function abortGame1() {
+            const state = gameState.game1;
+            state.animating = false;
+            if (state.timer) {
+                clearTimeout(state.timer);
+                state.timer = null;
+            }
+            document.getElementById('conveyor').innerHTML = '';
+        }
+
+        // ==================== GAME 1: CONTROL TOWER ====================
+
+        function startGame1() {
+            gameState.game1 = {
+                score: 0,
+                streak: 0,
+                maxStreak: 0,
+                current: 0,
+                total: 15,
+                variables: selectRandomVariables(15),
+                currentVariable: null,
+                animating: false,
+                timer: null
+            };
+
+            document.getElementById('game1Result').style.display = 'none';
+            document.getElementById('conveyor').innerHTML = '';
+            updateGame1Display();
+            showScreen('game1');
+            presentNextVariable();
+        }
+
+        function selectRandomVariables(count) {
+            const shuffled = [...VARIABLES].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count);
+        }
+
+        function updateGame1Display() {
+            const state = gameState.game1;
+            document.getElementById('score').textContent = state.score;
+            document.getElementById('streak').textContent = state.streak;
+            document.getElementById('progress').textContent = `${state.current}/${state.total}`;
+
+            const scoreBoard = document.getElementById('scoreBoard');
+            if (state.streak >= 5) {
+                scoreBoard.classList.add('streak-glow');
+            } else {
+                scoreBoard.classList.remove('streak-glow');
+            }
+        }
+
+        function presentNextVariable() {
+            const state = gameState.game1;
+
+            if (state.current >= state.total) {
+                endGame1();
+                return;
+            }
+
+            state.currentVariable = state.variables[state.current];
+            state.animating = true;
+
+            const conveyor = document.getElementById('conveyor');
+            conveyor.innerHTML = '';
+
+            const card = document.createElement('div');
+            card.className = 'variable-card';
+            card.innerHTML = `
+                <div class="device-tag">${state.currentVariable.device}</div>
+                <div>${state.currentVariable.variable}</div>
+            `;
+
+            conveyor.appendChild(card);
+
+            // Clear any existing timer
+            if (state.timer) {
+                clearTimeout(state.timer);
+            }
+
+            // Set new timer - 6.8 seconds
+            state.timer = setTimeout(() => {
+                if (state.animating) {
+                    classify(null);
+                }
+            }, 6800);
+        }
+
+        function classify(answer) {
+            const state = gameState.game1;
+
+            if (!state.animating || !state.currentVariable) return;
+
+            state.animating = false;
+
+            // Clear the timer immediately when answer is selected
+            if (state.timer) {
+                clearTimeout(state.timer);
+                state.timer = null;
+            }
+
+            const card = document.querySelector('.variable-card');
+            const correct = answer === state.currentVariable.answer;
+
+            if (correct) {
+                card.classList.add('success');
+                state.score += 100 * (1 + Math.floor(state.streak / 5));
+                state.streak++;
+                if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+
+                showFeedback(true, `✅ Correct! ${state.currentVariable.answer}`, state.currentVariable.explanation);
+            } else {
+                card.classList.add('explode');
+                state.streak = 0;
+
+                const title = answer === null ? '⏱️ Too Slow!' : '❌ Incorrect';
+                const correctAnswer = `Correct answer: ${state.currentVariable.answer}`;
+                showFeedback(false, title, `${correctAnswer}\n\n${state.currentVariable.explanation}`);
+            }
+
+            state.current++;
+            updateGame1Display();
+
+            setTimeout(() => {
+                document.getElementById('conveyor').innerHTML = '';
+            }, 500);
+        }
+
+        function showFeedback(isCorrect, title, text) {
+            const modal = document.getElementById('feedbackModal');
+            modal.className = 'feedback-modal show ' + (isCorrect ? 'correct' : 'incorrect');
+            document.getElementById('feedbackTitle').textContent = title;
+            document.getElementById('feedbackText').textContent = text;
+        }
+
+        function closeFeedback() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.remove('show');
+
+            setTimeout(() => {
+                presentNextVariable();
+            }, 300);
+        }
+
+        function endGame1() {
+            const state = gameState.game1;
+            document.getElementById('finalScore1').textContent = state.score;
+
+            const achievements = [];
+            if (state.maxStreak >= 10) achievements.push('🔥 Streak Master');
+            if (state.score >= 2000) achievements.push('🏆 High Scorer');
+            if (state.current === state.total && state.streak >= 5) achievements.push('⚡ Speed Demon');
+
+            document.getElementById('achievements').innerHTML = 
+                achievements.map(a => `<div class="achievement-badge">${a}</div>`).join('');
+
+            document.getElementById('game1Result').style.display = 'block';
+        }
+
+        // ==================== GAME 2: OUTPUT ASSEMBLY ====================
+
+        function startGame2() {
+            gameState.game2 = {
+                currentRound: 0,
+                roundScore: 0,
+                totalScore: 0,
+                perfectRounds: 0,
+                selected: {col1: null, col2: null, col3: null},
+                submitted: false
+            };
+
+            document.getElementById('game2Result').style.display = 'none';
+            showScreen('game2');
+            loadRound();
+        }
+
+        function loadRound() {
+            const state = gameState.game2;
+
+            if (state.currentRound >= ROUNDS.length) {
+                endGame2();
+                return;
+            }
+
+            const round = ROUNDS[state.currentRound];
+            state.selected = {col1: null, col2: null, col3: null};
+            state.submitted = false;
+            state.roundScore = 0;
+
+            document.getElementById('roundHeader').innerHTML = `
+                <h3>Round ${state.currentRound + 1} of ${ROUNDS.length} • ${round.difficulty.toUpperCase()}</h3>
+                <p id="roundStep">Step: ${round.step}</p>
+            `;
+
+            document.getElementById('assemblyPreview').className = 'assembly-preview';
+            document.getElementById('assemblyPreview').textContent = 'Select components from each column below...';
+
+            document.getElementById('roundScore').textContent = 0;
+            document.getElementById('totalScore').textContent = state.totalScore;
+            document.getElementById('perfectRounds').textContent = state.perfectRounds;
+
+            renderTiles(round);
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').style.display = 'block';
+
+            // Remove any existing next button
+            const existingNextBtn = document.querySelector('.tile-columns + .next-btn');
+            if (existingNextBtn) {
+                existingNextBtn.remove();
+            }
+        }
+
+        function renderTiles(round) {
+            const container = document.getElementById('tileColumns');
+            container.innerHTML = `
+                <div class="tile-column">
+                    <h4>Component 1:<br/>What's Created</h4>
+                    ${round.column1_tiles.map((tile, i) => 
+                        `<div class="tile" onclick="selectTile(1, ${i})">${tile.text}</div>`
+                    ).join('')}
+                </div>
+                <div class="tile-column">
+                    <h4>Component 2:<br/>Performance</h4>
+                    ${round.column2_tiles.map((tile, i) => 
+                        `<div class="tile" onclick="selectTile(2, ${i})">${tile.text}</div>`
+                    ).join('')}
+                </div>
+                <div class="tile-column">
+                    <h4>Component 3:<br/>Purpose</h4>
+                    ${round.column3_tiles.map((tile, i) => 
+                        `<div class="tile" onclick="selectTile(3, ${i})">${tile.text}</div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function selectTile(column, index) {
+            const state = gameState.game2;
+            if (state.submitted) return;
+
+            const colKey = `col${column}`;
+            const round = ROUNDS[state.currentRound];
+
+            if (state.selected[colKey] !== null) {
+                const tiles = document.querySelectorAll(`.tile-column:nth-child(${column}) .tile`);
+                tiles[state.selected[colKey]].classList.remove('selected');
+            }
+
+            state.selected[colKey] = index;
+            const tiles = document.querySelectorAll(`.tile-column:nth-child(${column}) .tile`);
+            tiles[index].classList.add('selected');
+
+            updatePreview();
+
+            const allSelected = state.selected.col1 !== null && 
+                               state.selected.col2 !== null && 
+                               state.selected.col3 !== null;
+            document.getElementById('submitBtn').disabled = !allSelected;
+        }
+
+        function updatePreview() {
+            const state = gameState.game2;
+            const round = ROUNDS[state.currentRound];
+
+            const parts = [];
+            if (state.selected.col1 !== null) {
+                parts.push(round.column1_tiles[state.selected.col1].text);
+            }
+            if (state.selected.col2 !== null) {
+                parts.push(round.column2_tiles[state.selected.col2].text);
+            }
+            if (state.selected.col3 !== null) {
+                parts.push(round.column3_tiles[state.selected.col3].text);
+            }
+
+            const preview = document.getElementById('assemblyPreview');
+            if (parts.length > 0) {
+                preview.className = 'assembly-preview filled';
+                preview.textContent = parts.join(' ');
+            } else {
+                preview.className = 'assembly-preview';
+                preview.textContent = 'Select components from each column below...';
+            }
+        }
+
+        function checkAnswer() {
+            const state = gameState.game2;
+            if (state.submitted) return;
+
+            state.submitted = true;
+            const round = ROUNDS[state.currentRound];
+
+            let correctCount = 0;
+            let feedbackParts = [];
+
+            [1, 2, 3].forEach(col => {
+                const colKey = `col${col}`;
+                const tiles = round[`column${col}_tiles`];
+                const selectedIndex = state.selected[colKey];
+                const tile = tiles[selectedIndex];
+
+                const tileElements = document.querySelectorAll(`.tile-column:nth-child(${col}) .tile`);
+                const selectedElement = tileElements[selectedIndex];
+
+                if (tile.correct) {
+                    selectedElement.classList.add('correct');
+                    correctCount++;
+                    feedbackParts.push(`✅ Component ${col}: ${tile.feedback}`);
+                } else {
+                    selectedElement.classList.add('incorrect');
+                    feedbackParts.push(`❌ Component ${col}: ${tile.feedback}`);
+
+                    tiles.forEach((t, i) => {
+                        if (t.correct && i !== selectedIndex) {
+                            tileElements[i].classList.add('correct');
+                        }
+                    });
+                }
+            });
+
+            if (correctCount === 3) {
+                state.roundScore = 500;
+                state.perfectRounds++;
+                showFeedback(true, '🎉 Perfect Assembly!', 'All components correct! +500 points\n\n' + feedbackParts.join('\n\n'));
+            } else if (correctCount === 2) {
+                state.roundScore = 200;
+                showFeedback(false, '📝 Almost There!', `2 out of 3 correct. +200 points\n\n` + feedbackParts.join('\n\n'));
+            } else {
+                state.roundScore = 0;
+                showFeedback(false, '❌ Review and Learn', 'Study the feedback to improve.\n\n' + feedbackParts.join('\n\n'));
+            }
+
+            state.totalScore += state.roundScore;
+            document.getElementById('roundScore').textContent = state.roundScore;
+            document.getElementById('totalScore').textContent = state.totalScore;
+            document.getElementById('perfectRounds').textContent = state.perfectRounds;
+
+            document.getElementById('submitBtn').style.display = 'none';
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'next-btn';
+            nextBtn.textContent = state.currentRound < ROUNDS.length - 1 ? 'Next Round →' : 'See Results';
+            nextBtn.onclick = () => {
+                closeFeedback();
+                state.currentRound++;
+                loadRound();
+            };
+            document.querySelector('.tile-columns').after(nextBtn);
+        }
+
+        function endGame2() {
+            const state = gameState.game2;
+            document.getElementById('finalScore2').textContent = state.totalScore;
+
+            const perfectMsg = state.perfectRounds === ROUNDS.length 
+                ? '🌟 PERFECT! All rounds completed flawlessly!'
+                : `${state.perfectRounds} out of ${ROUNDS.length} rounds perfect`;
+            document.getElementById('perfectionMessage').textContent = perfectMsg;
+
+            const achievements = [];
+            if (state.perfectRounds >= 5) achievements.push('⭐ Master Assembler');
+            if (state.totalScore >= 3000) achievements.push('🏆 High Scorer');
+            if (state.perfectRounds === ROUNDS.length) achievements.push('💎 Perfectionist');
+
+            document.getElementById('achievements2').innerHTML = 
+                achievements.map(a => `<div class="achievement-badge">${a}</div>`).join('');
+
+            document.getElementById('game2Result').style.display = 'block';
+        }
+
+        // ==================== KEYBOARD SHORTCUTS ====================
+
+        document.addEventListener('keydown', (e) => {
+            const game1Active = document.getElementById('game1').classList.contains('active');
+            const modal = document.getElementById('feedbackModal').classList.contains('show');
+
+            if (game1Active && !modal && gameState.game1.animating) {
+                if (e.key === 'ArrowLeft' || e.key === 'c' || e.key === 'C') {
+                    classify('C');
+                } else if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
+                    classify('N');
+                }
+            }
+
+            if (modal && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                closeFeedback();
+            }
+        });
+
+        // ==================== INITIALIZE ====================
+
+        window.onload = () => {
+            showScreen('landing');
+        };
+    </script>
+</body>
+</html>
