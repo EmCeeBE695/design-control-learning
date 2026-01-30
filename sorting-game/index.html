@@ -909,7 +909,7 @@
             <span class="icon">📦</span><span>Sorting Game</span>
         </button>
 
-        <button class="nav-btn" onclick="showScreen('part2')">
+<button class="nav-btn" onclick="showScreen('part2')" style="display:none;">
             <span class="icon">🔨</span><span>Build Requirements</span>
         </button>
 
@@ -928,7 +928,8 @@
                 </div>
             </div>
 
-            <div class="progress-item">
+<div class="progress-item" style="display:none;">
+    <span>Build</span>
                 <span>Build</span>
                 <div class="progress-badges">
                     <span class="error-badge" id="errors-part2" style="display:none;">0 ✗</span>
@@ -963,7 +964,7 @@
                         </div>
                     </div>
 
-                    <div class="module-card part2" onclick="showScreen('part2')">
+<div class="module-card part2" onclick="showScreen('part2')" style="display:none;">
                         <h3>🔨 Build Requirements</h3>
                         <p>Construct proper Design Inputs using structured selections. Learn the grammar of testable, quantitative requirements.</p>
                         <div class="meta">
