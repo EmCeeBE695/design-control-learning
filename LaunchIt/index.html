@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Launch It — CardioWatch Simulation</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+#root{max-width:960px;margin:0 auto;padding:32px 20px 60px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tickIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes envIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.screen{animation:fadeIn .4s ease}
+.logo-bar{display:flex;align-items:center;gap:12px;margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid #1e293b}
+.logo-badge{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:800;font-size:13px;letter-spacing:2px;padding:6px 14px;border-radius:6px}
+.logo-sub{color:#64748b;font-size:13px}
+.prog-bar{display:flex;gap:6px;margin-bottom:32px}
+.prog-step{height:4px;flex:1;border-radius:2px;background:#1e293b;transition:background .3s}
+.prog-done{background:linear-gradient(90deg,#3b82f6,#6366f1)}
+.prog-cur{background:#6366f1}
+.act-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:12px}
+.act1{background:#1e3a5f;color:#60a5fa}
+.act2{background:#2d1b69;color:#a78bfa}
+.act3{background:#450a0a;color:#fca5a5}
+h2{font-size:28px;font-weight:800;color:#f1f5f9;margin-bottom:8px}
+.sub{color:#94a3b8;font-size:15px;line-height:1.6;margin-bottom:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 32px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;width:100%}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff}
+.btn-blue:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(99,102,241,.4)}
+.btn-blue:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+/* intro */
+.hero{text-align:center;padding:20px 0}
+.hero h1{font-size:52px;font-weight:900;background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.tagline{color:#94a3b8;font-size:18px;margin-bottom:8px}
+.course-tag{display:inline-block;background:#1e293b;color:#64748b;font-size:12px;letter-spacing:1px;padding:4px 12px;border-radius:20px;margin-bottom:28px}
+.device-block{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:24px 28px;margin-bottom:20px;text-align:left}
+.device-block h3{font-size:14px;font-weight:800;color:#60a5fa;margin-bottom:14px;letter-spacing:.5px}
+.specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:580px){.specs-grid{grid-template-columns:1fr}}
+.spec{display:flex;gap:8px;align-items:flex-start}
+.dot{width:6px;height:6px;border-radius:50%;background:#3b82f6;margin-top:6px;flex-shrink:0}
+.spec-txt{font-size:13px;color:#94a3b8;line-height:1.5}
+.spec-txt b{color:#cbd5e1}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:640px){.intro-grid{grid-template-columns:1fr}}
+.intro-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:18px 20px;text-align:left}
+.intro-card-ico{font-size:22px;margin-bottom:8px}
+.intro-card h3{font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px}
+.intro-card p{font-size:13px;color:#94a3b8;line-height:1.6}
+.intro-card p b{color:#cbd5e1}
+.warn-note{background:#1a1000;border:1px solid #92400e;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:13px;color:#fcd34d;line-height:1.7}
+/* seg cards */
+.seg-card{background:#1e293b;border:2px solid #334155;border-radius:14px;padding:22px 24px;cursor:pointer;transition:all .2s;margin-bottom:14px}
+.seg-card:hover{border-color:#6366f1;transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.15)}
+.seg-selected{border-color:#6366f1;background:#1a1f35}
+.seg-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.seg-title{font-size:17px;font-weight:700;color:#f1f5f9}
+.seg-tag{font-size:11px;color:#fbbf24;font-weight:700;margin-top:2px}
+.seg-reimb{font-size:13px;font-weight:700;background:#0f2744;color:#38bdf8;padding:4px 10px;border-radius:6px;white-space:nowrap;margin-left:12px}
+.vol-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;margin-bottom:8px}
+.vol-h{background:#1a3a20;color:#4ade80}
+.vol-m{background:#2d2010;color:#fbbf24}
+.vol-l{background:#1e2030;color:#94a3b8}
+.seg-profile{font-size:13px;color:#94a3b8;margin-bottom:10px;line-height:1.5}
+.seg-signal{font-size:13px;color:#60a5fa;font-style:italic;padding:8px 12px;background:#0f172a;border-radius:6px;border-left:3px solid #3b82f6}
+/* congrats */
+.congrats{text-align:center;padding:40px 20px}
+.congrats-ico{font-size:64px;margin-bottom:16px}
+.congrats h2{color:#4ade80;font-size:32px}
+.seg-hl{display:inline-block;background:#0f2744;color:#60a5fa;padding:2px 10px;border-radius:6px;font-weight:600}
+/* act2 layout */
+.act2-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+@media(max-width:760px){.act2-layout{grid-template-columns:1fr}}
+.act2-right{position:sticky;top:24px;display:flex;flex-direction:column;gap:16px}
+.side-card{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:18px 20px}
+.side-card h4{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#64748b;margin-bottom:10px}
+.seg-ctx-title{font-size:14px;font-weight:700;color:#60a5fa;margin-bottom:4px}
+.seg-ctx-detail{font-size:12px;color:#94a3b8;line-height:1.6}
+.seg-ctx-detail b{color:#cbd5e1}
+.claim-live{font-size:13.5px;line-height:2.2;color:#cbd5e1}
+.blank{display:inline;padding:1px 8px;border-radius:4px;font-weight:600;font-size:13px;border:1px dashed #475569;color:#64748b;background:transparent}
+.blank-active{border-color:#6366f1;color:#a78bfa;background:#1e1b4b}
+.blank-safe{background:#052e16;color:#4ade80;border:1px solid #166534}
+.blank-trap{background:#450a0a;color:#fca5a5;border:1px solid #991b1b}
+.blank-gray{background:#3b2700;color:#fcd34d;border:1px solid #92400e}
+.blank-lbl{font-size:12px;font-weight:700;letter-spacing:1.5px;color:#64748b;text-transform:uppercase;margin-bottom:12px}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+@media(max-width:520px){.opts-grid{grid-template-columns:1fr}}
+.opt-btn{background:#1e293b;border:2px solid #334155;border-radius:10px;padding:14px 16px;text-align:left;cursor:pointer;color:#cbd5e1;font-size:13px;line-height:1.5;transition:all .15s}
+.opt-btn:hover{border-color:#6366f1;background:#1a1f35}
+.opt-safe{border-color:#16a34a;background:#052e16;color:#4ade80}
+.opt-trap{border-color:#dc2626;background:#450a0a;color:#fca5a5}
+.opt-gray{border-color:#d97706;background:#3b2700;color:#fcd34d}
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-box{background:#1e293b;border:2px solid #d97706;border-radius:16px;padding:32px 28px;max-width:520px;width:100%;animation:fadeIn .3s ease}
+.modal-ico{font-size:40px;margin-bottom:12px;text-align:center}
+.modal-title{font-size:20px;font-weight:800;color:#fcd34d;margin-bottom:8px;text-align:center}
+.modal-txt{color:#94a3b8;font-size:14px;line-height:1.7;margin-bottom:24px}
+.modal-txt b{color:#fcd34d}
+/* launch success */
+.ticker-wrap{border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:28px}
+.tick{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;border-bottom:1px solid #1e293b;opacity:0}
+.tick:last-child{border-bottom:none}
+.tick-green{background:#020f07}
+.tick-blue{background:#020d1a}
+.tick-ico{font-size:22px;margin-top:2px;flex-shrink:0}
+.tick-lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4ade80;margin-bottom:3px}
+.tick-txt{font-size:14px;color:#cbd5e1;line-height:1.6}
+.tick-txt b{color:#f1f5f9}
+.envelope{background:#1a0a0a;border:2px solid #7f1d1d;border-radius:12px;padding:28px;text-align:center;opacity:0}
+.envelope-ico{font-size:52px;margin-bottom:12px}
+.envelope-sender{display:inline-block;background:#2d0a0a;border:1px solid #7f1d1d;border-radius:8px;padding:8px 18px;margin-bottom:16px;font-size:12px;color:#fca5a5;font-family:'Times New Roman',serif;letter-spacing:.5px}
+.envelope h3{font-size:22px;font-weight:900;color:#fca5a5;margin-bottom:8px}
+.envelope p{font-size:14px;color:#94a3b8;line-height:1.7;max-width:460px;margin:0 auto 20px}
+/* warning letter */
+.letter{background:#fffef7;border:1px solid #d1c9a0;border-radius:4px;padding:48px 52px;margin-bottom:32px;color:#1a1a1a;font-family:'Times New Roman',Times,serif;box-shadow:0 4px 20px rgba(0,0,0,.4);position:relative}
+@media(max-width:600px){.letter{padding:28px 20px}}
+.letter-seal{text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:3px double #1a1a1a}
+.letter-dept{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#333;margin-bottom:4px}
+.letter-agency{font-size:18px;font-weight:900;color:#000;letter-spacing:1px;margin-bottom:2px}
+.letter-div{font-size:11px;color:#555}
+.letter-meta{font-size:12px;color:#333;margin-bottom:20px;line-height:1.8}
+.letter-re{font-size:13px;font-weight:700;text-decoration:underline;margin-bottom:16px;color:#000}
+.letter-body{font-size:13.5px;line-height:2;color:#1a1a1a}
+.letter-body p{margin-bottom:14px}
+.hl-gray{background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:2px;font-weight:700;border-bottom:2px solid #d97706}
+.hl-trap{background:#fee2e2;color:#991b1b;padding:1px 4px;border-radius:2px;font-weight:700;border-bottom:2px solid #dc2626}
+.letter-sig{margin-top:32px;padding-top:20px;border-top:1px solid #ccc;font-size:12px;color:#333;line-height:1.8}
+.letter-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:72px;font-weight:900;color:rgba(220,38,38,.08);letter-spacing:4px;pointer-events:none;white-space:nowrap;font-family:'Times New Roman',serif}
+.red-banner{background:#450a0a;border:1px solid #991b1b;border-radius:10px;padding:16px 20px;margin-bottom:24px;color:#fca5a5;font-size:14px;line-height:1.7}
+/* questions */
+.q-counter{font-size:11px;font-weight:700;letter-spacing:2px;color:#64748b;text-transform:uppercase;margin-bottom:8px}
+.q-box{background:#1e293b;border-left:4px solid #6366f1;border-radius:0 10px 10px 0;padding:16px 20px;font-size:15px;color:#e2e8f0;line-height:1.7;margin-bottom:16px}
+.q-hl{background:#1a1f35;color:#a78bfa;padding:1px 6px;border-radius:4px;font-style:italic}
+.ans-btn{display:block;width:100%;background:#1e293b;border:2px solid #334155;border-radius:10px;padding:16px 18px;text-align:left;cursor:pointer;color:#cbd5e1;font-size:14px;line-height:1.6;transition:all .15s;margin-bottom:10px}
+.ans-btn:hover:not(:disabled){border-color:#6366f1;background:#1a1f35}
+.ans-btn:disabled{cursor:default}
+.ans-correct{border-color:#16a34a!important;background:#052e16!important;color:#4ade80!important}
+.ans-wrong{border-color:#dc2626!important;background:#450a0a!important;color:#fca5a5!important}
+.ans-dim{opacity:.6}
+.debrief{background:#0f172a;border:1px solid #334155;border-left:4px solid #3b82f6;border-radius:0 10px 10px 0;padding:18px 20px;margin-top:14px;font-size:13.5px;line-height:1.8;color:#94a3b8}
+.debrief b{color:#60a5fa}
+/* clean launch */
+.clean-center{text-align:center;padding:40px 20px}
+.clean-ico{font-size:80px;margin-bottom:20px}
+.clean-h{font-size:36px;font-weight:900;color:#4ade80;margin-bottom:12px}
+.zio-card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:28px;margin-bottom:24px}
+.zio-card h3{font-size:18px;font-weight:800;color:#f1f5f9;margin-bottom:12px}
+.zio-txt{font-size:14px;color:#94a3b8;line-height:1.8}
+.zio-txt b{color:#fca5a5}
+.ref-btn{display:block;width:100%;background:#1e293b;border:2px solid #334155;border-radius:10px;padding:16px 20px;cursor:pointer;color:#cbd5e1;font-size:14px;text-align:left;transition:all .15s;margin-bottom:10px}
+.ref-btn:hover:not(:disabled){border-color:#6366f1}
+/* final */
+.final-card{background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid #334155;border-radius:14px;padding:36px;text-align:center;margin-top:24px}
+.final-card h2{font-size:28px;font-weight:900;color:#f1f5f9;margin-bottom:16px}
+.real-case{background:#0a0a0a;border:1px solid #fca5a5;border-radius:10px;padding:20px 24px;margin-bottom:20px;text-align:left}
+.real-case-ttl{font-size:13px;font-weight:700;letter-spacing:1px;color:#fca5a5;margin-bottom:10px;text-transform:uppercase}
+.real-case p{font-size:14px;color:#94a3b8;line-height:1.8;margin-bottom:8px}
+.real-case b{color:#fcd34d}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ─── DATA ───────────────────────────────────────────────────────
+var SEGMENTS = [
+  {id:'A',title:'General Cardiology — Symptom Evaluation',volClass:'vol-h',volLabel:'High Volume',reimb:'$180–$220/wear',profile:'Adults 18+ with palpitations, dizziness, or shortness of breath. Low acuity. Sent home by cardiologist to monitor over 1–2 weeks.',signal:'Growing rapidly as cardiologists shift to outpatient-first diagnosis.'},
+  {id:'B',title:'High-Risk Arrhythmia Monitoring',tag:'← FASTEST GROWING',volClass:'vol-m',volLabel:'Moderate Volume',reimb:'$420–$600/wear',profile:'Patients with known arrhythmia history, post-ablation follow-up, or suspected life-threatening rhythm disorders. High acuity.',signal:'Fastest-growing segment. Biggest unmet need. Competitors are slow and bulky.'},
+  {id:'C',title:'Post-Surgical Cardiac Monitoring',volClass:'vol-l',volLabel:'Low-Moderate Volume',reimb:'$500–$700/wear',profile:'Patients discharged after cardiac procedures (CABG, valve repair). Monitoring for complications in first 30 days.',signal:'Hospital-controlled. Hard to access without existing system contracts.'},
+];
+var BLANKS = [
+  {id:1,label:'BLANK 1 — Patient Type',options:[
+    {id:'A',text:'adults 18 and older with suspected cardiac arrhythmia',type:'safe'},
+    {id:'B',text:'high-risk arrhythmia patients requiring active surveillance',type:'trap'},
+    {id:'C',text:'ambulatory patients referred for long-term cardiac monitoring',type:'safe'},
+    {id:'D',text:'patients with life-threatening rhythm disorders',type:'trap'},
+    {id:'E',text:'patients experiencing intermittent cardiac symptoms',type:'safe'},
+    {id:'F',text:'post-ablation and high-acuity cardiac patients',type:'trap'},
+  ]},
+  {id:2,label:'BLANK 2 — Monitoring Type',options:[
+    {id:'A',text:'continuous ECG recording over a prescribed wear period',type:'safe'},
+    {id:'B',text:'near real-time cardiac rhythm monitoring',type:'trap'},
+    {id:'C',text:'long-term ambulatory arrhythmia detection',type:'safe'},
+    {id:'D',text:'beat-to-beat real-time rhythm analysis',type:'gray',gw:'real-time analysis',gm:'The device does record beat-to-beat — every heartbeat is captured. But what does "real-time analysis" imply, and can this device actually deliver that?'},
+    {id:'E',text:'event-triggered and continuous ECG capture',type:'safe'},
+    {id:'F',text:'live cardiac telemetry with remote data access',type:'trap'},
+  ]},
+  {id:3,label:'BLANK 3 — Notification Speed',options:[
+    {id:'A',text:'end-of-wear reporting delivered to the care team',type:'safe'},
+    {id:'B',text:'immediate clinician notification of detected events',type:'trap'},
+    {id:'C',text:'batch event reporting after the wear period',type:'safe'},
+    {id:'D',text:'timely transmission of arrhythmia data to the care team',type:'gray',gw:'timely',gm:'"Timely" is vague. What does it actually mean in a clinical context — and could the FDA measure it?'},
+    {id:'E',text:'rapid alerts enabling same-day clinical response',type:'trap'},
+    {id:'F',text:'comprehensive end-of-wear summary reports',type:'safe'},
+  ]},
+  {id:4,label:'BLANK 4 — Clinical Action',options:[
+    {id:'A',text:'informed clinical decision-making and diagnosis',type:'safe'},
+    {id:'B',text:'emergent intervention in life-threatening arrhythmias',type:'trap'},
+    {id:'C',text:'long-term rhythm pattern analysis and diagnosis',type:'safe'},
+    {id:'D',text:'proactive patient management and treatment planning',type:'gray',gw:'proactive',gm:'"Proactive" implies anticipatory intervention — but this device delivers retrospective data after a mail-back cycle.'},
+    {id:'E',text:'rapid detection and treatment of high-risk cardiac events',type:'trap'},
+    {id:'F',text:'clinician review to render a diagnosis based on clinical judgment',type:'safe'},
+  ]},
+];
+var Q = [
+  {id:1,
+   prompt:function(c){return ['Your claim includes “',e('span',{className:'q-hl'},c[2]),'”. The device can transmit limited events wirelessly — but walk through the actual data path. When does the clinician receive actionable cardiac data?']},
+   opts:[
+    {id:'A',text:'Within minutes — the device transmits each event wirelessly to the clinician as it happens.'},
+    {id:'B',text:'Up to 600 events are transmitted wirelessly to the care team throughout the wear period.'},
+    {id:'C',text:'Limited events are transmitted to the patient app during wear, but the clinician only receives a comprehensive report after the device is mailed back and processed — days to weeks after events occur.'},
+    {id:'D',text:'If the patient reports symptoms in the app, the clinician gets a real-time notification.'},
+   ],
+   correct:'C',
+   debrief:'The device transmits some events wirelessly — but only to the patient app, not the clinician. Once the device hits 100 patient-triggered or 500 auto-detected events, all transmission stops. The clinician’s report only arrives after the patient mails the device back. Option D is a common trap: the app is patient-facing only — for symptom logging, not clinician alerts.'},
+  {id:2,
+   prompt:function(c){return ['CardioWatch stores a maximum of 100 patient-triggered and 500 auto-detected events. After that, new events are not captured. What is the problem if you’ve targeted “',e('span',{className:'q-hl'},c[0]),'”?']},
+   opts:[
+    {id:'A',text:'500 events is more than enough — most patients won’t trigger that many in two weeks.'},
+    {id:'B',text:'High-risk patients may experience more frequent arrhythmia episodes, exhausting the storage cap early and leaving the remainder of the wear period completely unmonitored.'},
+    {id:'C',text:'The device should just overwrite older events with newer ones to solve this.'},
+    {id:'D',text:'This is a hardware limitation — it doesn’t affect the validity of the claim.'},
+   ],
+   correct:'B',
+   debrief:'For a general symptom patient, 500 events is probably adequate. For a post-ablation high-risk patient, it may not be. Option C sounds like a reasonable engineering fix, but overwriting earlier events would destroy potentially critical data. The cap is a patient safety issue when you’ve claimed the device is for patients who need continuous, reliable monitoring.'},
+  {id:3,
+   prompt:function(c){return ['Your claim uses “',e('span',{className:'q-hl'},c[0]),'”. The cleared indication says the device is for “patients 18+ who may be asymptomatic or suffer from transient symptoms… NOT intended for critical care patients.” What’s the gap?']},
+   opts:[
+    {id:'A',text:'“High-risk” is just a marketing term — everyone in cardiology understands it’s not for ICU patients.'},
+    {id:'B',text:'The indication covers almost any adult with cardiac symptoms. “High-risk” in claims implies a specific acuity level — and a specific monitoring capability — that the indication and design were never built to support.'},
+    {id:'C',text:'Just remove “high-risk” from the marketing claim and the problem goes away.'},
+    {id:'D',text:'The FDA is being overly strict — “high-risk” is standard cardiology language.'},
+   ],
+   correct:'B',
+   debrief:'The FDA’s exact language: “near real-time cardiac event monitoring implies the device provides monitoring for high-risk patients that require clinically actionable, timely notification of life-threatening arrhythmias to prevent serious injury or death.” Option C is tempting as a partial fix, but the design still can’t deliver what high-risk patients need regardless of word choice.'},
+  {id:4,
+   prompt:function(){ return ['Was “near real-time monitoring for high-risk patients” a clinical need or a clinical want for this device — and what should have happened?']},
+   opts:[
+    {id:'A',text:'A clinical want — it should have stayed in marketing only. When the design couldn’t prove it, the claim should have been dropped before launch.'},
+    {id:'B',text:'A clinical need from the start — it required verified specs proving real-time transmission, and the design had to deliver it.'},
+    {id:'C',text:'Neither — it’s a branding statement. FDA’s interpretation was overly literal.'},
+    {id:'D',text:'It started as a clinical want, but the moment they targeted high-risk patients, it became a clinical need. Either the design had to change to actually deliver it — or the claim and the patient segment had to go.'},
+   ],
+   correct:'D',
+   debrief:'D is the most complete answer. Option A is valid engineering but business-incomplete: without high-risk differentiation, CardioWatch is just a smaller Holter monitor. Option B misses the key insight: it became a need because of the segment choice, not inherently. D captures the real lesson: a clinical want becomes a clinical need the moment it changes your efficacy profile or creates new risk. At that point you had two honest choices — build the design to deliver it, or walk back the claim and the segment together.'},
+];
+
+// ─── HELPERS ────────────────────────────────────────────────
+var e = React.createElement;
+var useState = React.useState;
+var useEffect = React.useEffect;
+
+function getType(bi,oi){var o=BLANKS[bi].options.find(function(x){return x.id===oi});return o?o.type:'safe'}
+function getText(bi,oi){if(!oi)return null;var o=BLANKS[bi].options.find(function(x){return x.id===oi});return o?o.text:''}
+
+// ─── LOGO & PROGRESS ───────────────────────────────────────
+function LogoBar(){
+  return e('div',{className:'logo-bar'},
+    e('span',{className:'logo-badge'},'LAUNCH IT'),
+    e('span',{className:'logo-sub'},'CardioWatch Simulation · BE 695 Medical Device Development')
+  );
+}
+function ProgBar(p){
+  return e('div',{className:'prog-bar'},
+    Array.from({length:p.total}).map(function(_,i){
+      return e('div',{key:i,className:'prog-step '+(i<p.step?'prog-done':i===p.step?'prog-cur':'')});
+    })
+  );
+}
+
+// ─── INTRO ──────────────────────────────────────────────────
+function Intro(p){
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e('div',{className:'hero'},
+      e('h1',null,'Launch It'),
+      e('div',{className:'tagline'},'You just cleared 510(k). Now ship it.'),
+      e('div',{className:'course-tag'},'BE 695 · MEDICAL DEVICE DEVELOPMENT')
+    ),
+    e('div',{className:'device-block'},
+      e('h3',null,'THE DEVICE: CARDIOWATCH'),
+      e('div',{className:'specs-grid'},
+        [['Form factor','Wearable patch, worn continuously for up to 14 days'],
+         ['Return model','Patient mails device back after wear period'],
+         ['Recording','Single-lead ECG, captures every heartbeat continuously'],
+         ['Event storage cap','100 patient-triggered + 500 auto-detected events max'],
+         ['Wireless','Limited event transmission to patient-facing app only'],
+         ['Clinician report','Generated only after device is returned and processed'],
+         ['Cleared indication','Patients 18+ with transient cardiac symptoms. NOT for critical care.'],
+         ['Regulatory status','510(k) cleared, Class II, predicate: Holter monitor'],
+        ].map(function(s,i){
+          return e('div',{key:i,className:'spec'},
+            e('div',{className:'dot'}),
+            e('div',{className:'spec-txt'},e('b',null,s[0]+': '),s[1])
+          );
+        })
+      )
+    ),
+    e('div',{className:'intro-grid'},
+      e('div',{className:'intro-card'},e('div',{className:'intro-card-ico'},'🎥'),e('h3',null,'Your Role'),e('p',null,e('b',null,'Product manager.'),' CardioWatch just cleared FDA. Investors are watching, reps are ready. Your job: get to market.')),
+      e('div',{className:'intro-card'},e('div',{className:'intro-card-ico'},'📋'),e('h3',null,'Three Acts'),e('p',null,e('b',null,'Act 1:'),' Pick your launch segment. ',e('b',null,'Act 2:'),' Write your marketing claim. ',e('b',null,'Act 3:'),' Find out what happens next.')),
+      e('div',{className:'intro-card'},e('div',{className:'intro-card-ico'},'⚖️'),e('h3',null,'The Regulatory Context'),e('p',null,'FDA’s 21 CFR Part 801 governs device labeling. ',e('b',null,'Marketing claims are labeling.'),' If they misrepresent intended use, the device is misbranded — regardless of 510(k) clearance.')),
+      e('div',{className:'intro-card'},e('div',{className:'intro-card-ico'},'🎯'),e('h3',null,'What This Is Based On'),e('p',null,'This simulation is based on a ',e('b',null,'real FDA warning letter'),' issued to a cardiac monitoring company. The device, the claims, and the regulatory outcome all happened. You’ll find out which company at the end.'))
+    ),
+    e('div',{className:'warn-note'},'⚠️ ',e('b',null,'Note for students:'),' Every option will look professionally written and clinically reasonable. There are no obviously wrong answers. Make the choices that feel right for the business — that’s the point.'),
+    e('button',{className:'btn btn-blue',style:{maxWidth:320,margin:'0 auto',display:'flex'},onClick:p.onStart},'Start the Simulation →')
+  );
+}
+
+// ─── ACT 1 ──────────────────────────────────────────────────
+function Act1(p){
+  var s=useState(null),seg=s[0],setSeg=s[1];
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e(ProgBar,{step:0,total:5}),
+    e('span',{className:'act-badge act1'},'ACT 1'),
+    e('h2',null,'Choose Your Launch Segment'),
+    e('p',{className:'sub'},'CardioWatch just cleared 510(k). The device records cardiac data for up to 14 days — patients wear it, then mail it back for report generation. Choose your primary launch segment.'),
+    SEGMENTS.map(function(sg){
+      return e('div',{key:sg.id,className:'seg-card '+(seg===sg.id?'seg-selected':''),onClick:function(){setSeg(sg.id)}},
+        e('div',{className:'seg-head'},
+          e('div',null,
+            e('div',{className:'seg-title'},sg.title),
+            sg.tag?e('div',{className:'seg-tag'},sg.tag):null
+          ),
+          e('div',{className:'seg-reimb'},sg.reimb)
+        ),
+        e('span',{className:'vol-badge '+sg.volClass},sg.volLabel),
+        e('div',{className:'seg-profile'},sg.profile),
+        e('div',{className:'seg-signal'},'“'+sg.signal+'”')
+      );
+    }),
+    e('button',{className:'btn btn-blue',disabled:!seg,style:{marginTop:24},onClick:function(){if(seg)p.onSelect(seg)}},'Confirm Segment →')
+  );
+}
+
+// ─── CONGRATS ───────────────────────────────────────────────
+function Congrats(p){
+  var sg=SEGMENTS.find(function(s){return s.id===p.segment});
+  var msgs={
+    A:{h:'Solid choice.',b:'General Cardiology is a high-volume, defensible segment. Your reps will have plenty of doors to knock on. Let’s build the claim.'},
+    B:{h:'Bold move.',b:'High-Risk Arrhythmia is the fastest-growing segment with the best reimbursement. This is the play. Now let’s write a claim that captures it.'},
+    C:{h:'Interesting angle.',b:'Post-surgical monitoring is premium and underserved. Hospital access is the challenge — but the margin is there. Time to write the claim.'},
+  };
+  var m=msgs[p.segment];
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e('div',{className:'congrats'},
+      e('div',{className:'congrats-ico'},'🎯'),
+      e('h2',null,m.h),
+      e('p',{style:{marginBottom:8}},'You’ve selected ',e('span',{className:'seg-hl'},sg.title),'.'),
+      e('p',{style:{color:'#94a3b8',fontSize:15,marginBottom:32,maxWidth:520,margin:'0 auto 32px'}},m.b),
+      e('button',{className:'btn btn-blue',style:{maxWidth:320},onClick:p.onContinue},'Build Your Claim →')
+    )
+  );
+}
+
+// ─── ACT 2 ──────────────────────────────────────────────────
+function Act2(p){
+  var cs=useState([null,null,null,null]),choices=cs[0],setChoices=cs[1];
+  var ab=useState(0),activeBlank=ab[0],setActive=ab[1];
+  var gm=useState(null),grayModal=gm[0],setGray=gm[1];
+  var sg=SEGMENTS.find(function(s){return s.id===p.segment});
+
+  function apply(bi,oi){
+    var n=choices.slice();n[bi]=oi;setChoices(n);
+    if(bi<3)setActive(bi+1);
+  }
+  function handleSel(bi,opt){
+    if(opt.type==='gray'){setGray({bi:bi,opt:opt});}
+    else{apply(bi,opt.id);}
+  }
+  function dismissGray(){apply(grayModal.bi,grayModal.opt.id);setGray(null);}
+
+  var allFilled=choices.every(function(c){return c!==null});
+
+  function slotClass(i){
+    if(!choices[i])return i===activeBlank?'blank blank-active':'blank';
+    var t=getType(i,choices[i]);
+    return 'blank blank-'+t;
+  }
+
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e(ProgBar,{step:1,total:5}),
+    e('span',{className:'act-badge act2'},'ACT 2'),
+    e('h2',null,'Write Your Claim'),
+    e('p',{className:'sub'},'Your marketing team needs a headline claim for the launch deck. Select one option per blank.'),
+
+    e('div',{className:'act2-layout'},
+      // LEFT
+      e('div',null,
+        BLANKS.map(function(blank,idx){
+          return e('div',{key:blank.id},
+            e('div',{className:'blank-lbl'},blank.label),
+            e('div',{className:'opts-grid'},
+              blank.options.map(function(opt){
+                var cls='opt-btn';
+                if(choices[idx]===opt.id)cls+=' opt-'+opt.type;
+                return e('button',{key:opt.id,className:cls,onClick:function(){handleSel(idx,opt)}},
+                  e('b',{style:{fontSize:11,opacity:.6,marginRight:6}},opt.id+'.'),
+                  opt.text
+                );
+              })
+            )
+          );
+        }),
+        allFilled?e('div',null,
+          e('div',{style:{background:'#0f2744',border:'1px solid #1d4ed8',borderRadius:10,padding:'16px 20px',marginBottom:20,color:'#93c5fd',fontSize:14}},
+            '🚀 ',e('b',null,'Claim locked in.'),' Ready to launch.'
+          ),
+          e('button',{className:'btn btn-blue',onClick:function(){p.onComplete(choices)}},'Launch CardioWatch →')
+        ):null
+      ),
+      // RIGHT
+      e('div',{className:'act2-right'},
+        e('div',{className:'side-card'},
+          e('h4',null,'Your Segment'),
+          e('div',{className:'seg-ctx-title'},sg.title),
+          e('div',{className:'seg-ctx-detail',style:{marginTop:8}},
+            e('b',null,'Reimbursement: '),sg.reimb,e('br'),
+            e('b',null,'Volume: '),sg.volLabel,e('br'),
+            e('b',null,'Profile: '),sg.profile
+          ),
+          e('div',{style:{fontSize:12,color:'#60a5fa',fontStyle:'italic',marginTop:10,lineHeight:1.5}},'“'+sg.signal+'”')
+        ),
+        e('div',{className:'side-card'},
+          e('h4',null,'Your Claim (Live)'),
+          e('div',{className:'claim-live'},
+            e('span',{style:{color:'#64748b',fontStyle:'italic',fontSize:12}},'“'),
+            ' The CardioWatch is intended for ',
+            e('span',{className:slotClass(0)},choices[0]?getText(0,choices[0]):'patient type…'),
+            ' and provides ',
+            e('span',{className:slotClass(1)},choices[1]?getText(1,choices[1]):'monitoring type…'),
+            ' with ',
+            e('span',{className:slotClass(2)},choices[2]?getText(2,choices[2]):'notification speed…'),
+            ' to support ',
+            e('span',{className:slotClass(3)},choices[3]?getText(3,choices[3]):'clinical action…'),
+            '. ',
+            e('span',{style:{color:'#64748b',fontStyle:'italic',fontSize:12}},'”')
+          )
+        )
+      )
+    ),
+
+    grayModal?e('div',{className:'modal-bg'},
+      e('div',{className:'modal-box'},
+        e('div',{className:'modal-ico'},'⚠️'),
+        e('div',{className:'modal-title'},'Yellow Flag: Measurability Question'),
+        e('div',{className:'modal-txt'},
+          'You chose: ',e('b',null,'“'+grayModal.opt.text+'”'),e('br'),e('br'),
+          grayModal.opt.gm,e('br'),e('br'),
+          'This isn’t wrong yet — but could you define ',e('b',null,'“'+grayModal.opt.gw+'”'),' in a way the FDA could measure?'
+        ),
+        e('button',{className:'btn btn-blue',onClick:dismissGray},'I understand — continue with this choice')
+      )
+    ):null
+  );
+}
+
+// ─── LAUNCH SUCCESS ─────────────────────────────────────────
+function LaunchSuccess(p){
+  var sb=useState(false),showBtn=sb[0],setShow=sb[1];
+  useEffect(function(){
+    var ticks=[
+      [100,'tick t1'],[600,'tick t2'],[1100,'tick t3'],[1600,'tick t4'],[2100,'tick t5'],
+    ];
+    var timers=[];
+    ticks.forEach(function(t){
+      timers.push(setTimeout(function(){
+        var el=document.querySelector('.'+t[1].split(' ')[1]);
+        if(el)el.style.animation='tickIn .5s ease forwards';
+      },t[0]));
+    });
+    timers.push(setTimeout(function(){
+      var el=document.querySelector('.env-box');
+      if(el)el.style.animation='envIn .8s ease forwards';
+    },2700));
+    timers.push(setTimeout(function(){setShow(true);},3400));
+    return function(){timers.forEach(clearTimeout);};
+  },[]);
+
+  var seg=SEGMENTS.find(function(s){return s.id===p.segment});
+
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e(ProgBar,{step:2,total:5}),
+    e('span',{className:'act-badge act2'},'LAUNCH'),
+    e('h2',null,'CardioWatch is live.'),
+    e('p',{className:'sub'},'Claim filed. Sales team briefed. Reps in the field. Here’s how the first six months go.'),
+    e('div',{className:'ticker-wrap'},
+      e('div',{className:'tick tick-green t1',style:{opacity:0}},e('div',{className:'tick-ico'},'📦'),e('div',null,e('div',{className:'tick-lbl'},'Month 1 — Distribution'),e('div',{className:'tick-txt'},e('b',null,'14 cardiology practices'),' across 6 states. Reps reporting strong physician interest in the '+seg.title.toLowerCase()+' population.'))),
+      e('div',{className:'tick tick-blue t2',style:{opacity:0}},e('div',{className:'tick-ico'},'📈'),e('div',null,e('div',{className:'tick-lbl'},'Month 2 — Traction'),e('div',{className:'tick-txt'},'Reorder rate at ',e('b',null,'68%'),'. Two regional health systems begin formulary review. Sales team exceeds Q1 target by 22%.'))),
+      e('div',{className:'tick tick-green t3',style:{opacity:0}},e('div',{className:'tick-ico'},'🏥'),e('div',null,e('div',{className:'tick-lbl'},'Month 3 — Expansion'),e('div',{className:'tick-txt'},'Added to preferred vendor list at ',e('b',null,'3 IDN systems'),'. Materials distributed at HRS Annual Scientific Sessions. Press release issued.'))),
+      e('div',{className:'tick tick-blue t4',style:{opacity:0}},e('div',{className:'tick-ico'},'💰'),e('div',null,e('div',{className:'tick-lbl'},'Month 5 — Revenue'),e('div',{className:'tick-txt'},'ARR tracking at ',e('b',null,'$4.2M'),'. Series B investor deck updated. Board meeting scheduled to discuss national rollout strategy.'))),
+      e('div',{className:'tick tick-green t5',style:{opacity:0}},e('div',{className:'tick-ico'},'🌐'),e('div',null,e('div',{className:'tick-lbl'},'Month 6 — Conference'),e('div',{className:'tick-txt'},'Featured in ',e('b',null,'Cardiac Electrophysiology Review'),'. Physician testimonials collected. Everything is going exactly as planned.')))
+    ),
+    e('div',{className:'envelope env-box',style:{opacity:0}},
+      e('div',{className:'envelope-ico'},'📬'),
+      e('div',{className:'envelope-sender'},'From: U.S. Food and Drug Administration · CDRH · Office of Regulatory Affairs'),
+      e('h3',null,'Then this arrives.'),
+      e('p',null,'Six months after launch, a letter lands on your desk. It’s not a routine inquiry. It’s not a request for information. It’s addressed to your CEO, CC’d to your legal team — and it quotes your marketing materials word for word.'),
+      showBtn?e('button',{className:'btn btn-blue',style:{maxWidth:300,margin:'0 auto'},onClick:p.onContinue},'Open the Letter →'):null
+    )
+  );
+}
+
+// ─── WARNING LETTER ─────────────────────────────────────────
+function WarningLetter(p){
+  var c=p.choices.map(function(ch,i){return getText(i,ch)});
+  var t=p.choices.map(function(ch,i){return getType(i,ch)});
+  function hl(txt,type){return e('span',{className:type==='trap'?'hl-trap':'hl-gray'},txt)}
+  var segLabel=p.segment==='B'?'high-risk arrhythmia patients':p.segment==='C'?'post-surgical cardiac patients':'general cardiology patients';
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e(ProgBar,{step:3,total:5}),
+    e('span',{className:'act-badge act3'},'ACT 3'),
+    e('h2',null,'The Warning Letter'),
+    e('p',{className:'sub'},'Your launch is live. Six months later, this arrives.'),
+    e('div',{className:'letter'},
+      e('div',{className:'letter-wm'},'WARNING'),
+      e('div',{className:'letter-seal'},
+        e('div',{className:'letter-dept'},'Department of Health and Human Services'),
+        e('div',{className:'letter-agency'},'FOOD AND DRUG ADMINISTRATION'),
+        e('div',{className:'letter-div'},'Center for Devices and Radiological Health · Office of Regulatory Affairs')
+      ),
+      e('div',{className:'letter-meta'},e('b',null,'WARNING LETTER'),' · CardioWatch Systems, Inc. · Reference: CDRH-WL-2024-XXXX'),
+      e('div',{className:'letter-re'},'RE: Misbranded Medical Device — Promotional Claims'),
+      e('div',{className:'letter-body'},
+        e('p',null,'Dear CardioWatch Systems, Inc.:'),
+        e('p',null,'The Food and Drug Administration (FDA) has reviewed promotional materials for the CardioWatch wearable cardiac monitor and determined that the device is misbranded under Section 502(a) of the Federal Food, Drug, and Cosmetic Act, in that its labeling is false or misleading.'),
+        e('p',null,'Your promotional materials represent that CardioWatch is intended for ',hl(c[0],t[0]),'. The device’s 510(k) clearance, K-XXXXXXX, indicates the device is intended for patients 18 years or older who may be asymptomatic or who may suffer from transient symptoms. The cleared indication explicitly states the device is ',e('b',null,'NOT intended for critical care patients'),'.'),
+        e('p',null,'Furthermore, your materials claim that the device provides ',hl(c[1],t[1]),' with ',hl(c[2],t[2]),'. FDA has determined that this representation is false or misleading. The device stores cardiac data locally, with limited wireless transmission to a patient-facing mobile application only. Comprehensive clinical reporting occurs only after the patient returns the device and data is processed — a period that may span days to weeks.'),
+        e('p',null,'Your claim that the device supports ',hl(c[3],t[3]),' further compounds this misrepresentation. For ',segLabel,', the monitoring gap between data collection and clinician notification is not clinically acceptable. The device’s design — including a maximum of 100 patient-triggered and 500 auto-detected events — does not support the patient population implied by your claim.'),
+        e('p',null,'FDA requests that you immediately cease distribution of all promotional materials containing the above representations and provide a written response within 15 business days. Failure to promptly correct these violations may result in enforcement action, including seizure, injunction, or civil money penalties.')
+      ),
+      e('div',{className:'letter-sig'},'Sincerely,',e('br'),e('b',null,'[Director, Division of Enforcement]'),e('br'),'Center for Devices and Radiological Health')
+    ),
+    e('div',{className:'red-banner'},'🔴 ',e('b',null,'Your words are highlighted in red.'),' The FDA quoted your marketing claim — word for word — in the violation notice.'),
+    e('button',{className:'btn btn-blue',onClick:p.onBegin},'Answer for Your Team →')
+  );
+}
+
+// ─── QUESTIONS ──────────────────────────────────────────────
+function Questions(p){
+  var qs=useState(0),qi=qs[0],setQi=qs[1];
+  var ss=useState(null),sel=ss[0],setSel=ss[1];
+  var rs=useState(false),rev=rs[0],setRev=rs[1];
+  var choiceTexts=p.choices.map(function(ch,i){return getText(i,ch)});
+  var q=Q[qi];
+
+  function pick(oid){if(rev)return;setSel(oid);setRev(true);}
+  function next(){
+    if(qi<Q.length-1){setQi(qi+1);setSel(null);setRev(false);}
+    else{p.onComplete();}
+  }
+  function aCls(oid){
+    if(!rev)return 'ans-btn';
+    if(oid===q.correct)return 'ans-btn ans-correct';
+    if(oid===sel&&oid!==q.correct)return 'ans-btn ans-wrong';
+    return 'ans-btn ans-dim';
+  }
+
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e(ProgBar,{step:4,total:5}),
+    e('span',{className:'act-badge act3'},'ACT 3 — DEBRIEF'),
+    e('h2',null,'Answer for Your Team'),
+    e('p',{className:'sub'},'The FDA reviewer is asking the questions your marketing deck didn’t answer.'),
+    e('div',{className:'q-counter'},'Question '+(qi+1)+' of '+Q.length),
+    e('div',{className:'q-box'},q.prompt(choiceTexts)),
+    q.opts.map(function(opt){
+      return e('button',{key:opt.id,className:aCls(opt.id),onClick:function(){pick(opt.id)},disabled:rev},
+        e('b',{style:{marginRight:8,opacity:.7}},opt.id+'.'),opt.text
+      );
+    }),
+    rev?e('div',{className:'debrief'},(sel===q.correct?'✅ Correct. ':'❌ Not quite. '),q.debrief):null,
+    rev?e('button',{className:'btn btn-blue',style:{marginTop:16},onClick:next},qi<Q.length-1?'Next Question →':'See the Final Reveal →'):null
+  );
+}
+
+// ─── CLEAN LAUNCH ───────────────────────────────────────────
+function CleanLaunch(p){
+  var rs=useState(null),rsel=rs[0],setRsel=rs[1];
+  var rv=useState(false),rrev=rv[0],setRrev=rv[1];
+  var ropts=[
+    {id:'yes',label:'Yes — Segment B would have made the warning letter more likely.',wrong:true,reply:'Segment B alone isn’t the problem. The claim has to also overstate what the design delivers.'},
+    {id:'no',label:'No — the segment doesn’t matter, only the claims.',wrong:true,reply:'Almost. Segment context matters — it sets FDA expectations for the monitoring level required.'},
+    {id:'dep',label:'Depends on the claim wording.',wrong:false,reply:'Exactly right. Segment B alone doesn’t create the problem. The claim has to also overstate what the design delivers. A conservative claim on a high-risk segment is defensible.'},
+  ];
+  function pick(id){setRsel(id);setRrev(true);}
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e('div',{className:'clean-center'},
+      e('div',{className:'clean-ico'},'✅'),
+      e('h2',{className:'clean-h'},'Clean Launch.'),
+      e('p',{style:{color:'#94a3b8',fontSize:16,lineHeight:1.8,maxWidth:560,margin:'0 auto 8px'}},'No warning letter. Your claims matched your design and your cleared indication.'),
+      e('p',{style:{color:'#94a3b8',fontSize:16,lineHeight:1.8,maxWidth:560,margin:'0 auto 24px'}},'That’s good engineering. That’s what design controls are for.')
+    ),
+    e('div',{className:'zio-card'},
+      e('h3',null,'Here’s what another team did with the same device.'),
+      e('div',{className:'zio-txt'},
+        e('p',null,'Another CardioWatch team targeted Segment B and wrote a headline positioning the device as providing ',e('b',null,'“near real-time cardiac rhythm monitoring”'),' with ',e('b',null,'“immediate clinician notification”'),' — aimed at ',e('b',null,'“high-risk arrhythmia patients requiring active surveillance.”')),
+        e('p',{style:{marginTop:10}},'Six months after launch, they received a warning letter. The FDA quoted their marketing materials verbatim and cited the gap between the claim and the actual design.')
+      )
+    ),
+    e('div',{style:{background:'#1e293b',border:'1px solid #334155',borderRadius:12,padding:24,marginBottom:24}},
+      e('div',{style:{fontSize:15,color:'#e2e8f0',marginBottom:16,fontWeight:600}},'If you had chosen Segment B and written the same claims, would anything have changed?'),
+      ropts.map(function(opt){
+        var cls='ref-btn';
+        if(rrev&&opt.id===rsel)cls+=opt.wrong?' ans-wrong':' ans-correct';
+        return e('button',{key:opt.id,className:cls,onClick:function(){if(!rrev)pick(opt.id);},disabled:rrev},opt.label);
+      }),
+      rrev?e('div',{className:'debrief',style:{marginTop:12}},ropts.find(function(o){return o.id===rsel})?.reply):null
+    ),
+    rrev?e('button',{className:'btn btn-blue',onClick:p.onReveal},'See the Real Case →'):null
+  );
+}
+
+// ─── FINAL REVEAL ───────────────────────────────────────────
+function FinalReveal(p){
+  return e('div',{className:'screen'},
+    e(LogoBar),
+    e('div',{className:'final-card'},
+      e('h2',null,'This wasn’t hypothetical.'),
+      e('p',{style:{color:'#94a3b8',fontSize:15,marginBottom:28,lineHeight:1.8}},'CardioWatch is a fictional device. The regulatory story it’s based on is not.'),
+      e('div',{className:'real-case'},
+        e('div',{className:'real-case-ttl'},'📋 Real Case: iRhythm / Zio Patch — FDA Warning Letter, May 2023'),
+        e('p',null,e('b',null,'The device:'),' The Zio XT Patch — a wearable, single-lead, continuous ECG monitor. Long-term wear. Mail-back for report generation. FDA-cleared Class II device.'),
+        e('p',null,e('b',null,'The claim:'),' iRhythm’s promotional materials described the Zio as providing ',e('b',null,'“near real-time cardiac event monitoring.”'),' The cleared indication covered ambulatory patients — not critical care, not high-acuity.'),
+        e('p',null,e('b',null,'The gap:'),' FDA determined the claim implied continuous, real-time clinician notification — which the mail-back architecture could not deliver. The letter cited specific promotional language and required immediate corrective action.'),
+        e('p',null,e('b',null,'The outcome:'),' iRhythm issued a corrective action, revised promotional materials, and incurred significant regulatory and commercial disruption. The warning letter is publicly available in FDA’s database.'),
+        e('p',null,e('b',null,'The lesson:'),' The device was cleared. The design was sound. The claim was the problem.')
+      ),
+      e('p',{style:{color:'#60a5fa',fontSize:14,lineHeight:1.8,marginBottom:28}},'Marketing claims are regulatory documents. They set the scope of intended use — and the standard by which your design will be judged. If your claim outpaces your design, the FDA will close that gap for you.'),
+      e('button',{className:'btn btn-blue',style:{maxWidth:280,margin:'0 auto'},onClick:p.onRestart},'Restart Simulation ↺')
+    )
+  );
+}
+
+// ─── APP ────────────────────────────────────────────────────
+function App(){
+  var ss=useState('intro'),screen=ss[0],setScreen=ss[1];
+  var sg=useState(null),segment=sg[0],setSeg=sg[1];
+  var ch=useState([null,null,null,null]),choices=ch[0],setChoices=ch[1];
+
+  function reset(){setScreen('intro');setSeg(null);setChoices([null,null,null,null]);}
+
+  function handleClaim(c){
+    setChoices(c);
+    setScreen('launch');
+  }
+  function handleLetter(){
+    var trap=choices.some(function(c,i){return c&&getType(i,c)==='trap'});
+    setScreen(trap?'warning':'clean');
+  }
+
+  if(screen==='intro')     return e(Intro,{onStart:function(){setScreen('act1')}});
+  if(screen==='act1')      return e(Act1,{onSelect:function(s){setSeg(s);setScreen('congrats')}});
+  if(screen==='congrats')  return e(Congrats,{segment:segment,onContinue:function(){setScreen('act2')}});
+  if(screen==='act2')      return e(Act2,{segment:segment,onComplete:handleClaim});
+  if(screen==='launch')    return e(LaunchSuccess,{segment:segment,choices:choices,onContinue:handleLetter});
+  if(screen==='warning')   return e(WarningLetter,{segment:segment,choices:choices,onBegin:function(){setScreen('questions')}});
+  if(screen==='questions') return e(Questions,{choices:choices,onComplete:function(){setScreen('final')}});
+  if(screen==='clean')     return e(CleanLaunch,{onReveal:function(){setScreen('final')}});
+  if(screen==='final')     return e(FinalReveal,{onRestart:reset});
+  return null;
+}
+
+var root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(e(App));
+</script>
+</body>
+</html>
