@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STERILE GENIUS: Sterilization Matchmaker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ==========================================
+           SIDEBAR NAVIGATION
+           ========================================== */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+            padding: 32px 24px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 32px;
+            font-style: italic;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .difficulty-foundational {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .difficulty-intermediate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .difficulty-advanced {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+
+        .btn-new-session {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            margin-bottom: 16px;
+        }
+
+        .btn-new-session:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-new-session:active {
+            transform: translateY(0);
+        }
+
+        .info-section {
+            background: rgba(249, 250, 251, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .info-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* ==========================================
+           MAIN CONTENT AREA
+           ========================================== */
+        .main-content {
+            margin-left: 320px;
+            padding: 48px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        /* ==========================================
+           DEVICE CARD
+           ========================================== */
+        .device-card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            margin-bottom: 32px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .device-card.correct-answer {
+            animation: correctPulse 0.6s ease;
+            border: 3px solid #10b981;
+        }
+
+        .device-card.wrong-answer {
+            animation: wrongShake 0.5s ease;
+            border: 3px solid #ef4444;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .tag-foundational {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .tag-intermediate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .tag-advanced {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .device-name {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .device-description {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .materials-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .materials-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .materials-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .materials-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .materials-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            flex: 1;
+        }
+
+        .method-section {
+            margin-top: 32px;
+        }
+
+        .method-question {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .current-method {
+            display: block;
+            padding: 20px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            text-align: center;
+        }
+
+        /* ==========================================
+           SWIPE BUTTONS
+           ========================================== */
+        .swipe-buttons {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .swipe-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swipe-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .swipe-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .swipe-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-incompatible {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+            color: white;
+        }
+
+        .btn-incompatible:hover:not(:disabled) {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-compatible {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
+        .btn-compatible:hover:not(:disabled) {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+        }
+
+        .swipe-labels {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .swipe-label {
+            width: 120px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .label-incompatible {
+            color: #ef4444;
+        }
+
+        .label-compatible {
+            color: #10b981;
+        }
+
+        /* ==========================================
+           FEEDBACK AREA
+           ========================================== */
+        .feedback-area {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            min-height: 120px;
+            display: none;
+        }
+
+        .feedback-area.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .feedback-icon {
+            font-size: 32px;
+        }
+
+        .feedback-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .feedback-correct {
+            color: #10b981;
+        }
+
+        .feedback-wrong {
+            color: #ef4444;
+        }
+
+        .feedback-text {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .feedback-rationale {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .rationale-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .rationale-text {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .btn-next {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ==========================================
+           COMPLETION SCREEN
+           ========================================== */
+        .completion-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .completion-screen.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .completion-emoji {
+            font-size: 80px;
+            margin-bottom: 24px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .completion-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .completion-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+
+        .completion-stats {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin: 32px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .completion-stat {
+            margin-bottom: 24px;
+        }
+
+        .completion-stat:last-child {
+            margin-bottom: 0;
+        }
+
+        .completion-stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .completion-stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        /* ==========================================
+           HINT SYSTEM
+           ========================================== */
+        .hint-section {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .btn-hint {
+            background: transparent;
+            border: 2px solid #cbd5e1;
+            color: #64748b;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hint:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .btn-hint:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .hint-display {
+            margin-top: 12px;
+            padding: 12px;
+            background: #fef3c7;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #92400e;
+            font-weight: 500;
+            display: none;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .hint-display.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        /* ==========================================
+           MOBILE RESPONSIVE
+           ========================================== */
+        @media (max-width: 968px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 24px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 24px;
+            }
+
+            .device-card {
+                padding: 32px 24px;
+            }
+
+            .device-name {
+                font-size: 24px;
+            }
+
+            .swipe-btn {
+                width: 90px;
+                height: 90px;
+                font-size: 36px;
+            }
+
+            .swipe-label {
+                width: 90px;
+                font-size: 11px;
+            }
+
+            .current-method {
+                font-size: 18px;
+                padding: 16px 24px;
+            }
+        }
+
+        /* ==========================================
+           UTILITY CLASSES
+           ========================================== */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- ==========================================
+         SIDEBAR NAVIGATION
+         ========================================== -->
+    <div class="sidebar">
+        <div class="logo">STERILE GENIUS</div>
+        <div class="tagline">Swipe right on sterility! 💉</div>
+        
+        <div class="difficulty-badge" id="difficultyBadge">Beginner Mode</div>
+        
+        <div class="stats-card">
+            <div class="stat-row">
+                <span class="stat-label">Session</span>
+                <span class="stat-value" id="sessionNumber">1</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Progress</span>
+                <span class="stat-value"><span id="currentItem">0</span>/<span id="totalItems">10</span></span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="stat-row" style="margin-top: 12px;">
+                <span class="stat-label">Score</span>
+                <span class="stat-value" id="scoreDisplay" style="color: #667eea;">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Errors</span>
+                <span class="stat-value" id="errorCount" style="color: #ef4444;">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Streak</span>
+                <span class="stat-value" id="streakCount" style="color: #10b981;">0 🔥</span>
+            </div>
+        </div>
+
+        <button class="btn-new-session" id="btnNewSession">🔄 New Session</button>
+
+        <div class="info-section">
+            <div class="info-title">How to Play</div>
+            <div class="info-text">
+                Match medical devices with sterilization methods! Tap ✗ if incompatible or ✓ if compatible. Learn the rationale behind each decision.
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Difficulty Progression</div>
+            <div class="info-text">
+                <strong>Sessions 1-3:</strong> Foundational<br>
+                <strong>Sessions 4-6:</strong> Mixed<br>
+                <strong>Sessions 7+:</strong> Advanced
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Scoring</div>
+            <div class="info-text">
+                ✓ Correct: +100 pts<br>
+                ✗ Wrong: -50 pts<br>
+                💡 Hint: -20 pts<br>
+                🔥 Streak bonus: +50 pts at 5 streak
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MAIN CONTENT AREA
+         ========================================== -->
+    <div class="main-content">
+        <div class="game-container">
+            <!-- Device Card -->
+            <div class="device-card" id="deviceCard">
+                <div class="difficulty-tag" id="difficultyTag">Foundational</div>
+                <h1 class="device-name" id="deviceName">Loading...</h1>
+                <p class="device-description" id="deviceDescription"></p>
+                
+                <div class="materials-section">
+                    <div class="materials-row">
+                        <span class="materials-label">Primary:</span>
+                        <span class="materials-value" id="materialPrimary"></span>
+                    </div>
+                    <div class="materials-row" id="materialSecondaryRow">
+                        <span class="materials-label">Secondary:</span>
+                        <span class="materials-value" id="materialSecondary"></span>
+                    </div>
+                </div>
+
+                <div class="method-section">
+                    <div class="method-question">Is this device compatible with:</div>
+                    <div class="current-method" id="currentMethod">STEAM</div>
+
+                    <div class="swipe-buttons">
+                        <button class="swipe-btn btn-incompatible" id="btnIncompatible" aria-label="Incompatible">✗</button>
+                        <button class="swipe-btn btn-compatible" id="btnCompatible" aria-label="Compatible">✓</button>
+                    </div>
+
+                    <div class="swipe-labels">
+                        <div class="swipe-label label-incompatible">Incompatible</div>
+                        <div class="swipe-label label-compatible">Compatible</div>
+                    </div>
+
+                    <div class="hint-section">
+                        <button class="btn-hint" id="btnHint">💡 Show Hint (-20 pts)</button>
+                        <div class="hint-display" id="hintDisplay"></div>
+                    </div>
+                </div>
+
+                <!-- Feedback Area -->
+                <div class="feedback-area" id="feedbackArea">
+                    <div class="feedback-header">
+                        <span class="feedback-icon" id="feedbackIcon">✓</span>
+                        <h3 class="feedback-title" id="feedbackTitle">Correct!</h3>
+                    </div>
+                    <p class="feedback-text" id="feedbackText"></p>
+                    <div class="feedback-rationale">
+                        <div class="rationale-label">Why This Matters</div>
+                        <p class="rationale-text" id="rationaleText"></p>
+                    </div>
+                    <button class="btn-next" id="btnNext">Next Challenge →</button>
+                </div>
+            </div>
+
+            <!-- Completion Screen -->
+            <div class="completion-screen" id="completionScreen">
+                <div class="completion-emoji">🎉</div>
+                <h1 class="completion-title">Session Complete!</h1>
+                <p class="completion-subtitle">You're on your way to becoming a sterilization expert!</p>
+                <div class="completion-stats">
+                    <div class="completion-stat">
+                        <div class="completion-stat-label">Accuracy</div>
+                        <div class="completion-stat-value" id="finalAccuracy">0%</div>
+                    </div>
+                    <div class="completion-stat">
+                        <div class="completion-stat-label">Final Score</div>
+                        <div class="completion-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="completion-stat">
+                        <div class="completion-stat-label">Best Streak</div>
+                        <div class="completion-stat-value" id="finalStreak">0 🔥</div>
+                    </div>
+                </div>
+                <button class="btn-new-session" id="btnNewSessionComplete">Start Next Session</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // COMPLETE ANSWER KEY DATA (ALL 55 ITEMS)
+        // ==========================================
+        const ANSWER_KEY = {
+            sterilizationMethods: ["ETO", "GAMMA", "EBEAM", "STEAM", "VH2O2"],
+            methodDetails: {
+                "ETO": { name: "Ethylene Oxide (EtO)", temp: "40-60°C" },
+                "GAMMA": { name: "Gamma Radiation", temp: "Room temp" },
+                "EBEAM": { name: "Electron Beam", temp: "Room temp" },
+                "STEAM": { name: "Steam Autoclave", temp: "121-134°C" },
+                "VH2O2": { name: "Vaporized H₂O₂", temp: "45-55°C" }
+            },
+            items: [
+                // FOUNDATIONAL ITEMS (18 items)
+                {
+                    id: "F001", difficulty: "foundational", device_name: "Silicone Foley Catheter",
+                    material_primary: "Medical-grade silicone", material_secondary: null,
+                    device_description: "Single-lumen urinary catheter, 16Fr diameter, balloon tip",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "ETO",
+                    rationale: "Silicone tolerates both EtO and radiation. EtO is industry standard for flexible catheters. Steam would cause swelling and surface tackiness.",
+                    why_mistake_fails: "Steam at 121°C + moisture causes silicone to swell up to 8-12%, become sticky, and lose dimensional stability.",
+                    hint: "Flexible polymer needing low temperature. Steam's heat + moisture = problem for silicone."
+                },
+                {
+                    id: "F002", difficulty: "foundational", device_name: "Stainless Steel Surgical Scissors",
+                    material_primary: "316L Stainless Steel", material_secondary: null,
+                    device_description: "Mayo scissors, 6 inch length, sharp-sharp tips",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM", "VH2O2"], best_answer: "STEAM",
+                    rationale: "Stainless steel is heat-stable and corrosion-resistant. Steam is fastest, cheapest, and available in every hospital. All methods work, but steam is optimal.",
+                    why_mistake_fails: "N/A - all methods work!",
+                    hint: "Metal instruments in hospitals use the most common, cheapest method."
+                },
+                {
+                    id: "F003", difficulty: "foundational", device_name: "Polypropylene Syringe (Unstabilized)",
+                    material_primary: "Polypropylene (standard grade)", material_secondary: "Rubber plunger",
+                    device_description: "3mL Luer-lock syringe, graduated markings, disposable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Standard PP is radiation-sensitive - undergoes chain scission leading to embrittlement. EtO is industry standard. Steam causes warping at 121°C.",
+                    why_mistake_fails: "Unstabilized PP exposed to 25 kGy gamma undergoes chain scission. Barrel becomes brittle and cracks.",
+                    hint: "Standard PP (not stabilized) is radiation-sensitive. What method works for heat/radiation-sensitive plastics?"
+                },
+                {
+                    id: "F004", difficulty: "foundational", device_name: "Latex Surgical Gloves",
+                    material_primary: "Natural rubber latex", material_secondary: "Cornstarch powder",
+                    device_description: "Size 7.5, sterile, powder-free option",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Natural rubber latex tolerates gamma well. Gamma is faster than EtO (no aeration needed). Steam causes protein degradation and yellowing.",
+                    why_mistake_fails: "Heat degrades rubber proteins, causes yellowing and loss of elasticity.",
+                    hint: "Natural rubber can handle radiation. High heat = protein damage."
+                },
+                {
+                    id: "F005", difficulty: "foundational", device_name: "Cotton Surgical Gauze",
+                    material_primary: "100% cotton fibers", material_secondary: null,
+                    device_description: "4x4 inch pads, non-woven, sterile",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Cotton is heat-stable and moisture-compatible. Steam is fastest and cheapest for cellulose materials. VH2O2 doesn't work with cellulose.",
+                    why_mistake_fails: "VH2O2 incompatible - cotton absorbs peroxide vapor like a sponge, preventing sterilization.",
+                    hint: "Cellulose + cheap + hospitals have this everywhere = ?"
+                },
+                {
+                    id: "F006", difficulty: "foundational", device_name: "PVC IV Tubing",
+                    material_primary: "PVC with DEHP plasticizer", material_secondary: "Polycarbonate connectors",
+                    device_description: "Standard IV administration set, 72 inch length",
+                    correct_answers: ["ETO", "GAMMA"], best_answer: "ETO",
+                    rationale: "PVC with DEHP is radiation-sensitive (yellowing, embrittlement). Polycarbonate is also radiation-sensitive. EtO is industry standard for IV sets.",
+                    why_mistake_fails: "PVC softens at ~80°C; autoclave heat causes deformation, plasticizer migration, and loss of flexibility.",
+                    hint: "Two radiation-sensitive plastics (PVC + PC). What method works for both?"
+                },
+                {
+                    id: "F007", difficulty: "foundational", device_name: "Glass Syringe (Reusable)",
+                    material_primary: "Borosilicate glass", material_secondary: "Stainless steel plunger",
+                    device_description: "10mL capacity, laboratory-grade, autoclavable",
+                    correct_answers: ["STEAM", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Borosilicate glass and stainless steel are both heat-stable. Steam is standard for reusable lab glassware. Fast and economical.",
+                    why_mistake_fails: "N/A - glass + metal = heat-stable!",
+                    hint: "Lab glassware - think chemistry class. What method?"
+                },
+                {
+                    id: "F008", difficulty: "foundational", device_name: "HDPE Specimen Container",
+                    material_primary: "High-density polyethylene", material_secondary: null,
+                    device_description: "60mL screw-cap container, single-use",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "HDPE has excellent radiation stability. Gamma is common for high-volume disposable containers. Cost-effective for mass production.",
+                    why_mistake_fails: "HDPE softens at ~120°C; autoclave causes warping and cap seal failure.",
+                    hint: "HDPE is radiation-stable. High volume = cost matters."
+                },
+                {
+                    id: "F009", difficulty: "foundational", device_name: "Nylon Suture (Monofilament)",
+                    material_primary: "Nylon 6 (polyamide)", material_secondary: null,
+                    device_description: "3-0 monofilament, 18 inch, non-absorbable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Nylon is highly radiation-sensitive - loses 30-50% tensile strength from gamma. EtO is industry standard. Steam causes hydrolysis.",
+                    why_mistake_fails: "Gamma causes nylon chain scission. Suture breaks during tissue closure.",
+                    hint: "Nylon (polyamide) is radiation-sensitive. Think gas sterilization."
+                },
+                {
+                    id: "F010", difficulty: "foundational", device_name: "Titanium Hip Implant",
+                    material_primary: "Ti-6Al-4V titanium alloy", material_secondary: null,
+                    device_description: "Total hip replacement femoral stem, cementless",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM", "VH2O2"], best_answer: "STEAM",
+                    rationale: "Titanium is heat-stable, corrosion-resistant, and radiation-stable. Steam is fastest for metal implants. All methods work.",
+                    why_mistake_fails: "N/A - titanium is indestructible by sterilization!",
+                    hint: "Titanium = incredibly stable. Any method works, but which is fastest/cheapest?"
+                },
+                {
+                    id: "F011", difficulty: "foundational", device_name: "Paper Surgical Drape (Polymer-Coated)",
+                    material_primary: "Cellulose paper + PE coating", material_secondary: null,
+                    device_description: "Disposable surgical drape, 36x48 inches, fluid-resistant",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "ETO",
+                    rationale: "Paper with polymer coating needs gas or radiation. EtO penetrates paper well. Steam would damage coating. VH2O2 incompatible with cellulose.",
+                    why_mistake_fails: "Cellulose absorbs H2O2 vapor, preventing sterilization. Steam damages polymer coating.",
+                    hint: "Cellulose = no VH2O2. Polymer coating = no steam. What's left?"
+                },
+                {
+                    id: "F012", difficulty: "foundational", device_name: "PMMA Bone Cement Powder",
+                    material_primary: "PMMA powder", material_secondary: "Barium sulfate (20%)",
+                    device_description: "Pre-packaged powder for orthopedic cement, sterile",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "PMMA powder tolerates gamma well. Some formulations are gamma-sterilized in final packaging. EtO also works but requires powder aeration.",
+                    why_mistake_fails: "Autoclave heat causes partial polymerization - powder clumps and can't be mixed.",
+                    hint: "PMMA is radiation-stable. Powder form = good for gamma."
+                },
+                {
+                    id: "F013", difficulty: "foundational", device_name: "Polycarbonate Face Shield",
+                    material_primary: "Polycarbonate", material_secondary: "Foam padding",
+                    device_description: "Protective face shield for surgical/clinical use",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Polycarbonate is highly radiation-sensitive - yellows and becomes brittle. EtO maintains optical clarity and impact strength. Critical for protective equipment.",
+                    why_mistake_fails: "Gamma causes PC to yellow (amber color) and lose 20-30% impact strength. Shield becomes brittle.",
+                    hint: "PC is radiation-sensitive. Optical clarity matters. What preserves transparency?"
+                },
+                {
+                    id: "F014", difficulty: "foundational", device_name: "Stainless Steel Bone Saw Blade",
+                    material_primary: "Martensitic stainless steel", material_secondary: null,
+                    device_description: "Oscillating saw blade, sterile disposable, 20mm width",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Hardened stainless steel is heat-stable. Steam is economically optimal for metal cutting tools.",
+                    why_mistake_fails: "N/A - all methods work!",
+                    hint: "Hardened steel for cutting. Any method works; which is cheapest?"
+                },
+                {
+                    id: "F015", difficulty: "foundational", device_name: "Polyester (PET) Suture",
+                    material_primary: "PET (Dacron)", material_secondary: "Silicone coating",
+                    device_description: "Braided suture, 2-0, coated, non-absorbable",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "PET has excellent radiation stability. Gamma is common for synthetic sutures. Fast processing, no residuals.",
+                    why_mistake_fails: "Steam degrades silicone coating; braided structure absorbs moisture, compromising handling.",
+                    hint: "PET is radiation-stable. Synthetic sutures often use radiation."
+                },
+                {
+                    id: "F016", difficulty: "foundational", device_name: "Rigid Endoscope (Metal + Glass)",
+                    material_primary: "Stainless steel shaft", material_secondary: "Glass lenses",
+                    device_description: "Laparoscopic telescope, 10mm diameter, reusable",
+                    correct_answers: ["STEAM", "VH2O2"], best_answer: "STEAM",
+                    rationale: "Metal and glass tolerate steam. VH2O2 also works for low-temp reprocessing. Both common in hospitals for reusable instruments.",
+                    why_mistake_fails: "N/A - introduces VH2O2 as hospital reprocessing option.",
+                    hint: "Reusable hospital instrument. Metal + glass = heat-stable."
+                },
+                {
+                    id: "F017", difficulty: "foundational", device_name: "Stainless Steel Hemostats",
+                    material_primary: "420 stainless steel", material_secondary: null,
+                    device_description: "Kelly clamps, 5.5 inch curved, ratcheted, reusable",
+                    correct_answers: ["STEAM", "VH2O2"], best_answer: "STEAM",
+                    rationale: "Standard reusable surgical clamps. Steam-sterilized between every case in hospital SPD. Fast and reliable.",
+                    why_mistake_fails: "N/A - metal clamps are perfect for steam!",
+                    hint: "Hospital reusable instruments = steam is king."
+                },
+                {
+                    id: "F018", difficulty: "foundational", device_name: "Aluminum Surgical Tray",
+                    material_primary: "Anodized aluminum", material_secondary: null,
+                    device_description: "Instrument tray, 12x8 inch, perforated bottom",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Anodized aluminum is heat-stable. Steam is standard for reusable surgical trays. The anodized layer prevents corrosion.",
+                    why_mistake_fails: "N/A - aluminum + anodizing = steam-safe!",
+                    hint: "Anodized aluminum resists corrosion. Hospital reusable = steam."
+                },
+
+                // INTERMEDIATE ITEMS (19 items)
+                {
+                    id: "I001", difficulty: "intermediate", device_name: "PEEK Spinal Cage Implant",
+                    material_primary: "Polyetheretherketone (PEEK)", material_secondary: "Titanium endplates",
+                    device_description: "Interbody fusion cage, porous structure for bone ingrowth",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "PEEK is radiation-sensitive - gamma causes discoloration (white→brown/black) and 10-15% compressive strength reduction. EtO maintains color and properties.",
+                    why_mistake_fails: "Gamma causes PEEK to turn brown/black and reduces strength. Not acceptable for spinal implant.",
+                    hint: "PEEK is high-performance but radiation-sensitive. Discoloration + strength loss = problem."
+                },
+                {
+                    id: "I002", difficulty: "intermediate", device_name: "Silicone Breast Implant",
+                    material_primary: "Medical-grade silicone shell", material_secondary: "Cohesive silicone gel",
+                    device_description: "Textured surface implant, 400cc volume",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Both EtO and Gamma work for silicone. Gamma increasingly preferred to avoid EtO residual concerns in long-term implants (10-20 year lifespan).",
+                    why_mistake_fails: "Steam causes silicone surface changes, shell swelling, potential gel consistency changes.",
+                    hint: "Long-term implant. Radiation = zero residuals. EtO = aeration concerns."
+                },
+                {
+                    id: "I003", difficulty: "intermediate", device_name: "Nitinol Stent (Bare Metal)",
+                    material_primary: "Nitinol shape memory alloy", material_secondary: null,
+                    device_description: "Self-expanding vascular stent, 8mm diameter, laser-cut",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "ETO",
+                    rationale: "Bare nitinol is compatible with all methods. Industry preference is EtO for consistency with coated stent lines and to avoid surface oxidation from repeated steam.",
+                    why_mistake_fails: "Steam technically works but repeated cycles may cause surface oxidation. EtO is cleaner solution.",
+                    hint: "Nitinol metal is stable. Industry uses EtO for consistency across product lines."
+                },
+                {
+                    id: "I004", difficulty: "intermediate", device_name: "PP Hernia Mesh (Radiation-Stabilized)",
+                    material_primary: "PP with antioxidant stabilizers", material_secondary: null,
+                    device_description: "Surgical mesh, knitted, 6x11 cm",
+                    correct_answers: ["GAMMA", "EBEAM", "ETO"], best_answer: "GAMMA",
+                    rationale: "Modern hernia meshes use radiation-stabilized PP formulated for 25-35 kGy gamma. Material costs 15-20% more but maintains mechanical properties post-radiation.",
+                    why_mistake_fails: "Unstabilized PP would degrade, but stabilized grades maintain tensile strength.",
+                    hint: "Note 'radiation-stabilized' designation. This changes everything vs. standard PP!"
+                },
+                {
+                    id: "I005", difficulty: "intermediate", device_name: "Glucose Test Strips (Enzyme-Based)",
+                    material_primary: "Polyester substrate + printed circuits", material_secondary: "Glucose oxidase enzyme",
+                    device_description: "Blood glucose test strips, enzyme-based detection",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "IF terminal sterilization required (rare), low-dose gamma (10-15 kGy) minimally impacts enzyme activity. Most manufacturers use aseptic assembly instead.",
+                    why_mistake_fails: "Heat denatures glucose oxidase enzyme (protein). No enzymatic reaction = no glucose measurement.",
+                    hint: "Enzyme = protein. Heat = denaturation. Low-dose radiation can preserve enzyme activity."
+                },
+                {
+                    id: "I006", difficulty: "intermediate", device_name: "Acetal Instrument Handle",
+                    material_primary: "Polyoxymethylene (Acetal/Delrin)", material_secondary: "Stainless steel insert",
+                    device_description: "Ergonomic handle for laparoscopic grasper, reusable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Acetal is THE most radiation-sensitive engineering plastic (max tolerable dose <15 kGy). Gamma causes catastrophic embrittlement. EtO is only viable method.",
+                    why_mistake_fails: "Acetal undergoes severe chain scission. Handle crumbles into powder when squeezed.",
+                    hint: "Acetal/POM has WORST radiation stability of common plastics. Only one method works."
+                },
+                {
+                    id: "I007", difficulty: "intermediate", device_name: "Hydrogel Wound Dressing",
+                    material_primary: "PEG hydrogel (85% water)", material_secondary: "Polyester backing",
+                    device_description: "Moisture-retentive wound dressing, 4x4 inch",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Hydrogels are gamma-sterilized in sealed packaging. High water content blocks EtO penetration. Steam would destroy hydrogel structure.",
+                    why_mistake_fails: "85% water content prevents EtO gas penetration. Requires weeks of aeration to remove absorbed EtO from water.",
+                    hint: "85% water content. EtO + water = poor penetration. What method works?"
+                },
+                {
+                    id: "I008", difficulty: "intermediate", device_name: "ABS Plastic Surgical Tray",
+                    material_primary: "Acrylonitrile butadiene styrene", material_secondary: null,
+                    device_description: "Rigid tray for instrument organization, thermoformed",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "ABS is radiation-sensitive - yellows dramatically and becomes brittle due to butadiene oxidation. EtO maintains color and impact strength.",
+                    why_mistake_fails: "ABS yellows (white→yellow→brown) and becomes brittle under gamma. Tray cracks when dropped.",
+                    hint: "ABS contains butadiene (radiation-sensitive component). Think gas sterilization."
+                },
+                {
+                    id: "I009", difficulty: "intermediate", device_name: "Copper IUD",
+                    material_primary: "Copper wire + PP frame", material_secondary: null,
+                    device_description: "T-shaped contraceptive device, 10-year implant",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Copper oxidizes in steam (moisture + heat = green patina, changes surface chemistry). PP frame may also be steam-sensitive. Radiation avoids moisture exposure.",
+                    why_mistake_fails: "Steam causes copper oxidation (green Cu₂O patina), altering copper ion release kinetics.",
+                    hint: "Copper + moisture + heat = oxidation/corrosion. Dry sterilization method?"
+                },
+                {
+                    id: "I010", difficulty: "intermediate", device_name: "Polyurethane Catheter (Ag-Coated)",
+                    material_primary: "Polyurethane", material_secondary: "Silver ion coating",
+                    device_description: "Foley catheter with antimicrobial coating, 14Fr",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Antimicrobial coatings can be radiation-sensitive. Gamma may alter silver ion release kinetics or damage coating matrix. EtO preserves coating integrity.",
+                    why_mistake_fails: "Radiation alters silver ion release rate (burst or none), reducing antimicrobial efficacy by 40-60%.",
+                    hint: "Antimicrobial coating with controlled release. Radiation may alter release kinetics."
+                },
+                {
+                    id: "I011", difficulty: "intermediate", device_name: "Collagen Surgical Sealant",
+                    material_primary: "Bovine collagen matrix", material_secondary: "Thrombin (separate)",
+                    device_description: "Hemostatic agent for bleeding control, sponge form",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Collagen proteins tolerate controlled radiation doses (15-25 kGy). Heat would denature collagen triple helix structure, destroying function.",
+                    why_mistake_fails: "Heat denatures collagen (breaks triple helix >65°C), destroying structural integrity and hemostatic function.",
+                    hint: "Collagen = protein. Heat = denaturation. Radiation at controlled dose works."
+                },
+                {
+                    id: "I012", difficulty: "intermediate", device_name: "FEP Fluoropolymer Tubing",
+                    material_primary: "FEP (Fluorinated Ethylene Propylene)", material_secondary: null,
+                    device_description: "Chemical-resistant tubing for drug delivery, 1/16 inch ID",
+                    correct_answers: ["GAMMA", "EBEAM", "STEAM"], best_answer: "GAMMA",
+                    rationale: "FEP has excellent radiation stability (better than PTFE). Gamma is common for finished assemblies. Steam also works but radiation preferred.",
+                    why_mistake_fails: "N/A - FEP is highly stable!",
+                    hint: "FEP fluoropolymer is radiation-stable (unlike PTFE). High chemical resistance."
+                },
+                {
+                    id: "I013", difficulty: "intermediate", device_name: "Aluminum External Fixator",
+                    material_primary: "Aluminum alloy 7075-T6", material_secondary: "Stainless steel pins",
+                    device_description: "External bone fixation frame for fracture stabilization",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Aluminum alloy and stainless steel are both heat-stable. Steam is economically optimal for metal orthopedic devices.",
+                    why_mistake_fails: "N/A - metals are stable!",
+                    hint: "Two metals (Al + SS). Heat-stable. Cheapest method?"
+                },
+                {
+                    id: "I014", difficulty: "intermediate", device_name: "TPU Film Wound Dressing",
+                    material_primary: "Thermoplastic polyurethane film", material_secondary: "Acrylic adhesive",
+                    device_description: "Transparent, breathable wound dressing, 4x4.75 inch",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "TPU tolerates radiation well. Acrylic adhesive must be validated - gamma is standard for adhesive dressings. Heat damages adhesive properties.",
+                    why_mistake_fails: "Heat damages acrylic adhesive - either loses tack (doesn't stick) or becomes too aggressive (skin stripping).",
+                    hint: "Adhesive dressings = radiation is standard. Heat affects adhesive tack."
+                },
+                {
+                    id: "I015", difficulty: "intermediate", device_name: "PTFE Vascular Graft",
+                    material_primary: "Expanded PTFE (ePTFE)", material_secondary: null,
+                    device_description: "Synthetic blood vessel graft, 6mm x 40cm length",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "PTFE is radiation-sensitive - gamma causes chain scission and 30-40% tensile strength loss. EtO is industry standard for PTFE vascular grafts.",
+                    why_mistake_fails: "PTFE chain scission under radiation reduces strength by 30-40%. Graft rupture risk under blood pressure.",
+                    hint: "PTFE (Teflon) is radiation-sensitive despite being chemical-resistant. Gas sterilization works."
+                },
+                {
+                    id: "I016", difficulty: "intermediate", device_name: "PP Syringe (Radiation-Stabilized)",
+                    material_primary: "PP with antioxidant stabilizers", material_secondary: "Rubber plunger",
+                    device_description: "3mL Luer-lock, radiation-compatible formulation",
+                    correct_answers: ["GAMMA", "EBEAM", "ETO"], best_answer: "GAMMA",
+                    rationale: "Radiation-stabilized PP formulations tolerate 25-30 kGy gamma. Material costs 15-20% more but enables faster sterilization without EtO residuals.",
+                    why_mistake_fails: "N/A - demonstrates material formulation matters more than polymer type!",
+                    hint: "STABILIZED PP. Compare to F003 (unstabilized). Stabilizers enable radiation compatibility."
+                },
+                {
+                    id: "I017", difficulty: "intermediate", device_name: "Nitinol Stent (Drug-Coated)",
+                    material_primary: "Nitinol mesh", material_secondary: "PDLLA coating + paclitaxel drug",
+                    device_description: "Drug-eluting peripheral stent, 6mm x 40mm",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Nitinol is radiation-stable, BUT polymer drug coating is radiation-sensitive. Coating dictates method. Gamma would alter drug release kinetics.",
+                    why_mistake_fails: "Radiation crosslinks polymer coating, altering drug release. May release too fast (toxicity) or too slow (ineffective).",
+                    hint: "Coating on metal. Metal is stable, but coating has sterilization constraints."
+                },
+                {
+                    id: "I018", difficulty: "intermediate", device_name: "Silicone Catheter (Long-Term Implant)",
+                    material_primary: "Medical-grade silicone", material_secondary: null,
+                    device_description: "Central venous catheter for 90-day IV access",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "For long-term implants (>30 days), radiation preferred to eliminate EtO residual concerns. Even after aeration, trace EtO may remain in silicone matrix. Gamma = zero residuals.",
+                    why_mistake_fails: "EtO works but requires extended aeration (10-14 days) and rigorous residual testing per ISO 10993-7.",
+                    hint: "90-day implant duration. Long-term tissue contact = residual concerns with EtO."
+                },
+                {
+                    id: "I019", difficulty: "intermediate", device_name: "Legacy Device (EPA Crisis Scenario)",
+                    material_primary: "Polycarbonate hub + PVC tubing + silicone tip", material_secondary: null,
+                    device_description: "Established catheter, only validated for EtO. Contract sterilizer closes due to EPA restrictions.",
+                    correct_answers: ["ETO"], best_answer: "ETO (but facility availability issue)",
+                    rationale: "PVC and silicone tolerate gamma, BUT polycarbonate yellows. Can't easily change materials (design change = new validation). Must find alternate EtO facility or reformulate PC to PPSU.",
+                    why_mistake_fails: "Gamma yellows PC hub significantly. Aesthetic change requires FDA supplement filing + revalidation.",
+                    hint: "Multi-material device. PC is limiting material (radiation-sensitive). Sterilization lock-in = business risk."
+                },
+                {
+                    id: "I020", difficulty: "intermediate", device_name: "Polycarbonate Connector (Medical)",
+                    material_primary: "Polycarbonate", material_secondary: null,
+                    device_description: "Luer-lock connector, female, sterile disposable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Polycarbonate is radiation-sensitive (yellowing, embrittlement). EtO maintains clarity. Critical for medical connectors where transparency helps verify connections.",
+                    why_mistake_fails: "Gamma causes yellowing and brittleness. Connector may crack under stress.",
+                    hint: "PC = radiation-sensitive. Optical clarity matters for visual verification."
+                },
+                {
+                    id: "I021", difficulty: "intermediate", device_name: "Polyethylene Tubing (LDPE)",
+                    material_primary: "Low-density polyethylene", material_secondary: null,
+                    device_description: "Flexible tubing for fluid transfer, 1/4 inch diameter",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "LDPE has good radiation stability. Gamma is common for polyethylene products. Cost-effective for high volume.",
+                    why_mistake_fails: "Steam softens LDPE (melting point ~110°C); autoclave at 121°C causes deformation.",
+                    hint: "LDPE (polyethylene) is radiation-stable. High volume = gamma is economical."
+                },
+                {
+                    id: "I022", difficulty: "intermediate", device_name: "Polysulfone Dialyzer Housing",
+                    material_primary: "Polysulfone", material_secondary: null,
+                    device_description: "Hemodialysis filter housing, high-temperature polymer",
+                    correct_answers: ["STEAM", "ETO", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Polysulfone is heat-stable (Tg ~185°C) and radiation-stable. Steam is economical. All methods work.",
+                    why_mistake_fails: "N/A - polysulfone is robust!",
+                    hint: "Polysulfone is high-temp engineering plastic. Heat-stable."
+                },
+                {
+                    id: "I023", difficulty: "intermediate", device_name: "Polyurethane Foam Dressing",
+                    material_primary: "Polyurethane foam", material_secondary: "Silicone adhesive border",
+                    device_description: "Absorbent foam wound dressing, 4x4 inch",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Polyurethane foam is radiation-stable. Silicone adhesive tolerates radiation. Gamma is standard for foam dressings.",
+                    why_mistake_fails: "Steam heat can affect foam cell structure and adhesive properties.",
+                    hint: "Foam + adhesive. Radiation is standard for wound dressings with adhesive."
+                },
+                {
+                    id: "I024", difficulty: "intermediate", device_name: "Braided Silk Suture",
+                    material_primary: "Natural silk protein fibers", material_secondary: "Wax coating",
+                    device_description: "Braided silk, 3-0, non-absorbable, black",
+                    correct_answers: ["ETO", "GAMMA"], best_answer: "ETO",
+                    rationale: "Silk is natural protein fiber. Both EtO and gamma work, but EtO is traditional method. Gamma at high doses may affect tensile strength.",
+                    why_mistake_fails: "Steam causes protein degradation and loss of tensile strength.",
+                    hint: "Natural protein fiber. Heat = protein damage. Gas or radiation?"
+                },
+                {
+                    id: "I025", difficulty: "intermediate", device_name: "PVC Blood Bag",
+                    material_primary: "PVC with DEHP plasticizer", material_secondary: "PVC tubing",
+                    device_description: "Blood collection and storage bag, 450mL capacity",
+                    correct_answers: ["GAMMA"], best_answer: "GAMMA",
+                    rationale: "Blood bags are gamma-sterilized in final sealed state. PVC with DEHP tolerates gamma better than alternatives. Liquid content rules out EtO.",
+                    why_mistake_fails: "Liquid content prevents EtO gas penetration. Steam heat damages PVC and plasticizer.",
+                    hint: "Liquid-filled bags. EtO can't penetrate liquids. Radiation works through sealed packages."
+                },
+                {
+                    id: "I026", difficulty: "intermediate", device_name: "Stainless Steel + PEEK Composite Device",
+                    material_primary: "Stainless steel base", material_secondary: "PEEK insulating components",
+                    device_description: "Surgical instrument with PEEK insulators, reusable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Steel is universal, BUT PEEK is radiation-sensitive (discoloration). PEEK is limiting material - dictates EtO.",
+                    why_mistake_fails: "PEEK discolors brown/black under gamma. Not acceptable for precision instrument.",
+                    hint: "Multi-material device. Identify LIMITING material. PEEK is radiation-sensitive."
+                },
+                {
+                    id: "I027", difficulty: "intermediate", device_name: "Polyester Mesh (Surgical Implant)",
+                    material_primary: "Polyester (Dacron) mesh", material_secondary: null,
+                    device_description: "Soft tissue reinforcement mesh, knitted",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Polyester has excellent radiation stability. Gamma is standard for synthetic mesh implants. Fast and no residuals.",
+                    why_mistake_fails: "Steam can cause fabric stiffness over repeated cycles (not ideal but technically works).",
+                    hint: "Polyester (PET) = radiation-stable. Mesh implants commonly use radiation."
+                },
+
+                // ADVANCED ITEMS (18 items)
+                {
+                    id: "A001", difficulty: "advanced", device_name: "Drug-Eluting Coronary Stent",
+                    material_primary: "Cobalt-chromium alloy", material_secondary: "Biodegradable polymer + sirolimus drug",
+                    device_description: "Coronary stent with controlled drug release over 3-6 months",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Drug and biodegradable polymer are highly radiation-sensitive. Gamma alters drug release kinetics (crosslinks polymer, changes degradation rate) and may affect drug stability. EtO preserves coating and drug.",
+                    why_mistake_fails: "Radiation crosslinks polymer coating. Drug may release too fast (toxicity) or too slow (ineffective). Clinical failure.",
+                    hint: "Combination product: drug stability + controlled release polymer = major sterilization constraint."
+                },
+                {
+                    id: "A002", difficulty: "advanced", device_name: "3D-Printed PLLA Surgical Guide",
+                    material_primary: "Poly-L-lactic acid (PLLA)", material_secondary: null,
+                    device_description: "Custom drill guide for dental implant placement, SLA printed",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "PLLA is HIGHLY radiation-sensitive - loses 50-70% mechanical properties post-gamma within days. Steam causes distortion (Tg ~60°C). EtO is ONLY viable option for dimensional accuracy.",
+                    why_mistake_fails: "PLLA undergoes rapid chain scission under gamma. Guide becomes brittle, dimensional accuracy lost (2-3mm deviation unacceptable).",
+                    hint: "PLLA is one of the most radiation-sensitive biodegradable polymers. Very limited sterilization options."
+                },
+                {
+                    id: "A003", difficulty: "advanced", device_name: "Pacemaker with Lithium Battery",
+                    material_primary: "Titanium housing", material_secondary: "Lithium-ion battery + electronics",
+                    device_description: "Implantable cardiac pacemaker, 8-10 year battery life",
+                    correct_answers: ["VH2O2"], best_answer: "VH2O2",
+                    rationale: "Lithium batteries = MAJOR fire risk with EtO (flammable/explosive gas + spark source). Cannot tolerate steam heat. Low-temp VH2O2 plasma or aseptic assembly required.",
+                    why_mistake_fails: "Battery + EtO = EXPLOSION HAZARD! Lithium can spark; EtO is flammable (3-12% concentration is explosive range).",
+                    hint: "Battery + flammable gas = fire/explosion. Need low-temp, non-flammable method."
+                },
+                {
+                    id: "A004", difficulty: "advanced", device_name: "Bioresorbable Vascular Scaffold (PLLA/PDLLA)",
+                    material_primary: "Poly-L-lactic acid", material_secondary: "PDLLA coating",
+                    device_description: "Coronary stent designed to dissolve over 2-3 years",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "PLLA/PDLLA are EXTREMELY radiation-sensitive. Even low-dose e-beam (15-20 kGy) causes embrittlement and premature resorption. EtO with extended aeration is only validated method.",
+                    why_mistake_fails: "Even low radiation doses cause molecular weight drop (30-50%), loss of radial strength. Scaffold collapses prematurely (weeks instead of years).",
+                    hint: "Bioresorbable polymers are typically radiation-sensitive. PLLA especially so."
+                },
+                {
+                    id: "A005", difficulty: "advanced", device_name: "Heart Valve Annuloplasty Ring",
+                    material_primary: "Elgiloy (Co-Cr-Ni alloy)", material_secondary: "Polyester fabric + silicone",
+                    device_description: "Flexible ring for mitral valve repair, fabric-covered",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "ETO",
+                    rationale: "Metal core tolerates all. Polyester fabric is radiation-stable. However, EtO is industry standard for fabric-covered implants to preserve textile handling and avoid fabric stiffening.",
+                    why_mistake_fails: "Steam causes fabric stiffness over cycles, making surgical suturing difficult. Fabric handling matters for delicate valve repair.",
+                    hint: "Fabric-covered implant. EtO standard for preserving textile properties in medical textiles."
+                },
+                {
+                    id: "A006", difficulty: "advanced", device_name: "CGM Sensor (Subcutaneous Implant)",
+                    material_primary: "Platinum electrode", material_secondary: "Glucose oxidase enzyme + PTFE housing",
+                    device_description: "Continuous glucose monitor, 7-14 day wear time",
+                    correct_answers: ["GAMMA"], best_answer: "GAMMA",
+                    rationale: "Enzyme must retain activity. Low-dose gamma (12-18 kGy) preserves glucose oxidase function (85-95% activity retained). EtO residuals are concern for 7-14 day implant (cytotoxicity risk).",
+                    why_mistake_fails: "EtO residuals in subcutaneous implant pose cytotoxicity risk. Aeration of small sensors is difficult. Gamma = no residuals.",
+                    hint: "Enzyme sensor + implant duration. Residual concerns with EtO. Low-dose radiation preserves enzyme."
+                },
+                {
+                    id: "A007", difficulty: "advanced", device_name: "PCL Tissue Scaffold (Collagen-Coated)",
+                    material_primary: "Polycaprolactone (PCL)", material_secondary: "Type I collagen coating",
+                    device_description: "3D-printed porous scaffold, 10x10x5mm",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "PCL has moderate radiation stability - requires dose optimization (18-25 kGy max). Collagen tolerates low-dose radiation. Steam melts PCL (Tm ~60°C).",
+                    why_mistake_fails: "PCL melting point ~60°C; autoclave completely melts scaffold. Pore structure collapses. Collagen also denatures.",
+                    hint: "PCL melts at low temperature (60°C). Autoclave temperature is 121°C. What happens?"
+                },
+                {
+                    id: "A008", difficulty: "advanced", device_name: "Hybrid Stent (Nitinol + PEEK)",
+                    material_primary: "Nitinol frame", material_secondary: "PEEK coating sections",
+                    device_description: "Multi-material stent for complex anatomy",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Nitinol is radiation-stable. PEEK is radiation-sensitive. PEEK is LIMITING material - dictates EtO. Must preserve PEEK coating properties.",
+                    why_mistake_fails: "PEEK coating discolors brown/black and experiences mechanical property degradation under radiation.",
+                    hint: "Multi-material. Identify limiting material. PEEK is radiation-sensitive."
+                },
+                {
+                    id: "A009", difficulty: "advanced", device_name: "Bone Wax (Beeswax-Based)",
+                    material_primary: "Natural beeswax (90%)", material_secondary: "Isopropyl palmitate (10%)",
+                    device_description: "Hemostatic agent for bone bleeding during orthopedic surgery",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Natural wax tolerates radiation. Cannot use heat (wax melts at 62-64°C, autoclave liquefies it). EtO has absorption issues with waxes. Gamma is standard.",
+                    why_mistake_fails: "Beeswax melts at 62-64°C; autoclave at 121°C completely liquefies product into oily liquid.",
+                    hint: "Wax melting point is ~62°C. Steam temperature is 121°C. Math = ?"
+                },
+                {
+                    id: "A010", difficulty: "advanced", device_name: "Triclosan-Coated Suture",
+                    material_primary: "Polyglactin 910 (Vicryl)", material_secondary: "Triclosan coating",
+                    device_description: "Absorbable antimicrobial suture, 2-0, 70cm",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Triclosan coating must maintain antimicrobial activity. Gamma at controlled doses (20-25 kGy) preserves coating function (90-95% activity). Polyglactin is radiation-stable.",
+                    why_mistake_fails: "EtO can affect triclosan release kinetics, reducing antimicrobial efficacy by 30-50%.",
+                    hint: "Antimicrobial coating with activity requirement. Synthetic absorbable = radiation-stable."
+                },
+                {
+                    id: "A011", difficulty: "advanced", device_name: "Chitosan Nerve Conduit",
+                    material_primary: "Chitosan biopolymer", material_secondary: "PCL reinforcement",
+                    device_description: "Tubular guide for peripheral nerve regeneration, 15mm x 3mm",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Chitosan is natural polysaccharide - tolerates controlled radiation (18-25 kGy). PCL also radiation-compatible at low doses. Heat/moisture degrades chitosan.",
+                    why_mistake_fails: "Heat/moisture causes chitosan depolymerization, loss of structure and molecular weight. Conduit collapses.",
+                    hint: "Natural biopolymer (chitosan) + PCL. Both tolerate controlled radiation doses."
+                },
+                {
+                    id: "A012", difficulty: "advanced", device_name: "Hydrophilic-Coated Guidewire",
+                    material_primary: "Nitinol core (0.014 inch)", material_secondary: "PVP hydrophilic coating",
+                    device_description: "Coronary guidewire with lubricious coating for vessel navigation",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "PVP coating tolerates radiation well. Nitinol is radiation-stable. Gamma is industry standard for coated guidewires. EtO can affect PVP hydration properties.",
+                    why_mistake_fails: "EtO affects PVP coating's ability to hydrate (coating may not become slippery) or weakens adhesion to nitinol.",
+                    hint: "Hydrophilic coating = water-soluble polymer. Radiation is standard for coated wires."
+                },
+                {
+                    id: "A013", difficulty: "advanced", device_name: "Inflatable Penile Prosthesis",
+                    material_primary: "Silicone cylinders", material_secondary: "Saline reservoir + plastic pump mechanism",
+                    device_description: "Three-piece hydraulic implant system for erectile dysfunction",
+                    correct_answers: ["ETO", "GAMMA"], best_answer: "ETO",
+                    rationale: "Complex multi-material device. EtO penetrates all components (silicone, plastic gears, tubing) without damage. Gamma works for silicone but may affect plastic gears. Steam compromises pump seals.",
+                    why_mistake_fails: "Steam moisture enters pump mechanism (seals not rated for pressure differential). Plastic gears may warp. Pump fails.",
+                    hint: "Complex hydraulic system with precision seals. Need method compatible with ALL components."
+                },
+                {
+                    id: "A014", difficulty: "advanced", device_name: "Silver-Coated Catheter (Nanocrystalline)",
+                    material_primary: "Silicone catheter", material_secondary: "Nanocrystalline silver oxide coating",
+                    device_description: "Long-term indwelling catheter, antimicrobial, 30-day use",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Nanocrystalline silver coating maintains antimicrobial activity post-radiation (ionic release preserved). Silicone tolerates gamma. Radiation preferred for silver coatings.",
+                    why_mistake_fails: "EtO can interfere with silver ion release kinetics, reducing antimicrobial efficacy by 30-40%.",
+                    hint: "Silver antimicrobial coating. Radiation preserves ionic release mechanism better than EtO."
+                },
+                {
+                    id: "A015", difficulty: "advanced", device_name: "Decellularized Porcine Heart Valve",
+                    material_primary: "Acellular porcine tissue", material_secondary: null,
+                    device_description: "Biological valve for aortic valve replacement",
+                    correct_answers: ["GAMMA"], best_answer: "GAMMA",
+                    rationale: "Decellularized tissue requires terminal sterilization. Low-dose gamma (10-18 kGy) achieves sterility while minimizing collagen/elastin damage. FDA-accepted method for tissue products.",
+                    why_mistake_fails: "EtO: tissue absorbs EtO excessively, requires 3-6 weeks aeration. Steam: tissue shrinks and becomes rigid like beef jerky.",
+                    hint: "Biological tissue. EtO absorption issues. Low-dose radiation is FDA-accepted for tissue valves."
+                },
+                {
+                    id: "A016", difficulty: "advanced", device_name: "Paper Microfluidic Diagnostic (Impossible Scenario)",
+                    material_primary: "Cellulose paper", material_secondary: "Printed Ag electrodes + CR2032 battery",
+                    device_description: "Point-of-care diagnostic card with integrated electronics",
+                    correct_answers: [], best_answer: "NONE - Aseptic Assembly Required",
+                    rationale: "IMPOSSIBLE to terminally sterilize: Paper = no VH2O2 (absorbs), no Steam (burns). Electronics + battery = no heat/moisture. Battery = EtO explosion risk. Silver = radiation-sensitive. Must use aseptic assembly.",
+                    why_mistake_fails: "Every method has fatal flaw. This teaches that some material combinations cannot be terminally sterilized.",
+                    hint: "Try to think of ANY method that works. Trick question: sometimes design makes terminal sterilization impossible."
+                },
+                {
+                    id: "A017", difficulty: "advanced", device_name: "Cost Optimization (HDPE Container at Scale)",
+                    material_primary: "High-density polyethylene", material_secondary: null,
+                    device_description: "60mL container, projected 10 million units/year",
+                    correct_answers: ["GAMMA"], best_answer: "GAMMA",
+                    rationale: "Business scenario: EtO costs $0.75/unit (includes aeration hold time). Gamma costs $0.35/unit (immediate release). HDPE tolerates both equally. At 10M units/year, gamma saves $4M annually. Economics drive decision.",
+                    why_mistake_fails: "EtO works technically, but gamma is economically superior for high-volume radiation-stable products.",
+                    hint: "High volume (10M units). Cost difference: EtO $0.75 vs Gamma $0.35. Do the math."
+                },
+                {
+                    id: "A018", difficulty: "advanced", device_name: "Regulatory Arbitrage (Multi-Market Entry)",
+                    material_primary: "HDPE container + silicone seal", material_secondary: null,
+                    device_description: "Device CE-marked with gamma; entering US via 510(k), predicate used EtO",
+                    correct_answers: ["GAMMA", "ETO"], best_answer: "GAMMA (preferred to match EU) or justify difference",
+                    rationale: "Regulatory scenario: CE-marked with gamma. US 510(k) predicate used EtO. FDA expects: match predicate OR justify why gamma is equivalent. Both technically work. Decision involves regulatory strategy.",
+                    why_mistake_fails: "Different sterilization method from predicate = additional justification burden in 510(k). May extend review 2-4 months.",
+                    hint: "Regulatory strategy. Matching predicate simplifies submission. Difference = must justify."
+                },
+                {
+                    id: "A019", difficulty: "advanced", device_name: "Electrosurgical Pencil (Multi-Material Boss)",
+                    material_primary: "Polycarbonate handle", material_secondary: "SS electrode + electrical circuit + silicone button",
+                    device_description: "Electrosurgical cautery pencil, reusable/disposable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "BOSS LEVEL: PC is radiation-sensitive, circuit cannot tolerate moisture, steel is universal, silicone is flexible. EtO is ONLY method compatible with ALL components. Must identify limiting materials.",
+                    why_mistake_fails: "Gamma damages PC (yellowing/embrittlement). Steam damages electronics. Must satisfy ALL material constraints.",
+                    hint: "Multi-material challenge! Identify what EACH material can't tolerate. Only one method works for ALL."
+                },
+                {
+                    id: "A020", difficulty: "advanced", device_name: "Hydrogel Contact Lens (Medical)",
+                    material_primary: "HEMA hydrogel", material_secondary: null,
+                    device_description: "Therapeutic contact lens, 14mm diameter",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Hydrogel with high water content. Radiation works through hydrated state. EtO penetration blocked by water. Steam would destroy hydrogel structure and optical clarity.",
+                    why_mistake_fails: "High water content blocks EtO. Steam heat damages hydrogel crosslinking and optical properties.",
+                    hint: "Hydrogel = high water content. Water blocks EtO gas penetration. Radiation penetrates everything."
+                },
+                {
+                    id: "A021", difficulty: "advanced", device_name: "Polycarbonate Oxygenator Housing",
+                    material_primary: "Polycarbonate", material_secondary: "Silicone membrane",
+                    device_description: "Heart-lung machine oxygenator housing, disposable",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "Polycarbonate is radiation-sensitive (yellowing = optical clarity loss). Silicone tolerates both. PC is limiting material. EtO maintains transparency critical for blood flow visualization.",
+                    why_mistake_fails: "Gamma yellows PC housing, obscuring visual verification of blood flow and air bubbles (safety concern).",
+                    hint: "PC housing where transparency matters (blood flow visualization). Radiation = yellowing."
+                },
+                {
+                    id: "A022", difficulty: "advanced", device_name: "Cobalt-Chrome Stent (Bare Metal)",
+                    material_primary: "Cobalt-chromium alloy", material_secondary: null,
+                    device_description: "Coronary stent, bare metal, no coating, 3mm x 15mm",
+                    correct_answers: ["ETO", "GAMMA", "EBEAM"], best_answer: "ETO",
+                    rationale: "Bare Co-Cr is compatible with all methods. Industry preference is EtO for consistency (most stents are coated and require EtO). Maintains manufacturing consistency.",
+                    why_mistake_fails: "N/A technically, but EtO is industry norm for stents.",
+                    hint: "Bare metal is universal. Industry uses EtO for consistency with coated versions."
+                },
+                {
+                    id: "A023", difficulty: "advanced", device_name: "Polyurethane Catheter (Heparin-Coated)",
+                    material_primary: "Polyurethane", material_secondary: "Heparin anticoagulant coating",
+                    device_description: "Central venous catheter, heparin-bonded surface",
+                    correct_answers: ["GAMMA"], best_answer: "GAMMA",
+                    rationale: "Heparin coating must maintain anticoagulant activity. Low-dose gamma (18-25 kGy) preserves heparin bioactivity. EtO may affect heparin binding or activity.",
+                    why_mistake_fails: "EtO residuals or sterilization stress may reduce heparin anticoagulant activity by 25-40%.",
+                    hint: "Heparin is a biological molecule (mucopolysaccharide). Controlled radiation dose preserves activity."
+                },
+                {
+                    id: "A024", difficulty: "advanced", device_name: "UHMWPE Joint Liner (Ultra-High Molecular Weight)",
+                    material_primary: "UHMWPE (ultra-high molecular weight polyethylene)", material_secondary: null,
+                    device_description: "Acetabular liner for hip replacement, bearing surface",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "UHMWPE is radiation-sterilized AND crosslinked by radiation. Controlled gamma dose (25-100 kGy) improves wear resistance. Radiation serves dual purpose: sterilization + crosslinking.",
+                    why_mistake_fails: "Steam softens UHMWPE (melting point ~130°C is too close to 121°C). EtO works but doesn't provide crosslinking benefit.",
+                    hint: "UHMWPE in orthopedics. Radiation provides sterilization + crosslinking for improved wear resistance."
+                },
+                {
+                    id: "A025", difficulty: "advanced", device_name: "Alginate Wound Dressing",
+                    material_primary: "Calcium alginate fibers", material_secondary: null,
+                    device_description: "Highly absorbent wound dressing for exudate management",
+                    correct_answers: ["GAMMA", "EBEAM", "ETO"], best_answer: "GAMMA",
+                    rationale: "Alginate (natural polysaccharide from seaweed) tolerates radiation. Gamma is common for alginate dressings. Steam may cause fiber breakdown.",
+                    why_mistake_fails: "Steam heat + moisture can cause alginate fiber degradation and loss of absorbency.",
+                    hint: "Natural polysaccharide (seaweed-derived). Tolerates radiation. Steam + moisture = fiber damage."
+                },
+                {
+                    id: "A026", difficulty: "advanced", device_name: "PLA Suture (Absorbable)",
+                    material_primary: "Poly-lactic acid (PLA)", material_secondary: null,
+                    device_description: "Absorbable suture, 3-0, monofilament",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "PLA is radiation-sensitive (chain scission, rapid degradation). EtO preserves tensile strength for absorbable sutures. Steam is too hot (Tg ~60°C).",
+                    why_mistake_fails: "Gamma causes PLA chain scission, reducing tensile strength and accelerating degradation (absorbs too fast).",
+                    hint: "PLA (polylactic acid) is radiation-sensitive like PLLA. Absorbable sutures need controlled degradation."
+                },
+                {
+                    id: "A027", difficulty: "advanced", device_name: "Electrospun PCL/Collagen Scaffold",
+                    material_primary: "PCL nanofibers", material_secondary: "Collagen co-spun",
+                    device_description: "Electrospun nanofibrous scaffold for tissue engineering",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "PCL nanofibers tolerate low-dose radiation (20-25 kGy). Collagen also radiation-compatible at low doses. Steam melts PCL (Tm ~60°C), destroying nanofiber structure.",
+                    why_mistake_fails: "PCL melts; nanofiber morphology completely destroyed. Collagen denatures.",
+                    hint: "Nanofibrous structure is delicate. PCL melts at 60°C. Controlled radiation dose preserves structure."
+                },
+                {
+                    id: "A028", difficulty: "advanced", device_name: "Polytetrafluoroethylene (PTFE) Suture",
+                    material_primary: "PTFE (Teflon)", material_secondary: null,
+                    device_description: "Non-absorbable suture for cardiovascular surgery",
+                    correct_answers: ["ETO"], best_answer: "ETO",
+                    rationale: "PTFE is radiation-sensitive (chain scission, strength loss). EtO is standard for PTFE sutures. Critical to maintain tensile strength for cardiovascular applications.",
+                    why_mistake_fails: "PTFE undergoes chain scission under radiation, losing 30-40% tensile strength. Suture may break under vascular tension.",
+                    hint: "PTFE (Teflon) is chemically inert BUT radiation-sensitive. Chain scission = strength loss."
+                },
+                {
+                    id: "A029", difficulty: "advanced", device_name: "Bioglass Bone Graft Substitute",
+                    material_primary: "Bioactive glass (silica-based)", material_secondary: null,
+                    device_description: "Synthetic bone graft particles for bone regeneration",
+                    correct_answers: ["STEAM", "GAMMA", "EBEAM"], best_answer: "STEAM",
+                    rationale: "Bioactive glass is heat-stable and radiation-stable. Steam is economical. Glass composition not affected by sterilization methods.",
+                    why_mistake_fails: "N/A - glass ceramic is robust!",
+                    hint: "Glass ceramic material. Heat-stable and radiation-stable. Cheapest method?"
+                },
+                {
+                    id: "A030", difficulty: "advanced", device_name: "TPU-Coated Fabric Mesh",
+                    material_primary: "Polyester fabric base", material_secondary: "TPU elastomer coating",
+                    device_description: "Soft tissue reconstruction mesh, coated for lubricity",
+                    correct_answers: ["GAMMA", "EBEAM"], best_answer: "GAMMA",
+                    rationale: "Polyester fabric is radiation-stable. TPU coating is also radiation-compatible. Gamma is standard for coated textile implants.",
+                    why_mistake_fails: "Steam heat may affect TPU coating properties (adhesion, flexibility).",
+                    hint: "Coated textile. Both fabric and coating are radiation-stable."
+                }
+            ]
+        };
+
+        // ==========================================
+        // GAME STATE MANAGEMENT
+        // ==========================================
+        let gameState = {
+            sessionNumber: 1,
+            currentItemIndex: 0,
+            currentItems: [],
+            currentMethod: null,
+            currentItem: null,
+            score: 0,
+            errors: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            answered: false,
+            correctAnswers: 0,
+            hintUsed: false
+        };
+
+        // ==========================================
+        // LOCAL STORAGE
+        // ==========================================
+        function loadSession() {
+            const saved = localStorage.getItem('sterileGeniusSession');
+            if (saved) {
+                const data = JSON.parse(saved);
+                gameState.sessionNumber = data.sessionNumber || 1;
+            }
+        }
+
+        function saveSession() {
+            localStorage.setItem('sterileGeniusSession', JSON.stringify({
+                sessionNumber: gameState.sessionNumber
+            }));
+        }
+
+        // ==========================================
+        // DIFFICULTY LOGIC
+        // ==========================================
+        function getDifficultyLevel() {
+            if (gameState.sessionNumber <= 3) return 'foundational';
+            if (gameState.sessionNumber <= 6) return 'mixed';
+            return 'advanced';
+        }
+
+        function getItemsForSession() {
+            const level = getDifficultyLevel();
+            let availableItems = [];
+
+            if (level === 'foundational') {
+                availableItems = ANSWER_KEY.items.filter(item => item.difficulty === 'foundational');
+            } else if (level === 'mixed') {
+                const foundational = ANSWER_KEY.items.filter(item => item.difficulty === 'foundational');
+                const intermediate = ANSWER_KEY.items.filter(item => item.difficulty === 'intermediate');
+                availableItems = [...foundational, ...intermediate];
+            } else {
+                availableItems = [...ANSWER_KEY.items];
+            }
+
+            // Shuffle and take 10 items
+            const shuffled = availableItems.sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, Math.min(10, shuffled.length));
+        }
+
+        // ==========================================
+        // GAME INITIALIZATION
+        // ==========================================
+        function initGame() {
+            loadSession();
+            gameState.currentItems = getItemsForSession();
+            gameState.currentItemIndex = 0;
+            gameState.score = 0;
+            gameState.errors = 0;
+            gameState.currentStreak = 0;
+            gameState.bestStreak = 0;
+            gameState.correctAnswers = 0;
+            gameState.answered = false;
+
+            updateUI();
+            loadNextItem();
+        }
+
+        function updateUI() {
+            // Update sidebar
+            document.getElementById('sessionNumber').textContent = gameState.sessionNumber;
+            document.getElementById('currentItem').textContent = gameState.currentItemIndex;
+            document.getElementById('totalItems').textContent = gameState.currentItems.length;
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+            document.getElementById('errorCount').textContent = gameState.errors;
+            document.getElementById('streakCount').textContent = gameState.currentStreak + ' 🔥';
+
+            const progress = (gameState.currentItemIndex / gameState.currentItems.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Update difficulty badge
+            const level = getDifficultyLevel();
+            const badge = document.getElementById('difficultyBadge');
+            badge.className = 'difficulty-badge';
+            if (level === 'foundational') {
+                badge.classList.add('difficulty-foundational');
+                badge.textContent = '🌱 Beginner Mode';
+            } else if (level === 'mixed') {
+                badge.classList.add('difficulty-intermediate');
+                badge.textContent = '📊 Intermediate Mode';
+            } else {
+                badge.classList.add('difficulty-advanced');
+                badge.textContent = '🚀 Advanced Mode';
+            }
+
+            // Streak bonus
+            if (gameState.currentStreak === 5) {
+                gameState.score += 50;
+                showStreakBonus();
+            }
+        }
+
+        function showStreakBonus() {
+            const bonus = document.createElement('div');
+            bonus.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 24px 48px; border-radius: 16px; font-size: 24px; font-weight: 800; box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4); z-index: 1000; animation: fadeIn 0.3s ease;';
+            bonus.textContent = '🔥 STREAK BONUS! +50 pts';
+            document.body.appendChild(bonus);
+            setTimeout(() => bonus.remove(), 2000);
+        }
+
+        function loadNextItem() {
+            if (gameState.currentItemIndex >= gameState.currentItems.length) {
+                showCompletionScreen();
+                return;
+            }
+
+            const item = gameState.currentItems[gameState.currentItemIndex];
+            gameState.currentItem = item;
+            gameState.answered = false;
+            gameState.hintUsed = false;
+
+            // Pick random method
+            const allMethods = ANSWER_KEY.sterilizationMethods;
+            gameState.currentMethod = allMethods[Math.floor(Math.random() * allMethods.length)];
+
+            // Update device card
+            document.getElementById('deviceName').textContent = item.device_name;
+            document.getElementById('deviceDescription').textContent = item.device_description;
+            document.getElementById('materialPrimary').textContent = item.material_primary;
+            
+            if (item.material_secondary) {
+                document.getElementById('materialSecondary').textContent = item.material_secondary;
+                document.getElementById('materialSecondaryRow').style.display = 'flex';
+            } else {
+                document.getElementById('materialSecondaryRow').style.display = 'none';
+            }
+
+            // Update difficulty tag
+            const tag = document.getElementById('difficultyTag');
+            tag.className = 'difficulty-tag';
+            tag.classList.add('tag-' + item.difficulty);
+            tag.textContent = item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1);
+
+            // Update current method
+            const methodInfo = ANSWER_KEY.methodDetails[gameState.currentMethod];
+            document.getElementById('currentMethod').textContent = methodInfo.name;
+
+            // Hide feedback
+            document.getElementById('feedbackArea').classList.remove('show');
+            document.getElementById('hintDisplay').classList.remove('show');
+            
+            // Reset card state
+            const card = document.getElementById('deviceCard');
+            card.classList.remove('correct-answer', 'wrong-answer');
+
+            // Enable buttons
+            document.getElementById('btnIncompatible').disabled = false;
+            document.getElementById('btnCompatible').disabled = false;
+            document.getElementById('btnHint').disabled = false;
+        }
+
+        // ==========================================
+        // ANSWER CHECKING
+        // ==========================================
+        function checkAnswer(userChoice) {
+            if (gameState.answered) return;
+
+            const item = gameState.currentItem;
+            const isCompatible = item.correct_answers.includes(gameState.currentMethod);
+            const userSaysCompatible = (userChoice === 'compatible');
+            const correct = (isCompatible === userSaysCompatible);
+
+            gameState.answered = true;
+
+            // Disable buttons
+            document.getElementById('btnIncompatible').disabled = true;
+            document.getElementById('btnCompatible').disabled = true;
+            document.getElementById('btnHint').disabled = true;
+
+            // Update stats
+            if (correct) {
+                gameState.score += 100;
+                gameState.currentStreak++;
+                gameState.correctAnswers++;
+                if (gameState.currentStreak > gameState.bestStreak) {
+                    gameState.bestStreak = gameState.currentStreak;
+                }
+                showFeedback(true, item, isCompatible);
+                document.getElementById('deviceCard').classList.add('correct-answer');
+            } else {
+                gameState.score -= 50;
+                gameState.errors++;
+                gameState.currentStreak = 0;
+                showFeedback(false, item, isCompatible);
+                document.getElementById('deviceCard').classList.add('wrong-answer');
+            }
+
+            updateUI();
+        }
+
+        function showFeedback(correct, item, isCompatible) {
+            const feedbackArea = document.getElementById('feedbackArea');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const text = document.getElementById('feedbackText');
+            const rationale = document.getElementById('rationaleText');
+
+            const methodName = ANSWER_KEY.methodDetails[gameState.currentMethod].name;
+
+            if (correct) {
+                icon.textContent = '✓';
+                title.textContent = 'Correct!';
+                title.className = 'feedback-title feedback-correct';
+                if (isCompatible) {
+                    text.textContent = `Yes! ${item.device_name} IS compatible with ${methodName}. Great job!`;
+                } else {
+                    text.textContent = `Correct! ${item.device_name} is NOT compatible with ${methodName}. Well done!`;
+                }
+            } else {
+                icon.textContent = '✗';
+                title.textContent = 'Incorrect';
+                title.className = 'feedback-title feedback-wrong';
+                if (isCompatible) {
+                    text.textContent = `Actually, ${item.device_name} IS compatible with ${methodName}! Here's why:`;
+                } else {
+                    text.textContent = `Actually, ${item.device_name} is NOT compatible with ${methodName}. Here's why it fails:`;
+                }
+            }
+
+            rationale.textContent = item.rationale;
+            feedbackArea.classList.add('show');
+        }
+
+        function showHint() {
+            if (gameState.answered || gameState.hintUsed) return;
+            
+            const item = gameState.currentItem;
+            const hintDisplay = document.getElementById('hintDisplay');
+            hintDisplay.textContent = '💡 ' + (item.hint || "Think about material compatibility and temperature sensitivity!");
+            hintDisplay.classList.add('show');
+            gameState.score -= 20;
+            gameState.hintUsed = true;
+            document.getElementById('btnHint').disabled = true;
+            updateUI();
+        }
+
+        function nextItem() {
+            gameState.currentItemIndex++;
+            updateUI();
+            loadNextItem();
+        }
+
+        // ==========================================
+        // COMPLETION SCREEN
+        // ==========================================
+        function showCompletionScreen() {
+            document.getElementById('deviceCard').style.display = 'none';
+            const screen = document.getElementById('completionScreen');
+            screen.classList.add('show');
+
+            const accuracy = Math.round((gameState.correctAnswers / gameState.currentItems.length) * 100);
+            document.getElementById('finalAccuracy').textContent = accuracy + '%';
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalStreak').textContent = gameState.bestStreak + ' 🔥';
+        }
+
+        function startNewSession() {
+            gameState.sessionNumber++;
+            saveSession();
+            document.getElementById('deviceCard').style.display = 'block';
+            document.getElementById('completionScreen').classList.remove('show');
+            initGame();
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+        document.getElementById('btnIncompatible').addEventListener('click', () => checkAnswer('incompatible'));
+        document.getElementById('btnCompatible').addEventListener('click', () => checkAnswer('compatible'));
+        document.getElementById('btnNext').addEventListener('click', nextItem);
+        document.getElementById('btnHint').addEventListener('click', showHint);
+        document.getElementById('btnNewSession').addEventListener('click', () => {
+            if (confirm('Start a new session? Current progress will be saved.')) {
+                startNewSession();
+            }
+        });
+        document.getElementById('btnNewSessionComplete').addEventListener('click', startNewSession);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (gameState.answered) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'x' || e.key === 'X') {
+                checkAnswer('incompatible');
+            } else if (e.key === 'ArrowRight' || e.key === 'c' || e.key === 'C') {
+                checkAnswer('compatible');
+            } else if (e.key === 'h' || e.key === 'H') {
+                showHint();
+            }
+        });
+
+        // ==========================================
+        // START GAME ON LOAD
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initGame();
+        });
+    </script>
+</body>
+</html>
