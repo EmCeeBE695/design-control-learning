@@ -1,1 +1,1600 @@
 
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Retractor Protocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;
+  --radius-xl:1rem;--radius-full:9999px;
+  --transition:180ms cubic-bezier(0.16,1,0.3,1);
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+}
+[data-theme="dark"]{
+  --color-bg:#0e0e0d;--color-surface:#151513;--color-surface-2:#1c1b19;
+  --color-surface-offset:#222120;--color-border:#2e2d2b;--color-divider:#252422;
+  --color-text:#d4d3d1;--color-text-muted:#7a7976;--color-text-faint:#4a4947;
+  --color-text-inverse:#0e0e0d;
+  --color-primary:#818cf8;--color-primary-hover:#6366f1;--color-primary-highlight:#1e1e2e;
+  --color-success:#4ade80;--color-success-bg:#0a1f15;--color-success-border:#1a3d27;
+  --color-amber:#fbbf24;--color-amber-bg:#1f1500;--color-amber-border:#3d2d10;
+  --color-error:#f87171;--color-error-bg:#1f0a0a;
+  --shadow-sm:0 1px 3px oklch(0 0 0/.3);--shadow-md:0 4px 16px oklch(0 0 0/.4);--shadow-lg:0 12px 40px oklch(0 0 0/.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);min-height:100dvh;line-height:1.6}
+button{cursor:pointer;font:inherit;color:inherit;background:none;border:none}
+input{font:inherit;color:inherit}
+img{display:block;max-width:100%}
+p{text-wrap:pretty;max-width:72ch}
+#app-shell{display:grid;grid-template-columns:1fr 300px;grid-template-rows:auto 1fr;min-height:100dvh}
+#top-bar{grid-column:1/-1;background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:var(--space-3) var(--space-6);display:flex;align-items:center;gap:var(--space-4);position:sticky;top:0;z-index:100}
+#main-content{grid-column:1;padding:var(--space-8) var(--space-8) var(--space-16);overflow-y:auto}
+#sidebar{grid-column:2;background:var(--color-surface);border-left:1px solid var(--color-border);padding:var(--space-6);position:sticky;top:57px;height:calc(100dvh - 57px);overflow-y:auto}
+.app-logo{font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);letter-spacing:-0.01em}
+.app-logo span{color:var(--color-primary)}
+#progress-dots{display:flex;gap:var(--space-2);align-items:center;flex:1;justify-content:center}
+.progress-dot{width:15px;height:15px;border-radius:50%;background:var(--color-surface-offset);border:1px solid var(--color-border);transition:all var(--transition);cursor:pointer}
+.progress-dot.completed{background:var(--color-success);border-color:var(--color-success)}
+.progress-dot.active{background:var(--color-primary);border-color:var(--color-primary);animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 color-mix(in oklch,var(--color-primary) 40%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in oklch,var(--color-primary) 0%,transparent)}}
+.dot-label{font-size:var(--text-xs);color:var(--color-text-faint);white-space:nowrap}
+#gear-btn{width:36px;height:36px;border-radius:var(--radius-md);border:1px solid var(--color-border);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:all var(--transition)}
+#gear-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+#gear-btn.active{background:var(--color-primary-highlight);color:var(--color-primary);border-color:var(--color-primary)}
+#instructor-banner{display:none;background:linear-gradient(90deg,color-mix(in oklch,var(--color-primary) 12%,var(--color-surface-2)),var(--color-surface-2));border:1px solid var(--color-primary);border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);margin-bottom:var(--space-5);align-items:center;gap:var(--space-3);font-size:var(--text-sm);color:var(--color-primary);font-weight:600}
+#instructor-banner.show{display:flex}
+.instructor-dot{width:8px;height:8px;border-radius:50%;background:var(--color-primary);animation:pulse-dot 1.5s infinite;flex-shrink:0}
+#instructor-controls{display:none;gap:var(--space-3);margin-bottom:var(--space-5)}
+#instructor-controls.show{display:flex}
+.instr-btn{font-size:var(--text-sm);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);color:var(--color-text-muted);transition:all var(--transition)}
+.instr-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.instr-btn.primary-btn{background:var(--color-primary);color:#0e0e0d;border-color:var(--color-primary);font-weight:600}
+.instr-btn.primary-btn:hover{background:var(--color-primary-hover)}
+.station{display:none}
+.station.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.station-badge{font-size:var(--text-xs);color:var(--color-primary);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
+.station-title{font-family:var(--font-display);font-size:var(--text-xl);color:var(--color-text);line-height:1.15;margin-bottom:var(--space-3)}
+.station-context{color:var(--color-text-muted);font-size:var(--text-sm);line-height:1.7;max-width:65ch;margin-bottom:var(--space-5)}
+.choice-group{display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-5)}
+.choice-card{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);cursor:pointer;transition:all var(--transition);text-align:left;width:100%}
+.choice-card:hover:not([disabled]){border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.choice-card.selected{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.choice-card.correct-answer{border-color:var(--color-success)!important;background:var(--color-success-bg)!important}
+.choice-card.wrong-answer{border-color:var(--color-amber)!important;background:var(--color-amber-bg)!important}
+.choice-card.instr-highlight{border:2px dashed var(--color-primary)!important}
+.choice-label{font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);display:flex;align-items:center;gap:var(--space-2)}
+.choice-desc{font-size:var(--text-sm);color:var(--color-text-muted)}
+.choice-feedback{display:none;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--color-border);font-size:var(--text-sm);line-height:1.6}
+.choice-feedback.show{display:block}
+.fb-green{color:var(--color-success)}
+.fb-amber{color:var(--color-amber)}
+.pill-group{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-4)}
+.pill-btn{padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);border:1px solid var(--color-border);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted);transition:all var(--transition)}
+.pill-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.pill-btn.selected{background:var(--color-primary);color:#0e0e0d;border-color:var(--color-primary);font-weight:600}
+.slider-wrapper{margin-bottom:var(--space-5)}
+.slider-value-big{font-family:var(--font-display);font-size:var(--text-xl);color:var(--color-text);margin-bottom:var(--space-2)}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:var(--radius-full);background:var(--color-surface-offset);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--color-primary);border:2px solid var(--color-bg);box-shadow:0 0 0 1px var(--color-primary);cursor:pointer;transition:transform var(--transition)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.slider-labels{display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-1)}
+.sfb{font-size:var(--text-sm);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);margin-top:var(--space-3);display:inline-block;transition:all var(--transition)}
+.sfb-green{background:var(--color-success-bg);color:var(--color-success);border:1px solid var(--color-success-border)}
+.sfb-amber{background:var(--color-amber-bg);color:var(--color-amber);border:1px solid var(--color-amber-border)}
+.sfb-red{background:var(--color-error-bg);color:var(--color-error);border:1px solid #3d1515}
+.nl-wrap{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-5) 0}
+.nl-label{font-size:var(--text-xs);color:var(--color-text-faint);margin-bottom:var(--space-3);letter-spacing:.05em;text-transform:uppercase}
+.hypo-builder{margin-bottom:var(--space-5)}
+.hypo-row{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)}
+.hypo-label{font-size:var(--text-sm);font-weight:700;color:var(--color-primary);width:28px;flex-shrink:0}
+.hypo-slot-auto{min-width:72px;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px dashed var(--color-border);background:var(--color-surface-offset);color:var(--color-text-muted);font-size:var(--text-sm);font-weight:600;text-align:center;opacity:.7;cursor:default;user-select:none}
+.hypo-slot-auto.filled{color:var(--color-text);opacity:1;border-color:var(--color-primary);background:oklch(from var(--color-primary) l c h / 0.08)}
+.hypo-slot{min-width:72px;height:40px;border:2px dashed var(--color-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:var(--text-sm);font-weight:600;cursor:pointer;transition:all var(--transition);padding:0 var(--space-3)}
+.hypo-slot.filled{border-style:solid;border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.hypo-slot:hover{border-color:var(--color-primary)}
+.hypo-ctx{font-size:var(--text-sm);color:var(--color-text-muted);margin:0 var(--space-1)}
+.tile-pool{display:flex;flex-wrap:wrap;gap:var(--space-2);margin:var(--space-4) 0}
+.tile{padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border);font-size:var(--text-sm);font-weight:600;background:var(--color-surface-2);cursor:pointer;transition:all var(--transition)}
+.tile:hover{border-color:var(--color-primary);background:var(--color-primary-highlight);color:var(--color-primary)}
+.tile.used{opacity:.3;pointer-events:none}
+.hypo-sentence{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted);min-height:46px;white-space:pre-line}
+.fmea-table{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-6)}
+.fmea-hdr{display:grid;grid-template-columns:2fr 1fr 2fr 1fr;background:var(--color-surface-offset);border-bottom:1px solid var(--color-border)}
+.fmea-hdr-cell{padding:var(--space-3) var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.06em;border-right:1px solid var(--color-border)}
+.fmea-hdr-cell:last-child{border-right:none}
+.fmea-row{display:grid;grid-template-columns:2fr 1fr 2fr 1fr;border-bottom:1px solid var(--color-divider)}
+.fmea-row:last-child{border-bottom:none}
+.fmea-cell{padding:var(--space-4);font-size:var(--text-sm);border-right:1px solid var(--color-divider);display:flex;align-items:center}
+.fmea-cell:last-child{border-right:none}
+.sev-9{color:var(--color-error);font-weight:700;font-size:var(--text-lg)}
+.sev-6{color:var(--color-amber);font-weight:700;font-size:var(--text-lg)}
+.select-btn{font-size:var(--text-xs);padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);transition:all var(--transition)}
+.select-btn:hover:not([disabled]){border-color:var(--color-primary);color:var(--color-primary)}
+.inline-panel{display:none;padding:var(--space-4);background:var(--color-surface);border-top:1px solid var(--color-border)}
+.inline-panel.show{display:block}
+.callout{background:var(--color-surface-2);border:1px solid var(--color-border);border-left:3px solid var(--color-primary);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);font-size:var(--text-sm);line-height:1.7;color:var(--color-text-muted);margin-bottom:var(--space-5)}
+.callout-title{font-weight:700;color:var(--color-text);margin-bottom:var(--space-2);font-size:var(--text-sm);display:flex;align-items:center;gap:var(--space-2)}
+.callout.warn{border-left-color:var(--color-amber)}
+.callout.success-c{border-left-color:var(--color-success)}
+.reg-note{display:inline-block;margin-bottom:var(--space-4)}
+.reg-note summary{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);border:1px solid var(--color-primary);color:var(--color-primary);cursor:pointer;list-style:none;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.reg-note summary::-webkit-details-marker{display:none}
+.reg-note-body{margin-top:var(--space-2);background:var(--color-primary-highlight);border:1px solid var(--color-primary);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted);max-width:55ch}
+.continue-wrap{margin-top:var(--space-8)}
+.continue-btn{background:var(--color-primary);color:#0e0e0d;font-size:var(--text-sm);font-weight:700;padding:var(--space-3) var(--space-8);border-radius:var(--radius-md);transition:all var(--transition);display:inline-flex;align-items:center;gap:var(--space-2)}
+.continue-btn:hover:not([disabled]){background:var(--color-primary-hover);transform:translateY(-1px)}
+.continue-btn[disabled]{background:var(--color-surface-offset);color:var(--color-text-faint);cursor:not-allowed;transform:none}
+.sidebar-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-4)}
+.sidebar-device{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4);margin-bottom:var(--space-5)}
+.sd-name{font-weight:700;font-size:var(--text-sm);margin-bottom:var(--space-1);color:var(--color-text)}
+.sd-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
+.sb-fields{display:flex;flex-direction:column;gap:var(--space-3)}
+.sb-field{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-2)}
+.sfl{font-size:var(--text-xs);color:var(--color-text-muted);flex-shrink:0;max-width:58%}
+.sfv{font-size:var(--text-xs);font-weight:600;color:var(--color-text-faint);text-align:right}
+.sfv.pop{color:var(--color-text)}
+.sfv.flash{animation:gf 1.2s ease}
+@keyframes gf{0%,100%{color:var(--color-text)}35%{color:var(--color-success)}}
+.sb-divider{border:none;border-top:1px solid var(--color-divider);margin:var(--space-3) 0}
+.em-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px;background:var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-5)}
+.em-cell{background:var(--color-surface-2);padding:var(--space-4);font-size:var(--text-sm)}
+.em-hdr{background:var(--color-surface-offset);font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;padding:var(--space-3) var(--space-4)}
+.em-corner{background:var(--color-surface-offset)}
+.em-correct{color:var(--color-success)}
+.em-t1{background:var(--color-error-bg)}
+.em-t2{background:var(--color-amber-bg);transition:background var(--transition)}
+.em-label{font-size:var(--text-xs);color:var(--color-text-faint);background:var(--color-surface-offset);writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;padding:var(--space-4) var(--space-2);font-weight:700;text-transform:uppercase;letter-spacing:.06em;transform:rotate(180deg)}
+.em-cell-title{font-weight:700;font-size:var(--text-sm);margin-bottom:var(--space-1)}
+.em-cell-desc{font-size:var(--text-xs);color:var(--color-text-muted)}
+.em-t1 .em-cell-desc{color:var(--color-error)}
+.em-t2 .em-cell-desc{color:var(--color-amber);transition:color var(--transition)}
+.em-correct .em-cell-desc{color:var(--color-success)}
+.big-n{text-align:center;padding:var(--space-8);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl);margin-bottom:var(--space-5)}
+.big-n-label{font-size:var(--text-xs);color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-2)}
+.big-n-val{font-family:var(--font-display);font-size:clamp(3rem,8vw,6rem);color:var(--color-primary);line-height:1}
+.formula-box{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4);font-family:'Courier New',monospace;font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:2}
+.achieved-row{display:flex;justify-content:space-between;align-items:center;background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);margin-bottom:var(--space-5)}
+.report-card{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-5)}
+.rc-hdr{background:var(--color-surface-offset);border-bottom:1px solid var(--color-border);padding:var(--space-4) var(--space-5);display:flex;align-items:center;gap:var(--space-3)}
+.rc-title{font-weight:700;font-size:var(--text-sm);color:var(--color-text)}
+.rc-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
+.rc-stamp{margin-left:auto;font-size:var(--text-xs);font-weight:700;padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);border:1px solid var(--color-border);color:var(--color-text-faint)}
+.rc-rows{padding:var(--space-4) var(--space-5);display:flex;flex-direction:column;gap:var(--space-3)}
+.rc-row{display:flex;justify-content:space-between;align-items:center;font-size:var(--text-sm);border-bottom:1px solid var(--color-divider);padding-bottom:var(--space-3)}
+.rc-row:last-child{border-bottom:none;padding-bottom:0}
+.rc-row-lbl{color:var(--color-text-muted)}
+.rc-row-val{font-weight:600;color:var(--color-text)}
+.rc-row-val.pass-c{color:var(--color-success)}
+.rc-row-val.sig-c{color:var(--color-primary)}
+.plot-twist{display:none;background:linear-gradient(135deg,#110e18,#180d18);border:1px solid #7c3aed;border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5)}
+.plot-twist.show{display:block;animation:slideIn .5s cubic-bezier(.16,1,.3,1)}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.ptn-hdr{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)}
+.ptn-badge{font-size:var(--text-xs);font-weight:700;padding:var(--space-1) var(--space-2);background:#7c3aed;color:white;border-radius:var(--radius-sm);text-transform:uppercase;letter-spacing:.06em}
+.ptn-title{font-weight:700;font-size:var(--text-sm);color:#c4b5fd}
+.ptn-body{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7}
+.tost-intro{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5)}
+.tost-result{display:none;background:var(--color-success-bg);border:2px solid var(--color-success);border-radius:var(--radius-lg);padding:var(--space-5);text-align:center;margin-top:var(--space-5)}
+.tost-result.show{display:block;animation:fadeIn .5s ease}
+.tost-checks{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-4)}
+.tost-check{display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-sm);opacity:0;transition:opacity .6s ease}
+.tost-check.show{opacity:1}
+.tost-icon{width:20px;height:20px;border-radius:50%;background:var(--color-success);color:var(--color-text-inverse);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+.tost-eq-title{font-family:var(--font-display);font-size:var(--text-xl);color:var(--color-success);margin-bottom:var(--space-2)}
+.tost-eq-sub{font-size:var(--text-sm);color:var(--color-text-muted)}
+.reviewer-wrap{margin-bottom:var(--space-5)}
+.reviewer-card-block{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-4)}
+.reviewer-card-block.locked{opacity:.4;pointer-events:none}
+.rv-hdr{background:#15111f;border-bottom:1px solid #2a2535;padding:var(--space-4) var(--space-5)}
+.rv-from{font-size:var(--text-xs);color:#a78bfa;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:var(--space-1)}
+.rv-subj{font-size:var(--text-sm);font-weight:600;color:var(--color-text)}
+.rv-body{padding:var(--space-5)}
+.rv-q{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;margin-bottom:var(--space-4)}
+.flowchart{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);margin-bottom:var(--space-8)}
+.flow-node{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-6);font-size:var(--text-sm);font-weight:600;text-align:center;opacity:0;transition:opacity .5s ease,transform .5s ease;transform:translateY(8px);min-width:200px}
+.flow-node.vis{opacity:1;transform:translateY(0)}
+.flow-node.fn-primary{border-color:var(--color-primary);background:var(--color-primary-highlight);color:var(--color-primary)}
+.flow-node.fn-success{border-color:var(--color-success);background:var(--color-success-bg);color:var(--color-success)}
+.flow-node.fn-amber{border-color:var(--color-amber);background:var(--color-amber-bg);color:var(--color-amber)}
+.flow-arrow{color:var(--color-text-faint);opacity:0;transition:opacity .5s ease;font-size:var(--text-lg)}
+.flow-arrow.vis{opacity:1}
+.flow-row{display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap;justify-content:center}
+.disc-card{background:var(--color-primary-highlight);border:1px solid var(--color-primary);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-5)}
+.disc-label{font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-4)}
+.disc-q{font-size:var(--text-sm);color:var(--color-text);padding:var(--space-3) 0;border-bottom:1px solid color-mix(in oklch,var(--color-primary) 20%,transparent);line-height:1.7}
+.disc-q:last-child{border-bottom:none}
+.dq-n{font-weight:700;color:var(--color-primary);margin-right:var(--space-2)}
+.summary-prose{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);font-size:var(--text-sm);line-height:1.9;color:var(--color-text-muted);margin-bottom:var(--space-5)}
+.summary-prose p{max-width:70ch;margin-bottom:var(--space-3)}
+.summary-prose p:last-child{margin-bottom:0}
+.export-btn{display:inline-flex;align-items:center;gap:var(--space-2);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);font-size:var(--text-sm);color:var(--color-text-muted);transition:all var(--transition)}
+.export-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.ref-card{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-5);display:flex;flex-wrap:wrap;gap:var(--space-5)}
+.ref-i-lbl{font-size:var(--text-xs);color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--space-1)}
+.ref-i-val{font-size:var(--text-sm);font-weight:700;color:var(--color-primary)}
+.ref-i-note{font-size:var(--text-xs);color:var(--color-text-muted)}
+.bell-wrap{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin:var(--space-5) 0}
+#sidebar-toggle{display:none;position:fixed;bottom:var(--space-5);right:var(--space-5);width:52px;height:52px;background:var(--color-primary);color:#0e0e0d;border-radius:50%;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);z-index:200}
+@media(max-width:900px){
+  #app-shell{grid-template-columns:1fr}
+  #sidebar{display:none;position:fixed;right:0;top:0;width:280px;height:100dvh;z-index:300;transform:translateX(100%);transition:transform var(--transition)}
+  #sidebar.open{display:block;transform:translateX(0)}
+  #sidebar-toggle{display:flex}
+  #main-content{padding:var(--space-6) var(--space-4) var(--space-16)}
+}
+</style>
+</head>
+<body>
+<div id="app-shell">
+<header id="top-bar">
+  <div class="app-logo">The <span>Retractor</span> Protocol</div>
+  <div id="progress-dots">
+    <span class="dot-label">Station</span>
+    <div class="progress-dot active" id="dot-1" title="1: Brief" onclick="navigateToDot(1)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-2" title="2: FMEA" onclick="navigateToDot(2)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-3" title="3: Acceptance Criteria" onclick="navigateToDot(3)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-4" title="4: Hypotheses" onclick="navigateToDot(4)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-5" title="5: Power" onclick="navigateToDot(5)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-6" title="6: Sample Size" onclick="navigateToDot(6)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-7" title="7: Results" onclick="navigateToDot(7)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-7b" title="7B: TOST" onclick="navigateToDot('7b')" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-8" title="8: Defend" onclick="navigateToDot(8)" role="button" tabindex="0"></div>
+    <div class="progress-dot" id="dot-9" title="9: Debrief" onclick="navigateToDot(9)" role="button" tabindex="0"></div>
+  </div>
+  <div id="gear-btn" aria-label="Instructor mode indicator" title="Instructor mode">
+    <i data-lucide="settings" width="16" height="16" id="gear-icon"></i>
+  </div>
+</header>
+<main id="main-content">
+
+<!-- INSTRUCTOR UI -->
+<div id="instructor-banner">
+  <div class="instructor-dot"></div>
+  INSTRUCTOR MODE — Correct answers highlighted with dashed border
+</div>
+<div id="instructor-controls">
+  <button class="instr-btn" onclick="prevStation()">← Previous Station</button>
+  <button class="instr-btn primary-btn" onclick="revealAnswer()">Reveal Answer</button>
+</div>
+
+<!-- ═══════════ STATION 1 ═══════════ -->
+<section class="station active" id="station-1">
+<div class="station-badge">Station 1 of 9 — The Brief</div>
+<h1 class="station-title">The Brief</h1>
+<p class="station-context">Your team has developed a cam-locking surgical retractor with a locking elbow that engages under load to hold a retractor blade in position. The predicate device has a reported mean locking force of 10 Nm. You're pursuing 510(k) clearance — which means demonstrating substantial equivalence, not superiority.</p>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>21 CFR 820.30</strong> — Design controls require documented verification and validation. Every performance claim must trace to an objective test.</div></details>
+<p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-4);">What are you trying to prove about your device's locking force?</p>
+<div class="choice-group" id="s1-choices">
+  <button class="choice-card" data-correct="true" onclick="selectCard(this,'s1')">
+    <div class="choice-label">Non-Inferiority Framing</div>
+    <div class="choice-desc">My device locks as well as or better than the predicate</div>
+    <div class="choice-feedback fb-green">✓ Correct framing for 510(k). Substantial equivalence means performing at least as well as the predicate — not better. Non-inferiority is the standard bar for clearance.</div>
+  </button>
+  <button class="choice-card" onclick="selectCard(this,'s1')">
+    <div class="choice-label">Superiority Framing</div>
+    <div class="choice-desc">My device locks better than the predicate</div>
+    <div class="choice-feedback fb-amber">⚠ Superiority is a higher bar than 510(k) requires. You'd need to prove outperformance — much harder. For clearance, use non-inferiority. Superiority is a post-market marketing claim, not a V&V requirement.</div>
+  </button>
+  <button class="choice-card" onclick="selectCard(this,'s1')">
+    <div class="choice-label">Safety Threshold Framing</div>
+    <div class="choice-desc">My device is safe enough for surgery</div>
+    <div class="choice-feedback fb-amber">⚠ Right instinct, but "safe enough" is untestable without a specific number. FDA needs a quantified acceptance criterion. You'll define that threshold in Station 3 using clinical data.</div>
+  </button>
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s1-continue" disabled onclick="advanceStation(1)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 2 ═══════════ -->
+<section class="station" id="station-2">
+<div class="station-badge">Station 2 of 9 — The FMEA</div>
+<h1 class="station-title">The FMEA</h1>
+<p class="station-context">One failure mode can have two clinical thresholds. Review the partial FMEA and select the correct clinical consequence for each failure mode.</p>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>ISO 14971</strong> — Risk management requires identified hazards with defined severity and acceptance criteria. Both failure modes require separate acceptance criteria.</div></details>
+<div class="fmea-table">
+  <div class="fmea-hdr">
+    <div class="fmea-hdr-cell">Failure Mode</div>
+    <div class="fmea-hdr-cell">Severity</div>
+    <div class="fmea-hdr-cell">Clinical Consequence</div>
+    <div class="fmea-hdr-cell">Occurrence</div>
+  </div>
+  <!-- Row 1 -->
+  <div class="fmea-row" id="fmea-row-1">
+    <div class="fmea-cell"><strong>Lock releases — too weak</strong><br><span style="color:var(--color-text-muted);font-size:var(--text-xs)">Locking force below threshold</span></div>
+    <div class="fmea-cell"><span class="sev-9">9</span></div>
+    <div class="fmea-cell" id="fmea-r1-cell">
+      <button class="select-btn" id="fmea-r1-btn" onclick="openFmeaPanel(1)">Select →</button>
+    </div>
+    <div class="fmea-cell"><span style="color:var(--color-text-muted)">3</span></div>
+  </div>
+  <div class="inline-panel" id="fmea-panel-1">
+    <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Select Clinical Consequence:</p>
+    <div class="choice-group">
+      <button class="choice-card" onclick="selectFmea(1,this,false)">
+        <div class="choice-label">Usability Failure Only</div>
+        <div class="choice-desc">Blade drift, reduced surgical precision</div>
+        <div class="choice-feedback fb-amber">⚠ Incomplete. A single failure mode can have two distinct thresholds. Blade drift occurs at moderate force loss; full catastrophic release occurs at a lower threshold. Both need separate acceptance criteria.</div>
+      </button>
+      <button class="choice-card" onclick="selectFmea(1,this,false)">
+        <div class="choice-label">Safety Failure Only</div>
+        <div class="choice-desc">Full release under load, patient at risk</div>
+        <div class="choice-feedback fb-amber">⚠ Incomplete — ignores the intermediate usability failure. The FMEA needs both thresholds: one for "blade drift" and a lower threshold for "catastrophic release."</div>
+      </button>
+      <button class="choice-card" data-correct="true" onclick="selectFmea(1,this,true)">
+        <div class="choice-label">Both at Different Thresholds</div>
+        <div class="choice-desc">Usability failure at one force level; safety failure at a lower force level</div>
+        <div class="choice-feedback fb-green">✓ Correct. One failure mode, two clinical thresholds at different force values. This is why you need both a lower bound (safety floor) and upper bound (release ceiling) — each tested independently in V&V.</div>
+      </button>
+    </div>
+  </div>
+  <!-- Row 2 -->
+  <div class="fmea-row" id="fmea-row-2">
+    <div class="fmea-cell"><strong>Lock resists release — too stiff</strong><br><span style="color:var(--color-text-muted);font-size:var(--text-xs)">Locking force above threshold</span></div>
+    <div class="fmea-cell"><span class="sev-6">6</span></div>
+    <div class="fmea-cell" id="fmea-r2-cell">
+      <button class="select-btn" id="fmea-r2-btn" onclick="openFmeaPanel(2)" disabled style="opacity:.4">Select →</button>
+    </div>
+    <div class="fmea-cell"><span style="color:var(--color-text-muted)">2</span></div>
+  </div>
+  <div class="inline-panel" id="fmea-panel-2">
+    <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Select Clinical Consequence:</p>
+    <div class="choice-group">
+      <button class="choice-card" data-correct="true" onclick="selectFmea(2,this,true)">
+        <div class="choice-label">Usability / Safety</div>
+        <div class="choice-desc">Surgeon cannot release one-handed under time pressure</div>
+        <div class="choice-feedback fb-green">✓ Correct. Under surgical stress, a stiff lock that can't be released one-handed creates direct patient safety risk. FDA Human Factors Guidance (2011) requires devices perform correctly under realistic use conditions.</div>
+      </button>
+      <button class="choice-card" onclick="selectFmea(2,this,false)">
+        <div class="choice-label">Surgeon Preference</div>
+        <div class="choice-desc">Device feels stiff — surgeon preference issue</div>
+        <div class="choice-feedback fb-amber">⚠ Usability under surgical stress is not cosmetic. FDA human factors guidance requires that devices perform correctly under realistic conditions including time pressure and stress.</div>
+      </button>
+      <button class="choice-card" onclick="selectFmea(2,this,false)">
+        <div class="choice-label">No Clinical Consequence</div>
+        <div class="choice-desc">Stiffness is preference, not a risk</div>
+        <div class="choice-feedback fb-amber">⚠ Incorrect. If a surgeon cannot release the retractor one-handed during a critical moment, this is a use error with direct patient harm potential. It must be in the FMEA with a defined acceptance criterion.</div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="callout" id="fmea-callout" style="display:none">
+  <div class="callout-title">💡 Why Two Specs for One Feature?</div>
+  A single mechanical feature — locking force — controls two independent failure modes: too weak (safety floor) and too stiff (release ceiling). Both require separate acceptance criteria. Both will be tested. This is the foundation for the TOST procedure in Station 7B.
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s2-continue" disabled onclick="advanceStation(2)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 3 ═══════════ -->
+<section class="station" id="station-3">
+<div class="station-badge">Station 3 of 9 — Acceptance Criteria</div>
+<h1 class="station-title">Acceptance Criteria</h1>
+<p class="station-context">Set the lower and upper bound specifications. Your numbers must be clinically justified — not derived from statistics or convention.</p>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>FDA Non-Inferiority Guidance</strong> — The non-inferiority margin (delta) must be clinically derived and documented. FDA will ask: "What clinical evidence supports this threshold?"</div></details>
+<div class="ref-card">
+  <div><div class="ref-i-lbl">Predicate Mean</div><div class="ref-i-val">10 Nm</div></div>
+  <div><div class="ref-i-lbl">Clinical Safety Floor</div><div class="ref-i-val">8 Nm</div><div class="ref-i-note">surgical literature</div></div>
+  <div><div class="ref-i-lbl">95th Pctl Release Force</div><div class="ref-i-val">14 Nm</div><div class="ref-i-note">human factors study</div></div>
+</div>
+<div class="nl-wrap">
+  <div class="nl-label">Specification Window (live)</div>
+  <svg id="nl-svg-3" viewBox="0 0 500 60" width="100%" style="max-height:60px"></svg>
+</div>
+<div>
+  <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3);">Lower Bound — Minimum Locking Force</p>
+  <div class="slider-wrapper">
+    <div class="slider-value-big" id="lb-display">8 Nm</div>
+    <input type="range" id="lb-slider" min="0" max="3" step="1" value="2" oninput="updateLB(this.value)">
+    <div class="slider-labels"><span>7</span><span>7.5</span><span>8</span><span>8.5 Nm</span></div>
+    <div class="sfb sfb-green" id="lb-fb">✓ Anchored to clinical literature threshold</div>
+  </div>
+</div>
+<div>
+  <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3);">Upper Bound — Maximum Locking Force</p>
+  <div class="slider-wrapper">
+    <div class="slider-value-big" id="ub-display">13 Nm</div>
+    <input type="range" id="ub-slider" min="0" max="8" step="1" value="4" oninput="updateUB(this.value)">
+    <div class="slider-labels"><span>11</span><span>12</span><span>13</span><span>14</span><span>15 Nm</span></div>
+    <div class="sfb sfb-green" id="ub-fb">✓ Below 95th percentile human factors threshold</div>
+  </div>
+</div>
+<div class="callout">
+  <div class="callout-title">📐 Delta Must Be Clinical, Not Statistical</div>
+  The non-inferiority margin is not the predicate mean. It is the minimum clinically meaningful threshold — derived from clinical evidence, not from what's convenient to measure. FDA will ask for the source document.
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s3-continue" disabled onclick="advanceStation(3)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 4 ═══════════ -->
+<section class="station" id="station-4">
+<div class="station-badge">Station 4 of 9 — Hypotheses</div>
+<h1 class="station-title">Build the Hypotheses</h1>
+<p class="station-context">Build the null and alternative hypotheses for the lower bound test. H₀ is always the failure scenario — the thing you're trying to disprove.</p>
+<div class="ref-card">
+  <div><div class="ref-i-lbl">Your Lower Bound Spec</div><div class="ref-i-val" id="s4-lb-ref">— Nm</div></div>
+  <div><div class="ref-i-lbl">Test Direction</div><div class="ref-i-val">One-tailed, lower bound</div></div>
+</div>
+<div class="hypo-builder" id="hypo-builder-4">
+  <div class="hypo-row">
+    <div class="hypo-label">H₀:</div><div class="hypo-ctx">μ</div>
+    <div class="hypo-slot" id="h0s1" onclick="returnTile(this,'4')">?</div>
+    <div class="hypo-slot" id="h0s2" onclick="returnTile(this,'4')">?</div>
+  </div>
+  <div class="hypo-row">
+    <div class="hypo-label">H₁:</div><div class="hypo-ctx">μ</div>
+    <div class="hypo-slot" id="h1s1" onclick="returnTile(this,'4')">?</div>
+    <div class="hypo-slot hypo-slot-auto" id="h1s2" title="Auto-fills from H₀">—</div>
+  </div>
+  <div class="tile-pool" id="tile-pool-4"></div>
+  <div class="hypo-sentence" id="hypo-sent-4">Place tiles above to build your hypotheses.</div>
+</div>
+<div class="bell-wrap" id="bell-4" style="display:none">
+  <svg viewBox="0 0 400 120" width="100%" style="max-height:120px">
+    <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#818cf8" stop-opacity=".3"/><stop offset="100%" stop-color="#818cf8" stop-opacity="0"/></linearGradient></defs>
+    <path d="M30,100 Q60,100 80,40 Q90,20 100,100 Z" fill="url(#rg)" stroke="#818cf8" stroke-width="1" stroke-opacity=".5"/>
+    <path d="M30,100 Q80,100 120,60 Q160,20 200,10 Q240,20 280,60 Q320,100 370,100" fill="none" stroke="var(--color-border)" stroke-width="2"/>
+    <line x1="100" y1="15" x2="100" y2="105" stroke="#818cf8" stroke-width="2" stroke-dasharray="5,3"/>
+    <circle cx="230" cy="11" r="5" fill="#4ade80"/>
+    <text x="100" y="115" text-anchor="middle" font-size="10" fill="#818cf8" font-family="Inter,sans-serif">H₀ boundary</text>
+    <text x="230" y="115" text-anchor="middle" font-size="10" fill="#4ade80" font-family="Inter,sans-serif">x̄</text>
+    <text x="62" y="75" text-anchor="middle" font-size="9" fill="#818cf8" font-family="Inter,sans-serif" opacity=".8">Reject H₀</text>
+  </svg>
+</div>
+<div class="callout" id="s4-callout" style="display:none">
+  <div class="callout-title">🎯 You Never Prove H₁</div>
+  You reject H₀. FDA asks: "Can you reject the failure hypothesis?" — not "Can you prove safety?" Statistical tests only reject a null hypothesis with a specified error rate. The burden of proof is disproving the bad-news scenario.
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s4-continue" disabled onclick="advanceStation(4)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 5 ═══════════ -->
+<section class="station" id="station-5">
+<div class="station-badge">Station 5 of 9 — Confidence &amp; Power</div>
+<h1 class="station-title">Confidence &amp; Power</h1>
+<p class="station-context">Connect α and power to your FMEA risk level. These are risk management decisions that belong in your Design History File — not arbitrary conventions.</p>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>FDA Design Control Guidance 1997</strong> — Statistical techniques shall be specified in the test protocol. The rationale for chosen parameters must be documented in the DHF.</div></details>
+<p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3);">Type I &amp; Type II Error Matrix</p>
+<div class="em-grid">
+  <div class="em-corner em-cell"></div>
+  <div class="em-hdr">Device Actually Meets Spec</div>
+  <div class="em-hdr">Device Actually Fails Spec</div>
+  <div class="em-label">Test Says PASS</div>
+  <div class="em-cell em-correct"><div class="em-cell-title">✓ Correct Clearance</div><div class="em-cell-desc">True positive — good outcome</div></div>
+  <div class="em-cell em-t2" id="em-t2">
+    <div class="em-cell-title">Type II Error (β)</div>
+    <div class="em-cell-desc" id="em-t2-desc">β = 1 − power = —</div>
+  </div>
+  <div class="em-label">Test Says FAIL</div>
+  <div class="em-cell em-t1" id="em-t1"><div class="em-cell-title">Type I Error (α)</div><div class="em-cell-desc">False rejection — product delayed</div></div>
+  <div class="em-cell em-correct"><div class="em-cell-title">✓ Correct Rejection</div><div class="em-cell-desc">True negative — safety preserved</div></div>
+</div>
+<div style="margin-bottom:var(--space-5)">
+  <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3)">Select Significance Level (α)</p>
+  <div class="pill-group" id="alpha-pills">
+    <button class="pill-btn" data-val=".10" onclick="selectAlpha(this)">α = 0.10</button>
+    <button class="pill-btn" data-val=".05" onclick="selectAlpha(this)">α = 0.05</button>
+    <button class="pill-btn" data-val=".01" onclick="selectAlpha(this)">α = 0.01</button>
+  </div>
+  <div class="sfb sfb-green" id="alpha-fb">α = 0.05 — medical device convention, aligns with FDA expectations. This value will be used going forward.</div>
+</div>
+<div style="margin-bottom:var(--space-5)">
+  <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3)">Select Power (1 − β)</p>
+  <div class="slider-value-big" id="power-display">80%</div>
+  <input type="range" id="power-slider" min="0" max="7" step="1" value="3" oninput="updatePower(this.value)">
+  <div class="slider-labels"><span>60%</span><span>70%</span><span>75%</span><span>80%</span><span>85%</span><span>90%</span><span>95%</span><span>99%</span></div>
+  <div class="sfb" id="power-fb" style="margin-top:var(--space-3)">Set power level</div>
+  <div style="margin-top:var(--space-3);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
+    If your device is truly below spec, you have a <strong id="power-plain">80%</strong> chance of detecting it. β = <strong id="beta-plain">20%</strong>
+  </div>
+</div>
+<div class="callout warn">
+  <div class="callout-title">📁 Power is a Risk Management Decision</div>
+  For a Severity 9 failure mode, a 1-in-3 miss rate (60–70% power) is unacceptable. Your chosen power level must be justified in writing in the DHF — tied directly to the FMEA severity rating.
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s5-continue" disabled onclick="advanceStation(5)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 6 ═══════════ -->
+<section class="station" id="station-6">
+<div class="station-badge">Station 6 of 9 — Sample Size</div>
+<h1 class="station-title">Sample Size</h1>
+<p class="station-context">Sample size is a calculation with a paper trail — not a budget decision. Every input traces back to a documented source.</p>
+<div class="ref-card" id="s6-refs">
+  <div><div class="ref-i-lbl">α</div><div class="ref-i-val">0.05</div></div>
+  <div><div class="ref-i-lbl">Power</div><div class="ref-i-val" id="s6-power-ref">—</div></div>
+  <div><div class="ref-i-lbl">μ₀ (Lower Bound)</div><div class="ref-i-val" id="s6-mu0-ref">—</div></div>
+  <div><div class="ref-i-lbl">σ (feasibility)</div><div class="ref-i-val">1.2 Nm</div></div>
+  <div><div class="ref-i-lbl">μ₁ (expected)</div><div class="ref-i-val" id="s6-mu1-ref">—</div></div>
+</div>
+<div class="big-n">
+  <div class="big-n-label">Required Sample Size</div>
+  <div class="big-n-val" id="calc-n">—</div>
+</div>
+<div class="formula-box" id="s6-formula">N = ⌈ (z_α + z_β)² × σ² / (μ₁ − μ₀)² ⌉ = ...</div>
+<div class="achieved-row">
+  <span style="font-size:var(--text-sm);color:var(--color-text-muted)">Achieved power at N = 15:</span>
+  <span style="font-weight:700;font-size:var(--text-sm)" id="achieved-power">—</span>
+</div>
+<p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-2)">Adjust Power to see N change:</p>
+<input type="range" id="s6-power-slider" min="0" max="7" step="1" value="3" oninput="updateS6Power(this.value)" style="width:100%;margin-bottom:var(--space-1)">
+<div class="slider-labels" style="margin-bottom:var(--space-5)"><span>60%</span><span>70%</span><span>75%</span><span>80%</span><span>85%</span><span>90%</span><span>95%</span><span>99%</span></div>
+<p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-4)">Your manufacturer can supply 15 samples. What do you do?</p>
+<div class="choice-group" id="s6-choices">
+  <button class="choice-card" data-choice="A" onclick="selectCard(this,'s6')">
+    <div class="choice-label">Proceed with 15</div>
+    <div class="choice-desc">15 samples is sufficient for our test</div>
+    <div class="choice-feedback" id="s6a-fb">Conditional on calculated N.</div>
+  </button>
+  <button class="choice-card" data-choice="B" onclick="selectCard(this,'s6')">
+    <div class="choice-label">Negotiate for More Samples</div>
+    <div class="choice-desc">Request additional units to meet calculated N</div>
+    <div class="choice-feedback fb-amber" id="s6b-fb">Conditional on calculated N.</div>
+  </button>
+  <button class="choice-card" data-choice="C" onclick="selectCard(this,'s6')">
+    <div class="choice-label">Accept 15 with Documented Reduced Power</div>
+    <div class="choice-desc">Formally document the deviation in the risk file</div>
+    <div class="choice-feedback" id="s6c-fb">Conditional on calculated N.</div>
+  </button>
+  <button class="choice-card" data-choice="D" onclick="selectCard(this,'s6')">
+    <div class="choice-label">Re-examine Feasibility Data</div>
+    <div class="choice-desc">If σ is lower than 1.2 Nm, N drops — verify the sigma estimate</div>
+    <div class="choice-feedback fb-green">✓ Valid approach. If σ can be refined from a larger feasibility dataset, a lower sigma reduces required N. Document the sigma source in your statistical analysis plan.</div>
+  </button>
+</div>
+<div class="callout">
+  <div class="callout-title">📎 The FDA Question</div>
+  "How did you arrive at N?" — The answer must reference α, power, the sigma source document, and the spec limit. "It's what we always use," "budget," and "precedent" are not acceptable answers.
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s6-continue" disabled onclick="advanceStation(6)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 7 ═══════════ -->
+<section class="station" id="station-7">
+<div class="station-badge">Station 7 of 9 — Lower Bound Results</div>
+<h1 class="station-title">Lower Bound Results</h1>
+<p class="station-context">The lower bound test is complete. Interpret the results, then respond to a message from the clinical team.</p>
+<div class="report-card">
+  <div class="rc-hdr">
+    <div><div class="rc-title">Test Report — Locking Force (Lower Bound)</div><div class="rc-sub">V&amp;V Protocol VVP-2401 | One-Sample, One-Tailed Z-Test</div></div>
+    <div class="rc-stamp" id="s7-stamp">PENDING</div>
+  </div>
+  <div class="rc-rows">
+    <div class="rc-row"><span class="rc-row-lbl">Sample Size (N)</span><span class="rc-row-val" id="s7-n-row">—</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">H₀</span><span class="rc-row-val" id="s7-h0-row">—</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">Sample Mean</span><span class="rc-row-val">10.3 Nm</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">Sample SD</span><span class="rc-row-val">1.1 Nm</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">t-statistic</span><span class="rc-row-val sig-c" id="s7-tstat-row">—</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">p-value</span><span class="rc-row-val sig-c">0.003</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">95% CI</span><span class="rc-row-val" id="s7-ci-row">—</span></div>
+  </div>
+</div>
+<div class="nl-wrap">
+  <div class="nl-label">CI vs. Lower Bound Spec</div>
+  <svg id="nl-svg-7" viewBox="0 0 500 70" width="100%" style="max-height:70px"></svg>
+</div>
+<p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-4)">What is your conclusion?</p>
+<div class="choice-group" id="s7-choices">
+  <button class="choice-card" data-correct="true" onclick="selectCard(this,'s7',true)">
+    <div class="choice-label">Pass</div>
+    <div class="choice-desc">Device meets the lower bound specification</div>
+    <div class="choice-feedback fb-green">✓ Correct. p = 0.003 &lt; α = 0.05. CI lower bound clears the spec limit. H₀ rejected. Device passes lower bound.</div>
+  </button>
+  <button class="choice-card" onclick="selectCard(this,'s7',true)">
+    <div class="choice-label">Fail</div>
+    <div class="choice-desc">Test results indicate device does not meet spec</div>
+    <div class="choice-feedback fb-amber">⚠ p = 0.003 is well below α = 0.05 and the CI lower bound clears the spec. Both criteria for passing are clearly met.</div>
+  </button>
+  <button class="choice-card" onclick="selectCard(this,'s7',true)">
+    <div class="choice-label">Inconclusive</div>
+    <div class="choice-desc">More testing needed before a conclusion can be drawn</div>
+    <div class="choice-feedback fb-amber">⚠ Inconclusive requires p near α or a CI straddling the spec limit. Neither applies here. The result is clear: the device passes.</div>
+  </button>
+</div>
+<!-- Plot twist -->
+<div class="plot-twist" id="plot-twist">
+  <div class="ptn-hdr"><div class="ptn-badge">🔔 Message from Clinical Team</div><div class="ptn-title">Unexpected field feedback</div></div>
+  <div class="ptn-body">Two scrub nurses flagged the retractor lock as stiff during design review. One reported difficulty releasing it one-handed. This came up informally — not part of the V&amp;V protocol. <strong style="color:var(--color-text)">Is this a V&amp;V problem?</strong></div>
+  <div style="margin-top:var(--space-4)">
+    <div class="choice-group" id="s7b-choices">
+      <button class="choice-card" onclick="selectCard(this,'s7b',true)">
+        <div class="choice-label">Not a V&amp;V Problem</div>
+        <div class="choice-desc">Usability feedback is qualitative; our test passed</div>
+        <div class="choice-feedback fb-amber">⚠ Station 3 established an upper bound specification for exactly this reason. That spec exists because of your FMEA Row 2. This feedback is a signal that the upper bound test matters.</div>
+      </button>
+      <button class="choice-card" data-correct="true" onclick="selectCard(this,'s7b',true)">
+        <div class="choice-label">Yes — we have an open upper bound spec</div>
+        <div class="choice-desc">The upper bound test hasn't been evaluated yet</div>
+        <div class="choice-feedback fb-green">✓ Correct. FMEA Row 2 identified "too stiff" as Severity 6. You set an upper bound in Station 3. That spec requires a quantitative test.</div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s7-continue" disabled onclick="advanceStation(7)">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 7B ═══════════ -->
+<section class="station" id="station-7b">
+<div class="station-badge">Station 7B of 9 — TOST</div>
+<h1 class="station-title">Upper Bound &amp; TOST</h1>
+<p class="station-context">Two One-Sided Tests. You cleared the lower bound. Now test the upper bound. Equivalence means clearing both walls.</p>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>FDA Human Factors Guidance 2011</strong> — Usability under realistic surgical conditions is a design control requirement. When a quantitative spec exists, qualitative observation is not sufficient.</div></details>
+<div class="tost-intro">
+  <div class="nl-label">Equivalence = Clearing Both Walls</div>
+  <svg viewBox="0 0 500 80" width="100%" style="max-height:80px">
+    <rect x="0" y="20" width="500" height="40" fill="var(--color-surface-offset)" rx="4"/>
+    <rect x="60" y="20" width="340" height="40" fill="var(--color-success-bg)" opacity=".6" rx="4"/>
+    <rect x="58" y="10" width="4" height="60" fill="#4ade80" rx="2"/>
+    <text x="60" y="8" text-anchor="middle" font-size="9" fill="#4ade80" font-family="Inter">Lower ✅</text>
+    <rect x="398" y="10" width="4" height="60" fill="var(--color-amber)" rx="2"/>
+    <text x="400" y="8" text-anchor="middle" font-size="9" fill="var(--color-amber)" font-family="Inter">Upper — pending</text>
+    <circle cx="230" cy="40" r="6" fill="var(--color-primary)"/>
+    <text x="230" y="75" text-anchor="middle" font-size="9" fill="var(--color-primary)" font-family="Inter">x̄ = 10.3 Nm</text>
+    <line x1="230" y1="40" x2="80" y2="40" stroke="#4ade80" stroke-width="2"/>
+    <polygon points="80,37 62,40 80,43" fill="#4ade80"/>
+    <text x="155" y="35" text-anchor="middle" font-size="9" fill="#4ade80" font-family="Inter">Lower ✅</text>
+    <line x1="230" y1="40" x2="380" y2="40" stroke="var(--color-amber)" stroke-width="2" stroke-dasharray="6,3"/>
+    <polygon points="380,37 398,40 380,43" fill="var(--color-amber)" opacity=".5"/>
+    <text x="308" y="35" text-anchor="middle" font-size="9" fill="var(--color-amber)" font-family="Inter">Upper — pending</text>
+  </svg>
+</div>
+<div class="ref-card">
+  <div><div class="ref-i-lbl">Upper Bound Spec</div><div class="ref-i-val" id="s7b-ub-ref">—</div></div>
+  <div><div class="ref-i-lbl">Sample Mean</div><div class="ref-i-val">10.3 Nm</div></div>
+</div>
+<p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3)">Build the upper bound null hypothesis (H₀):</p>
+<div class="hypo-builder">
+  <div class="hypo-row">
+    <div class="hypo-label">H₀:</div><div class="hypo-ctx">μ</div>
+    <div class="hypo-slot" id="h7bs1" onclick="returnTile(this,'7b')">?</div>
+    <div class="hypo-slot hypo-slot-auto" id="h7bs2" title="Auto-fills from spec">—</div>
+  </div>
+  <div class="tile-pool" id="tile-pool-7b"></div>
+  <div class="hypo-sentence" id="hypo-sent-7b">Fill the slots above.</div>
+</div>
+<div class="report-card" id="s7b-report" style="display:none">
+  <div class="rc-hdr">
+    <div><div class="rc-title">Test Report — Locking Force (Upper Bound)</div><div class="rc-sub">V&amp;V Protocol VVP-2401 | One-Sample, One-Tailed Z-Test</div></div>
+    <div class="rc-stamp" id="s7b-stamp">PENDING</div>
+  </div>
+  <div class="rc-rows">
+    <div class="rc-row"><span class="rc-row-lbl">H₀</span><span class="rc-row-val" id="s7b-h0-row">—</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">Sample Mean</span><span class="rc-row-val">10.3 Nm</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">t-statistic</span><span class="rc-row-val sig-c" id="s7b-tstat-row">—</span></div>
+    <div class="rc-row"><span class="rc-row-lbl">p-value</span><span class="rc-row-val sig-c">&lt; 0.001</span></div>
+  </div>
+</div>
+<div class="choice-group" id="s7c-choices" style="display:none">
+  <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3)">Does the device pass the upper bound test?</p>
+  <button class="choice-card" data-correct="true" onclick="selectCard(this,'s7c',true)">
+    <div class="choice-label">Pass</div>
+    <div class="choice-desc">p &lt; α, CI below upper bound</div>
+    <div class="choice-feedback fb-green">✓ Correct. x̄ = 10.3 Nm is well below your upper bound. CI stays below it. p &lt; 0.001 — H₀ rejected. Upper bound test passes.</div>
+  </button>
+  <button class="choice-card" onclick="selectCard(this,'s7c',true)">
+    <div class="choice-label">Fail</div>
+    <div class="choice-desc">The device is too stiff</div>
+    <div class="choice-feedback fb-amber">⚠ Look at the numbers. x̄ = 10.3 Nm is far below the upper bound. The CI stays entirely below it. There is no evidence the device is too stiff.</div>
+  </button>
+  <button class="choice-card" onclick="selectCard(this,'s7c',true)">
+    <div class="choice-label">Separate physical test required</div>
+    <div class="choice-desc">Same data can't answer both lower and upper bound questions</div>
+    <div class="choice-feedback fb-amber">⚠ TOST uses the same sample data — two statistical tests, one experiment. You do not need new physical testing, just a second one-sided test on the same dataset.</div>
+  </button>
+</div>
+<div class="callout" id="tost-callout" style="display:none">
+  <div class="callout-title">⚖️ TOST: Two One-Sided Tests</div>
+  Equivalence ≠ two-tailed testing. TOST = two separate one-sided tests, each with its own H₀. Equivalence is declared only when both null hypotheses are independently rejected. FDA expects this structure for a bounded performance claim.<br><br><em style="color:var(--color-text-faint)">Footnote: With multiple simultaneous tests, a Bonferroni correction would split α — not required for this single bounded claim, but relevant for multi-endpoint submissions.</em>
+</div>
+<div class="tost-result" id="tost-result">
+  <div class="tost-checks">
+    <div class="tost-check" id="tost-c1"><div class="tost-icon">✓</div><span>Lower Bound Test — <strong>PASS</strong> (p = 0.003 &lt; α = 0.05)</span></div>
+    <div class="tost-check" id="tost-c2"><div class="tost-icon">✓</div><span>Upper Bound Test — <strong>PASS</strong> (p &lt; 0.001 &lt; α = 0.05)</span></div>
+  </div>
+  <div class="tost-eq-title">Equivalence Established</div>
+  <div class="tost-eq-sub" id="tost-eq-range">Device performs within the specified window at 95% CI</div>
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s7b-continue" disabled onclick="advanceStation('7b')">Continue <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 8 ═══════════ -->
+<section class="station" id="station-8">
+<div class="station-badge">Station 8 of 9 — Defend Your Analysis</div>
+<h1 class="station-title">Defend Your Analysis</h1>
+<p class="station-context">Three questions from an FDA reviewer. Answer each before the next unlocks. Translate your decisions into regulatory language.</p>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>21 CFR 820.72</strong> — Test method documentation must permit re-performance. Statistical rationales must be traceable to source data.</div></details>
+<div class="reviewer-wrap">
+  <div class="reviewer-card-block" id="rc-block-1">
+    <div class="rv-hdr"><div class="rv-from">FDA Reviewer Memo — Q1 of 3</div><div class="rv-subj">Please justify your sample size selection.</div></div>
+    <div class="rv-body">
+      <div class="rv-q">Your protocol specifies N samples. What is the basis for this number?</div>
+      <div class="choice-group" id="rc1-choices">
+        <button class="choice-card" data-correct="true" onclick="selectCard(this,'rc1')">
+          <div class="choice-label">Full Statistical Justification</div>
+          <div class="choice-desc">N was calculated using one-tailed z-test with α = 0.05, power = selected %, σ = 1.2 Nm from feasibility (Doc. FAB-2023-04), and μ₀ = lower bound spec</div>
+          <div class="choice-feedback fb-green">✓ Complete answer: α, power, sigma source, spec limit — all traceable. This is what FDA requires under 21 CFR 820.72.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc1')">
+          <div class="choice-label">Convention</div>
+          <div class="choice-desc">N = 15 is standard for this type of device test</div>
+          <div class="choice-feedback fb-amber">⚠ "Convention" is not a statistical rationale. Without a calculation traceable to α, power, σ, and the spec limit, this does not satisfy 21 CFR 820.72.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc1')">
+          <div class="choice-label">Budget Constraint</div>
+          <div class="choice-desc">Manufacturing provided 15 — this was the available quantity</div>
+          <div class="choice-feedback fb-amber">⚠ Budget is not a statistical justification. If N was constrained, document the achieved power and formally accept the reduced confidence in your risk file — with justification.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc1')">
+          <div class="choice-label">Predicate Matching</div>
+          <div class="choice-desc">The predicate device used a similar sample size</div>
+          <div class="choice-feedback fb-amber">⚠ Predicate matching doesn't transfer sample size justification. Your device, your sigma, your spec limit — your N. FDA expects a device-specific calculation.</div>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="reviewer-card-block locked" id="rc-block-2">
+    <div class="rv-hdr"><div class="rv-from">FDA Reviewer Memo — Q2 of 3</div><div class="rv-subj">Why did you select <span id="rc2-lb-text">your lower bound</span> Nm as lower bound, not 10 Nm (the predicate mean)?</div></div>
+    <div class="rv-body">
+      <div class="rv-q">The predicate mean is 10 Nm. Your lower bound is set below that. Justify this choice.</div>
+      <div class="choice-group" id="rc2-choices">
+        <button class="choice-card" data-correct="true" onclick="selectCard(this,'rc2')">
+          <div class="choice-label">Clinically Derived Threshold</div>
+          <div class="choice-desc">8 Nm was identified in surgical literature as the force below which positional instability occurs — clinically justified, not derived from the predicate mean</div>
+          <div class="choice-feedback fb-green">✓ Correct framing. The non-inferiority margin must be clinically justified. "The predicate does 10 Nm" is a technical comparison, not a clinical argument. The clinical argument comes from what the surgeon needs.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc2')">
+          <div class="choice-label">Statistical Buffer</div>
+          <div class="choice-desc">Lower bound adds margin below predicate to account for measurement variability</div>
+          <div class="choice-feedback fb-amber">⚠ Statistical margin is not clinical justification. "We subtracted 2 Nm for safety" invites: "Safety based on what clinical data?" The delta must come from clinical evidence.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc2')">
+          <div class="choice-label">Team Consensus</div>
+          <div class="choice-desc">The engineering team judged this level appropriate</div>
+          <div class="choice-feedback fb-amber">⚠ Team judgment is not evidence. FDA expects a traceable clinical rationale — a specific literature reference, human factors study, or clinical study establishing the minimum clinically meaningful threshold.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc2')">
+          <div class="choice-label">Predicate-Based Margin</div>
+          <div class="choice-desc">10 Nm minus 2 Nm gives an acceptable margin</div>
+          <div class="choice-feedback fb-amber">⚠ Subtracting from the predicate mean is arithmetic, not a clinical rationale. The 2 Nm reduction has no clinical meaning unless supported by evidence that performance at this threshold is clinically acceptable.</div>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="reviewer-card-block locked" id="rc-block-3">
+    <div class="rv-hdr"><div class="rv-from">FDA Reviewer Memo — Q3 of 3</div><div class="rv-subj">How do you address the releasability concern from design review?</div></div>
+    <div class="rv-body">
+      <div class="rv-q">Your design review notes include a comment about difficulty releasing the device one-handed. How is this addressed in V&amp;V?</div>
+      <div class="choice-group" id="rc3-choices">
+        <button class="choice-card" data-correct="true" onclick="selectCard(this,'rc3')">
+          <div class="choice-label">TOST with Upper Bound Spec</div>
+          <div class="choice-desc">Upper bound defined from 95th percentile release force (human factors study). One-sided test performed. Device passed. TOST establishes equivalence within the full window.</div>
+          <div class="choice-feedback fb-green">✓ Complete. You traced it: human factors data → upper bound spec → FMEA Row 2 → upper bound hypothesis test → TOST → result. This closes the loop for FDA.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc3')">
+          <div class="choice-label">Separate Qualitative Usability Study</div>
+          <div class="choice-desc">A usability study with clinical staff found no quantitative concern</div>
+          <div class="choice-feedback fb-amber">⚠ A qualitative study doesn't substitute for quantitative V&amp;V when a spec exists. You defined an upper bound specification. That spec requires a quantitative test result.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc3')">
+          <div class="choice-label">Predicate Comparison</div>
+          <div class="choice-desc">The predicate has similar release force — substantial equivalence establishes adequacy</div>
+          <div class="choice-feedback fb-amber">⚠ Predicate comparison doesn't satisfy a specific performance spec. You defined a quantitative upper bound. FDA expects a test result against that spec.</div>
+        </button>
+        <button class="choice-card" onclick="selectCard(this,'rc3')">
+          <div class="choice-label">FMEA Omission</div>
+          <div class="choice-desc">The concern was noted as cosmetic and excluded from the FMEA</div>
+          <div class="choice-feedback fb-amber">⚠ This directly contradicts your FMEA (Station 2, Row 2) where "too stiff" was identified as Severity 6 with a usability/safety consequence. Contradicting the DHF is a major FDA finding.</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="continue-wrap">
+  <button class="continue-btn" id="s8-continue" disabled onclick="advanceStation(8)">Continue to Debrief <i data-lucide="arrow-right" width="16" height="16"></i></button>
+</div>
+</section>
+
+<!-- ═══════════ STATION 9 ═══════════ -->
+<section class="station" id="station-9">
+<div class="station-badge">Station 9 of 9 — Debrief</div>
+<h1 class="station-title">Debrief</h1>
+<p class="station-context">The complete workflow you built — with your actual values — and why each step matters in a real 510(k) submission.</p>
+<div class="flowchart" id="debrief-fc">
+  <div class="flow-node fn-primary" id="fn1">FMEA → Two Failure Modes Identified</div>
+  <div class="flow-arrow" id="fa1">↓</div>
+  <div class="flow-row">
+    <div class="flow-node fn-amber" id="fn2">Lower Bound Spec<br><small id="fn2-val">— Nm</small></div>
+    <div class="flow-node fn-amber" id="fn3">Upper Bound Spec<br><small id="fn3-val">— Nm</small></div>
+  </div>
+  <div class="flow-arrow" id="fa2">↓</div>
+  <div class="flow-row">
+    <div class="flow-node fn-primary" id="fn4">H₀: μ ≤ <span id="fn4-val">—</span> Nm</div>
+    <div class="flow-node fn-primary" id="fn5">H₀: μ ≥ <span id="fn5-val">—</span> Nm</div>
+  </div>
+  <div class="flow-arrow" id="fa3">↓</div>
+  <div class="flow-node" id="fn6">α = 0.05 · Power = <span id="fn6-val">—</span> · N = <span id="fn7-val">—</span></div>
+  <div class="flow-arrow" id="fa4">↓</div>
+  <div class="flow-row">
+    <div class="flow-node fn-success" id="fn8">Lower Bound PASS ✓<br><small>p = 0.003</small></div>
+    <div class="flow-node fn-success" id="fn9">Upper Bound PASS ✓<br><small>p &lt; 0.001</small></div>
+  </div>
+  <div class="flow-arrow" id="fa5">↓</div>
+  <div class="flow-node fn-success" id="fn10" style="font-size:var(--text-lg)">Equivalence Established ✓</div>
+</div>
+<div class="summary-prose">
+  <p>You completed a full V&amp;V hypothesis testing workflow for a surgical retractor locking mechanism — the same structure used in actual 510(k) submissions.</p>
+  <p>It started with the FMEA, where you identified that one physical feature — locking force — controls two independent failure modes. That's why you needed two acceptance criteria, not one.</p>
+  <p>You set those criteria using clinical data: a surgical literature threshold for the lower bound and a human factors study for the upper bound. Delta must be clinically justified, not statistically convenient.</p>
+  <p>You built directional hypotheses where H₀ always represents the failure scenario — the thing you're trying to disprove. You chose α and power based on FMEA severity ratings, and calculated N using the standard formula with documented inputs.</p>
+  <p>The test results showed p = 0.003 (lower bound) and p &lt; 0.001 (upper bound). Both null hypotheses were rejected. This is TOST — the correct structure when making a bounded equivalence claim.</p>
+  <p>In a real submission, every step appears in the Design History File: the FMEA, acceptance criteria with clinical rationale, statistical analysis plan, and test report with the TOST conclusion.</p>
+</div>
+<div class="disc-card" id="disc-questions" style="display:none">
+  <div class="disc-label">For Discussion — Instructor Mode</div>
+  <div class="disc-q"><span class="dq-n">1.</span>If this were a Class III device, how would your approach to α and power change? What if severity were 10 across both failure modes?</div>
+  <div class="disc-q"><span class="dq-n">2.</span>Re-run the sample size calculation with σ = 2.5 instead of 1.2. How does N change? What if feasibility showed higher variability?</div>
+  <div class="disc-q"><span class="dq-n">3.</span>What if the predicate mean were 8.8 Nm instead of 10 Nm? How does this change the clinical argument for your lower bound?</div>
+  <div class="disc-q"><span class="dq-n">4.</span>Should upper and lower bounds always use the same power? When might you power the upper bound test differently?</div>
+</div>
+<button class="export-btn" onclick="exportReport()"><i data-lucide="download" width="16" height="16"></i> Export Test Plan Summary</button>
+</section>
+</main>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-title">Test Plan Summary<button onclick="document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar').style.display='none';document.getElementById('sidebar-toggle').style.display='flex'" aria-label="Close sidebar" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--color-text-muted);display:flex;align-items:center;padding:2px 4px;border-radius:var(--radius-sm)" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-muted)'"><i data-lucide="x" width="16" height="16"></i></button></div>
+  <div class="sidebar-device"><div class="sd-name">Cam-Lock Surgical Retractor</div><div class="sd-sub">510(k) Pathway · V&amp;V Testing</div></div>
+  <div class="sb-fields">
+    <div class="sb-field"><span class="sfl">Device</span><span class="sfv pop">Surgical Retractor</span></div>
+    <div class="sb-field"><span class="sfl">Pathway</span><span class="sfv pop">510(k)</span></div>
+    <div class="sb-field"><span class="sfl">Test Type</span><span class="sfv" id="sb-test-type">—</span></div>
+    <hr class="sb-divider">
+    <div class="sb-field"><span class="sfl">Lower Bound Spec</span><span class="sfv" id="sb-lb">—</span></div>
+    <div class="sb-field"><span class="sfl">Upper Bound Spec</span><span class="sfv" id="sb-ub">—</span></div>
+    <hr class="sb-divider">
+    <div class="sb-field"><span class="sfl">α (significance)</span><span class="sfv" id="sb-alpha">—</span></div>
+    <div class="sb-field"><span class="sfl">Power (1 − β)</span><span class="sfv" id="sb-power">—</span></div>
+    <div class="sb-field"><span class="sfl">β (Type II error)</span><span class="sfv" id="sb-beta">—</span></div>
+    <div class="sb-field"><span class="sfl">Sample Size (N)</span><span class="sfv" id="sb-n">—</span></div>
+    <hr class="sb-divider">
+    <div class="sb-field"><span class="sfl">Lower Bound Result</span><span class="sfv" id="sb-lb-result">—</span></div>
+    <div class="sb-field"><span class="sfl">Upper Bound Result</span><span class="sfv" id="sb-ub-result">—</span></div>
+    <div class="sb-field"><span class="sfl">Conclusion</span><span class="sfv" id="sb-conclusion">—</span></div>
+  </div>
+</aside>
+</div>
+<button id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Open summary"><i data-lucide="clipboard-list" width="22" height="22"></i></button>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const S = {
+  station: 1, instructor: false,
+  lb: 8, ub: 13, alpha: 0.05, power: 0.80, n: null,
+  h0op: null, h0val: null, h1op: null, h1val: null,
+  h7bop: null, h7bval: null,
+  fmea1: false, fmea2: false,
+  s7ans: false, s7bans: false, s7cans: false,
+  rc1done: false, rc2done: false, rc3done: false, alphaSet: false
+};
+const ORDER = [1,2,3,4,5,6,7,'7b',8,9];
+const POW_STEPS = [0.60,0.70,0.75,0.80,0.85,0.90,0.95,0.99];
+const Z_A = 1.6449; // z for alpha=0.05 one-tailed
+const SIGMA = 1.2; const MU1 = 9.0; const XBAR = 10.3; const SD = 1.1;
+const LB_VALS = [7,7.5,8,8.5]; // max = MU1-0.5 = 8.5
+const UB_VALS = [11,11.5,12,12.5,13,13.5,14,14.5,15];
+
+// ── Normal CDF approximation ──
+function normalCDF(x){
+  const a=[.254829592,-.284496736,1.421413741,-1.453152027,1.061405429],p=.3275911;
+  const s=x<0?-1:1,t=1/(1+p*Math.abs(x)/Math.SQRT2);
+  const y=1-((((a[4]*t+a[3])*t+a[2])*t+a[1])*t+a[0])*t*Math.exp(-x*x/2);
+  return .5*(1+s*y);
+}
+function normalInv(pp){
+  if(pp<=0)return-99;if(pp>=1)return 99;
+  const a=[2.515517,.802853,.010328],b=[1.432788,.189269,.001308];
+  const q=pp<.5?pp:1-pp;
+  const t=Math.sqrt(-2*Math.log(q));
+  const z=t-(a[0]+a[1]*t+a[2]*t*t)/(1+b[0]*t+b[1]*t*t+b[2]*t*t*t);
+  return pp<.5?-z:z;
+}
+function calcN(pow,mu0){return Math.ceil(Math.pow((Z_A+normalInv(pow))*SIGMA/(MU1-mu0),2))}
+function calcPow15(mu0){const z=(MU1-mu0)/(SIGMA/Math.sqrt(15))-Z_A;return normalCDF(z)}
+function calcT(mu0,n){return((XBAR-mu0)/(SD/Math.sqrt(n))).toFixed(2)}
+function calcCI(n){const me=1.96*SD/Math.sqrt(n);return{lo:(XBAR-me).toFixed(1),hi:(XBAR+me).toFixed(1)}}
+function calcTUB(ub,n){return((XBAR-ub)/(SD/Math.sqrt(n))).toFixed(2)}
+
+// ── Sidebar update ──
+function sbSet(id,val){
+  const el=document.getElementById(id);
+  if(!el||el.textContent===val)return;
+  el.textContent=val;el.classList.add('pop');
+  el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+}
+function syncSidebar(){
+  sbSet('sb-lb',S.lb+' Nm'); sbSet('sb-ub',S.ub+' Nm');
+  if(S.station>=4)sbSet('sb-test-type','One-sample, one-tailed z-test');
+  if(S.station>=5){sbSet('sb-alpha','0.05');sbSet('sb-power',Math.round(S.power*100)+'%');sbSet('sb-beta',Math.round((1-S.power)*100)+'%')}
+  if(S.n)sbSet('sb-n',String(S.n));
+  if(S.station>=7)sbSet('sb-lb-result','✅ PASS (p = 0.003)');
+  if(S.station>=8){sbSet('sb-ub-result','✅ PASS (p < 0.001)');sbSet('sb-conclusion','Equiv. '+S.lb+'–'+S.ub+' Nm @ 95% CI')}
+}
+
+// ── Station navigation ──
+function advanceStation(cur){
+  const idx=ORDER.indexOf(cur);if(idx<0||idx>=ORDER.length-1)return;
+  const next=ORDER[idx+1];
+  getStation(cur).classList.remove('active');
+  getDot(cur).classList.remove('active');getDot(cur).classList.add('completed');
+  getStation(next).classList.add('active');
+  getDot(next).classList.remove('completed');getDot(next).classList.add('active');
+  S.station=next;window.scrollTo({top:0,behavior:'smooth'});
+  onEnter(next);syncSidebar();updateInstructor();
+}
+function prevStation(){
+  const idx=ORDER.indexOf(S.station);if(idx<=0)return;
+  const prev=ORDER[idx-1];
+  getStation(S.station).classList.remove('active');getDot(S.station).classList.remove('active');
+  getStation(prev).classList.add('active');
+  getDot(prev).classList.remove('completed');getDot(prev).classList.add('active');
+  S.station=prev;window.scrollTo({top:0,behavior:'smooth'});updateInstructor();
+}
+function navigateToDot(target){
+  const targetIdx=ORDER.indexOf(target);
+  const currentIdx=ORDER.indexOf(S.station);
+  if(targetIdx<0||targetIdx>=currentIdx)return; // only navigate backward to completed
+  getStation(S.station).classList.remove('active');
+  getDot(S.station).classList.remove('active');
+  getDot(S.station).classList.add('completed');
+  // Restore all dots between target and current as completed
+  for(let i=targetIdx+1;i<currentIdx;i++){
+    const d=getDot(ORDER[i]);if(d){d.classList.remove('active');d.classList.add('completed');}
+  }
+  getStation(target).classList.add('active');
+  const td=getDot(target);if(td){td.classList.remove('completed');td.classList.add('active');}
+  S.station=target;
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateInstructor();
+}
+function getStation(id){return document.getElementById('station-'+(id==='7b'?'7b':id))}
+function getDot(id){return document.getElementById('dot-'+(id==='7b'?'7b':id))}
+
+function onEnter(id){
+  if(id===4)initHypo4();
+  if(id===5){
+    const ps=document.getElementById('power-slider');if(ps)updatePower(ps.value,false);
+  }
+  if(id===6)initS6();
+  if(id===7)initS7();
+  if(id==='7b')initS7b();
+  if(id===9)initDebrief();
+}
+
+// ── Instructor mode ──
+function toggleInstructor(){
+  S.instructor=!S.instructor;
+  const btn=document.getElementById('gear-btn');
+  btn.classList.toggle('active',S.instructor);
+  // Swap icon: wand-2 (wizard) when active, settings when not
+  const icon=document.getElementById('gear-icon');
+  icon.setAttribute('data-lucide', S.instructor ? 'wand-2' : 'settings');
+  lucide.createIcons({nodes:[icon]});
+  updateInstructor();
+}
+function updateInstructor(){
+  const banner=document.getElementById('instructor-banner');
+  const ctrls=document.getElementById('instructor-controls');
+  banner.classList.toggle('show',S.instructor);
+  ctrls.classList.toggle('show',S.instructor);
+  if(S.instructor)highlightCorrect(); else clearHighlight();
+  if(S.station===9&&S.instructor)document.getElementById('disc-questions').style.display='block';
+}
+function highlightCorrect(){
+  clearHighlight();
+  const station=getStation(S.station);
+  if(!station)return;
+  station.querySelectorAll('.choice-card[data-correct="true"]').forEach(c=>c.classList.add('instr-highlight'));
+  const tiles=station.querySelectorAll('.tile');
+  // For hypo builders, the correct tiles are ≤ (for s4) and ≥ (for 7b)
+}
+function clearHighlight(){
+  document.querySelectorAll('.instr-highlight').forEach(c=>c.classList.remove('instr-highlight'));
+}
+function revealAnswer(){
+  const station=getStation(S.station);
+  if(!station)return;
+  const correct=station.querySelector('.choice-card[data-correct="true"]');
+  if(correct){correct.click()}
+  // Handle hypothesis builders
+  if(S.station===4)autoHypo4();
+  if(S.station==='7b')autoHypo7b();
+}
+function autoHypo4(){
+  // Auto-fill: H₀ op=≤, H₀ val=LB (h1s2 auto-fills), H₁ op=>
+  resetHypoSlots('4');
+  const lb=S.lb;
+  placeTileValue('≤','4');      // H₀ operator → h0s1
+  placeTileValue(lb+' Nm','4'); // H₀ value → h0s2, triggers h1s2 auto-fill
+  placeTileValue('>','4');      // H₁ operator → h1s1
+}
+function autoHypo7b(){
+  resetHypoSlots('7b');
+  placeTileValue('≥','7b'); // operator only; value is auto-filled from spec
+}
+
+// ── Choice cards ──
+function selectCard(card,groupId,revealFb){
+  const group=document.getElementById(groupId+'-choices');
+  if(!group)return;
+  group.querySelectorAll('.choice-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  if(revealFb)doRevealFeedback(group,card);
+  handleCardSideEffect(groupId,card);
+}
+function doRevealFeedback(group,selected){
+  // Only show feedback for the selected card
+  group.querySelectorAll('.choice-card').forEach(c=>{
+    c.classList.remove('correct-answer','wrong-answer');
+    const fb=c.querySelector('.choice-feedback');if(fb)fb.classList.remove('show');
+  });
+  const fb=selected.querySelector('.choice-feedback');if(fb)fb.classList.add('show');
+  if(selected.dataset.correct==='true'){
+    selected.classList.add('correct-answer');
+  }else{
+    selected.classList.add('wrong-answer');
+  }
+}
+function handleCardSideEffect(groupId,card){
+  const isCorrect=card.dataset.correct==='true';
+  if(groupId==='s1'){
+    doRevealFeedback(document.getElementById('s1-choices'),card);
+    if(isCorrect)document.getElementById('s1-continue').disabled=false;
+  }
+  if(groupId==='s6'){
+    doRevealFeedback(document.getElementById('s6-choices'),card);
+    updateS6Feedback();
+    if(isCorrect)document.getElementById('s6-continue').disabled=false;
+  }
+  if(groupId==='s7'){
+    doRevealFeedback(document.getElementById('s7-choices'),card);
+    if(isCorrect){S.s7ans=true;setTimeout(()=>{document.getElementById('plot-twist').classList.add('show')},700);}
+    checkS7Continue();
+  }
+  if(groupId==='s7b'){
+    doRevealFeedback(document.getElementById('s7b-choices'),card);
+    if(isCorrect){S.s7bans=true;checkS7Continue();}
+  }
+  if(groupId==='s7c'){
+    doRevealFeedback(document.getElementById('s7c-choices'),card);
+    if(isCorrect){
+      S.s7cans=true;
+      document.getElementById('tost-callout').style.display='block';
+      setTimeout(()=>{
+        document.getElementById('tost-c1').classList.add('show');
+        setTimeout(()=>{
+          document.getElementById('tost-c2').classList.add('show');
+          setTimeout(()=>{document.getElementById('tost-result').classList.add('show');},500);
+        },600);
+      },300);
+      checkS7bContinue();
+    }
+  }
+  if(groupId==='rc1'||groupId==='rc2'||groupId==='rc3'){
+    doRevealFeedback(document.getElementById(groupId+'-choices'),card);
+    if(isCorrect){
+      if(groupId==='rc1')unlockRC(2);
+      if(groupId==='rc2')unlockRC(3);
+      if(groupId==='rc3')enableS8Continue();
+    }
+  }
+}
+function checkS7Continue(){
+  if(S.s7ans&&S.s7bans){document.getElementById('s7-continue').disabled=false}
+}
+function checkS7bContinue(){
+  if(S.s7cans){document.getElementById('s7b-continue').disabled=false}
+}
+
+// ── Station 2: FMEA ──
+function openFmeaPanel(row){
+  document.getElementById('fmea-panel-'+row).classList.add('show');
+}
+function selectFmea(row,card,isCorrect){
+  const panel=document.getElementById('fmea-panel-'+row);
+  panel.querySelectorAll('.choice-card').forEach(c=>{
+    const fb=c.querySelector('.choice-feedback');if(fb)fb.classList.add('show');
+    if(c.dataset.correct==='true')c.classList.add('correct-answer');
+    else if(c===card&&!isCorrect)c.classList.add('wrong-answer');
+  });
+  card.classList.add('selected');
+  const cell=document.getElementById('fmea-r'+row+'-cell');
+  const lbl={1:{A:'Usability only',B:'Safety only',C:'Both thresholds ✓'},2:{A:'Usability/Safety ✓',B:'Preference',C:'No consequence'}};
+  cell.innerHTML='<span style="font-size:var(--text-xs);color:'+(isCorrect?'var(--color-success)':'var(--color-amber)')+';font-weight:600">'+lbl[row][card.dataset.choice||card.querySelector('.choice-label').textContent.charAt(0)]+'</span>';
+  if(row===1){
+    S.fmea1=true;
+    const r2=document.getElementById('fmea-r2-btn');r2.disabled=false;r2.style.opacity='1';
+  }
+  if(row===2){
+    S.fmea2=true;
+    document.getElementById('fmea-callout').style.display='block';
+    document.getElementById('s2-continue').disabled=false;
+  }
+}
+
+// Attach data-choice from label for FMEA cards
+document.querySelectorAll('#fmea-panel-1 .choice-card, #fmea-panel-2 .choice-card').forEach((c,i)=>{
+  c.dataset.choice=['A','B','C'][i];
+});
+
+// ── Station 3: Sliders + Number Line ──
+function updateLB(idx){
+  const v=LB_VALS[+idx];S.lb=v;
+  document.getElementById('lb-display').textContent=v+' Nm';
+  const fb=document.getElementById('lb-fb');
+  if(v<8){fb.className='sfb sfb-red';fb.textContent='⚠ Below clinical safety floor (8 Nm) — cannot proceed. Raise the lower bound.'}
+  else if(v===8){fb.className='sfb sfb-green';fb.textContent='✓ 8 Nm — anchored to clinical literature threshold. Lower bound justified.'}
+  else{fb.className='sfb sfb-amber';fb.textContent='⚠ Above 8 Nm — ensure this threshold is clinically justified, not statistical convenience.'}
+  drawNL3();checkS3();syncSidebar();
+}
+function updateUB(idx){
+  const v=UB_VALS[+idx];S.ub=v;
+  document.getElementById('ub-display').textContent=v+' Nm';
+  const fb=document.getElementById('ub-fb');
+  if(v<=11){fb.className='sfb sfb-amber';fb.textContent='⚠ Below reasonable clinical ceiling'}
+  else if(v<=13){fb.className='sfb sfb-green';fb.textContent='✓ Below 95th percentile human factors threshold (14 Nm)'}
+  else if(v<=14){fb.className='sfb sfb-amber';fb.textContent='⚠ Borderline — at or near the human factors limit (14 Nm)'}
+  else{fb.className='sfb sfb-red';fb.textContent='⚠ Exceeds 95th percentile release force — unsafe upper bound'}
+  drawNL3();checkS3();syncSidebar();
+}
+function checkS3(){
+  const cont=document.getElementById('s3-continue');
+  if(S.lb<8){cont.disabled=true;return;}
+  if(S.lb>=8&&S.ub>=11&&S.ub<=15&&S.ub>S.lb){cont.disabled=false;}
+  else{cont.disabled=true;}
+}
+function drawNL3(){
+  const svg=document.getElementById('nl-svg-3');if(!svg)return;
+  const W=500,H=60,MIN=5,MAX=18;
+  const sc=x=>20+(x-MIN)/(MAX-MIN)*(W-40);
+  const lb=S.lb,ub=S.ub;
+  svg.innerHTML=`
+    <rect x="20" y="28" width="${W-40}" height="4" fill="var(--color-surface-offset)" rx="2"/>
+    <rect x="20" y="28" width="${Math.max(0,sc(lb)-20)}" height="4" fill="var(--color-error)" rx="2" opacity=".7"/>
+    <rect x="${sc(lb)}" y="22" width="${Math.max(0,sc(ub)-sc(lb))}" height="16" fill="var(--color-success)" rx="2" opacity=".4"/>
+    <rect x="${sc(ub)}" y="28" width="${Math.max(0,W-40-(sc(ub)-20))}" height="4" fill="var(--color-error)" rx="2" opacity=".7"/>
+    <rect x="${sc(lb)-1}" y="16" width="2" height="28" fill="var(--color-success)" rx="1"/>
+    <rect x="${sc(ub)-1}" y="16" width="2" height="28" fill="var(--color-amber)" rx="1"/>
+    <circle cx="${sc(10)}" cy="30" r="3" fill="var(--color-primary)" opacity=".8"/>
+    <text x="${sc(lb)}" y="55" text-anchor="middle" font-size="9" fill="var(--color-success)" font-family="Inter">${lb}</text>
+    <text x="${sc(ub)}" y="55" text-anchor="middle" font-size="9" fill="var(--color-amber)" font-family="Inter">${ub}</text>
+    <text x="${sc(10)}" y="13" text-anchor="middle" font-size="8" fill="var(--color-primary)" font-family="Inter">pred.</text>
+    <text x="22" y="55" font-size="8" fill="var(--color-error)" font-family="Inter">Too weak</text>
+    <text x="${sc(ub)+4}" y="55" font-size="8" fill="var(--color-error)" font-family="Inter">Too stiff</text>`;
+}
+
+// ── Station 4: Hypothesis Builder ──
+function initHypo4(){
+  const lb=S.lb;
+  document.getElementById('s4-lb-ref').textContent=lb+' Nm';
+  // Reset operator slots only; h0s2 is the value slot; h1s2 is display-only auto-fill
+  ['h0s1','h0s2','h1s1'].forEach(id=>{const s=document.getElementById(id);s.textContent='?';s.dataset.value='';s.classList.remove('filled')});
+  const h1s2=document.getElementById('h1s2');h1s2.textContent='—';h1s2.dataset.value='';h1s2.classList.remove('filled');
+  const pool=document.getElementById('tile-pool-4');pool.innerHTML='';
+  // Operators only — value for H₀ comes from value tiles; H₁ value auto-fills
+  const ops=['≤','≥','>','<','=','≠'];
+  const vals=[lb-1,lb-0.5,lb,lb+0.5,lb+1].filter(v=>v>0);
+  [...ops,...vals].forEach(t=>{
+    const tile=document.createElement('button');tile.className='tile';
+    tile.textContent=(typeof t==='number'?t+' Nm':t);tile.dataset.value=(typeof t==='number'?t+' Nm':t);
+    tile.onclick=()=>placeTileInSlots(tile,'4');pool.appendChild(tile);
+  });
+  S.h0op=null;S.h0val=null;S.h1op=null;S.h1val=null;
+}
+function resetHypoSlots(builder){
+  if(builder==='4'){
+    ['h0s1','h0s2','h1s1'].forEach(id=>{const s=document.getElementById(id);s.textContent='?';s.dataset.value='';s.classList.remove('filled')});
+    // Clear auto-fill display slot
+    const h1s2=document.getElementById('h1s2');h1s2.textContent='—';h1s2.dataset.value='';h1s2.classList.remove('filled');
+    document.querySelectorAll('#tile-pool-4 .tile').forEach(t=>t.classList.remove('used'));
+    S.h0op=null;S.h0val=null;S.h1op=null;S.h1val=null;
+  }else{
+    // Only reset operator slot; re-fill value slot with spec
+    const h7bs1=document.getElementById('h7bs1');h7bs1.textContent='?';h7bs1.dataset.value='';h7bs1.classList.remove('filled');
+    const h7bs2=document.getElementById('h7bs2');const ubStr=S.ub+' Nm';h7bs2.textContent=ubStr;h7bs2.dataset.value=ubStr;h7bs2.classList.add('filled');
+    document.querySelectorAll('#tile-pool-7b .tile').forEach(t=>t.classList.remove('used'));
+    S.h7bop=null;S.h7bval=null;
+  }
+}
+function placeTileValue(val,builder){
+  const pool=document.getElementById('tile-pool-'+builder);
+  if(!pool)return;
+  const tile=Array.from(pool.querySelectorAll('.tile')).find(t=>t.dataset.value===String(val));
+  if(tile&&!tile.classList.contains('used'))placeTileInSlots(tile,builder);
+}
+function placeTileInSlots(tile,builder){
+  if(tile.classList.contains('used'))return;
+  let slot=null;
+  if(builder==='4'){
+    const isOp=['≤','≥','>','<','=','≠'].includes(tile.dataset.value);
+    if(isOp){
+      // Fill H₀ operator first, then H₁ operator
+      const opSlots=['h0s1','h1s1'];
+      slot=opSlots.map(id=>document.getElementById(id)).find(s=>s&&!s.dataset.value);
+    }else{
+      // Value tile — only goes to h0s2; h1s2 auto-fills
+      const h0s2=document.getElementById('h0s2');
+      if(!h0s2.dataset.value)slot=h0s2;
+    }
+  }else if(builder==='7b'){
+    // Only operator slot h7bs1 is interactive; h7bs2 auto-fills
+    const h7bs1=document.getElementById('h7bs1');
+    if(!h7bs1.dataset.value)slot=h7bs1;
+  }
+  if(!slot)return;
+  slot.textContent=tile.dataset.value;slot.dataset.value=tile.dataset.value;
+  slot.classList.add('filled');tile.classList.add('used');
+  if(builder==='4'){
+    // Auto-fill h1s2 with same value as h0s2 whenever h0s2 has a value
+    const h0s2=document.getElementById('h0s2');
+    const h1s2=document.getElementById('h1s2');
+    if(h0s2.dataset.value){
+      h1s2.textContent=h0s2.textContent;h1s2.dataset.value=h0s2.dataset.value;h1s2.classList.add('filled');
+    }
+    checkHypo4();
+  }else{
+    // Auto-fill h7bs2 with spec value on init — handled in initS7b, just check here
+    checkHypo7b();
+  }
+}
+function returnTile(slot,builder){
+  if(!slot.dataset.value)return;
+  // Block returning auto-fill display-only slots
+  if(slot.classList.contains('hypo-slot-auto'))return;
+  const val=slot.dataset.value;
+  const pool=document.getElementById('tile-pool-'+builder);
+  if(pool){const tile=Array.from(pool.querySelectorAll('.tile')).find(t=>t.dataset.value===val);if(tile)tile.classList.remove('used')}
+  slot.textContent='?';slot.dataset.value='';slot.classList.remove('filled');
+  // If H₀ value is returned in Station 4, clear the H₁ auto-fill
+  if(builder==='4'&&slot.id==='h0s2'){
+    const h1s2=document.getElementById('h1s2');
+    h1s2.textContent='—';h1s2.dataset.value='';h1s2.classList.remove('filled');
+  }
+  if(builder==='4')checkHypo4();else checkHypo7b();
+}
+function checkHypo4(){
+  const h0s1=document.getElementById('h0s1'),h0s2=document.getElementById('h0s2'),h1s1=document.getElementById('h1s1');
+  // h1s2 auto-fills — only need h0s1, h0s2, h1s1 to be filled
+  if(![h0s1,h0s2,h1s1].every(x=>x&&x.dataset.value)){document.getElementById('hypo-sent-4').textContent='Select an operator for H₀, place the value, then choose an operator for H₁.';return}
+  const h0op=h0s1.dataset.value,h0val=parseFloat(h0s2.dataset.value),h1op=h1s1.dataset.value,h1val=h0val;
+  const lb=S.lb;
+  const correct=(h0op==='≤'&&h0val===lb&&(h1op==='>'||h1op==='≥')&&h1val===lb);
+  let msg='';
+  if(correct){
+    msg=`H₀: μ ≤ ${lb} Nm — The device's mean force is AT OR BELOW the lower bound (failure).\nH₁: μ > ${lb} Nm — The device's mean force EXCEEDS the lower bound (success).`;
+    document.getElementById('s4-continue').disabled=false;
+    document.getElementById('bell-4').style.display='block';
+    document.getElementById('s4-callout').style.display='block';
+    S.h0op=h0op;S.h0val=h0val;S.h1op=h1op;S.h1val=h1val;
+    sbSet('sb-test-type','One-sample, one-tailed z-test');
+  }else{
+    document.getElementById('s4-continue').disabled=true;
+    document.getElementById('bell-4').style.display='none';
+    document.getElementById('s4-callout').style.display='none';
+    if(h1op==='≤'||h1op==='<')msg='⚠ H₀ should represent the failure scenario. You want to disprove it — reverse your operators.';
+    else if(h0op==='='||h0op==='≠')msg='⚠ For a directional safety spec, one-tailed framing is correct. Use ≤ for H₀ and > for H₁.';
+    else msg='⚠ Check operators. H₀ should be ≤ (failure scenario) and H₁ should be > (success).';
+  }
+  document.getElementById('hypo-sent-4').textContent=msg;
+}
+
+// ── Station 5: Alpha + Power ──
+function selectAlpha(btn){
+  document.querySelectorAll('#alpha-pills .pill-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const val=parseFloat(btn.dataset.val);S.alpha=val;S.alphaSet=true;
+  const fb=document.getElementById('alpha-fb');
+  if(val===.05){fb.className='sfb sfb-green';fb.textContent='α = 0.05 — medical device convention, aligns with FDA expectations. This value will be used going forward.'}
+  else if(val===.10){fb.className='sfb sfb-amber';fb.textContent='⚠ Too permissive for Severity 9. Simulation will use 0.05 going forward.'}
+  else{fb.className='sfb sfb-amber';fb.textContent='⚠ Reserved for Class III devices — drives very large sample sizes. Simulation will use 0.05 going forward.'}
+  const t1=document.getElementById('em-t1');t1.style.transform='scale(1.03)';setTimeout(()=>t1.style.transform='',400);
+  checkS5Continue();
+}
+function checkS5Continue(){
+  if(S.alphaSet)document.getElementById('s5-continue').disabled=false;
+}
+function updatePower(idx,syncS6=true){
+  const pow=POW_STEPS[+idx];S.power=pow;
+  const pct=Math.round(pow*100),bpct=Math.round((1-pow)*100);
+  document.getElementById('power-display').textContent=pct+'%';
+  document.getElementById('power-plain').textContent=pct+'%';
+  document.getElementById('beta-plain').textContent=bpct+'%';
+  document.getElementById('em-t2-desc').textContent='β = 1 − power = '+bpct+'%';
+  const fb=document.getElementById('power-fb');
+  if(pow<.75){fb.className='sfb sfb-red';fb.textContent='⚠ 1-in-'+Math.round(1/(1-pow))+' miss rate — too risky for Severity 9'}
+  else if(pow<=.80){fb.className='sfb sfb-amber';fb.textContent='⚠ Borderline — document justification in the DHF'}
+  else if(pow<=.90){fb.className='sfb sfb-green';fb.textContent='✓ Appropriate for this risk level (N ≈ 25–35)'}
+  else{fb.className='sfb sfb-amber';fb.textContent='⚠ Class III territory — sample sizes climb steeply'}
+  if(syncS6){const s6=document.getElementById('s6-power-slider');if(s6)s6.value=idx}
+  document.getElementById('s5-continue').disabled=false;
+  syncSidebar();
+}
+
+// ── Station 6: Sample Size ──
+function initS6(){
+  document.getElementById('s6-power-ref').textContent=Math.round(S.power*100)+'%';
+  document.getElementById('s6-mu0-ref').textContent=S.lb+' Nm';
+  document.getElementById('s6-mu1-ref').textContent=MU1+' Nm';
+  const idx=POW_STEPS.indexOf(S.power);
+  const s6=document.getElementById('s6-power-slider');if(s6&&idx>=0)s6.value=idx;
+  updateS6Power(idx>=0?idx:3);
+}
+function updateS6Power(idx){
+  const pow=POW_STEPS[+idx];S.power=pow;
+  const n=calcN(pow,S.lb);S.n=n;
+  document.getElementById('calc-n').textContent=n;
+  const zb=normalInv(pow).toFixed(2);
+  const delta=(MU1-S.lb).toFixed(1);
+  document.getElementById('s6-formula').innerHTML=
+    `N = ⌈ (z<sub>α</sub> + z<sub>β</sub>)² × σ² / (μ₁ − μ₀)² ⌉<br>`+
+    `N = ⌈ (${Z_A.toFixed(4)} + ${zb})² × ${SIGMA}² / ${delta}² ⌉ = <strong>${n}</strong>`;
+  const ap=calcPow15(S.lb);
+  document.getElementById('achieved-power').textContent=(ap*100).toFixed(1)+'%'+(ap<pow?' (below target)':' ✓');
+  updateS6Feedback();
+  syncSidebar();
+}
+function updateS6Feedback(){
+  const n=S.n;if(!n)return;
+  const aEl=document.getElementById('s6a-fb'),bEl=document.getElementById('s6b-fb'),cEl=document.getElementById('s6c-fb');
+  const cards=document.querySelectorAll('#s6-choices .choice-card');
+  if(n<=15){
+    cards[0].dataset.correct='true';
+    if(aEl){aEl.className='choice-feedback fb-green';aEl.textContent='✓ N = '+n+' ≤ 15. You have sufficient samples to meet the required N.'}
+    cards[1].dataset.correct='false';
+    if(bEl){bEl.className='choice-feedback fb-amber';bEl.textContent='⚠ N = '+n+' ≤ 15 — you do not need more samples.'}
+    cards[2].dataset.correct='false';
+    if(cEl){cEl.className='choice-feedback fb-amber';cEl.textContent='⚠ N = '+n+' ≤ 15 — no deviation to document. Proceed.'}
+  }else{
+    cards[0].dataset.correct='false';
+    if(aEl){aEl.className='choice-feedback fb-amber';aEl.textContent='⚠ N = '+n+' > 15. 15 samples gives insufficient power. Document the deviation or get more.'}
+    cards[1].dataset.correct='true';
+    if(bEl){bEl.className='choice-feedback fb-green';bEl.textContent='✓ N = '+n+' > 15. Negotiating for adequate samples is the right path.'}
+    cards[2].dataset.correct='true';
+    if(cEl){cEl.className='choice-feedback fb-green';cEl.textContent='✓ If negotiation fails, formally documenting reduced power in the risk file is acceptable — with explicit acknowledgment.'}
+  }
+}
+
+// ── Station 7: Lower Bound Results ──
+function initS7(){
+  const n=S.n||20;const ci=calcCI(n);const t=calcT(S.lb,n);
+  document.getElementById('s7-n-row').textContent=n;
+  document.getElementById('s7-h0-row').textContent='μ ≤ '+S.lb+' Nm';
+  document.getElementById('s7-tstat-row').textContent=t;
+  document.getElementById('s7-ci-row').textContent='['+ci.lo+', '+ci.hi+'] Nm';
+  drawNL7(ci,S.lb);
+}
+function drawNL7(ci,lb){
+  const svg=document.getElementById('nl-svg-7');if(!svg)return;
+  const W=500,H=70,MIN=5,MAX=18;
+  const sc=x=>25+(x-MIN)/(MAX-MIN)*(W-50);
+  const lbX=sc(lb),ciLoX=sc(+ci.lo),ciHiX=sc(+ci.hi),xbarX=sc(XBAR);
+  svg.innerHTML=`
+    <rect x="25" y="32" width="${W-50}" height="4" fill="var(--color-surface-offset)" rx="2"/>
+    <rect x="${lbX-1}" y="20" width="2" height="28" fill="var(--color-primary)" rx="1"/>
+    <line x1="${ciLoX}" y1="34" x2="${ciHiX}" y2="34" stroke="var(--color-success)" stroke-width="3"/>
+    <rect x="${ciLoX-1}" y="26" width="2" height="16" fill="var(--color-success)" rx="1"/>
+    <rect x="${ciHiX-1}" y="26" width="2" height="16" fill="var(--color-success)" rx="1"/>
+    <circle cx="${xbarX}" cy="34" r="5" fill="var(--color-success)"/>
+    <text x="${lbX}" y="16" text-anchor="middle" font-size="9" fill="var(--color-primary)" font-family="Inter">Spec limit ${lb} Nm</text>
+    <text x="${ciLoX}" y="56" text-anchor="middle" font-size="8" fill="var(--color-success)" font-family="Inter">${ci.lo}</text>
+    <text x="${ciHiX}" y="56" text-anchor="middle" font-size="8" fill="var(--color-success)" font-family="Inter">${ci.hi}</text>
+    <text x="${xbarX}" y="56" text-anchor="middle" font-size="8" fill="var(--color-success)" font-family="Inter">x̄</text>
+    <text x="${(ciLoX+ciHiX)/2}" y="66" text-anchor="middle" font-size="8" fill="var(--color-success)" font-family="Inter">95% CI — entirely above spec limit ✓</text>`;
+}
+
+// ── Station 7B: TOST / Upper Bound ──
+function initS7b(){
+  const ub=S.ub;
+  document.getElementById('s7b-ub-ref').textContent=ub+' Nm';
+  const pool=document.getElementById('tile-pool-7b');pool.innerHTML='';
+  // Operators only — value auto-fills from spec
+  const ops=['≤','≥','>','<','=','≠'];
+  ops.forEach(t=>{
+    const tile=document.createElement('button');tile.className='tile';
+    tile.textContent=t;tile.dataset.value=t;
+    tile.onclick=()=>placeTileInSlots(tile,'7b');pool.appendChild(tile);
+  });
+  // Reset operator slot
+  const h7bs1=document.getElementById('h7bs1');h7bs1.textContent='?';h7bs1.dataset.value='';h7bs1.classList.remove('filled');
+  // Auto-fill value slot immediately with spec
+  const h7bs2=document.getElementById('h7bs2');
+  const ubStr=ub+' Nm';
+  h7bs2.textContent=ubStr;h7bs2.dataset.value=ubStr;h7bs2.classList.add('filled');
+  S.h7bop=null;S.h7bval=null;
+}
+function checkHypo7b(){
+  const h7bs1=document.getElementById('h7bs1'),h7bs2=document.getElementById('h7bs2');
+  if(!h7bs1.dataset.value){document.getElementById('hypo-sent-7b').textContent='Select an operator for the upper bound hypothesis.';return}
+  const op=h7bs1.dataset.value,val=parseFloat(h7bs2.dataset.value);
+  const ub=S.ub;
+  const correct=(op==='≥'&&val===ub);
+  let msg='';
+  if(correct){
+    msg=`H₀: μ ≥ ${ub} Nm — The device's mean force is AT OR ABOVE the upper bound (too stiff — failure).`;
+    S.h7bop=op;S.h7bval=val;
+    // Show report and choices
+    const n=S.n||20;
+    const t=calcTUB(ub,n);
+    document.getElementById('s7b-h0-row').textContent='μ ≥ '+ub+' Nm';
+    document.getElementById('s7b-tstat-row').textContent=t;
+    document.getElementById('s7b-report').style.display='block';
+    document.getElementById('s7c-choices').style.display='flex';
+    document.getElementById('s7c-choices').style.flexDirection='column';
+  }else{
+    msg='⚠ Mirror the lower bound structure. For the upper bound, H₀ is ≥ (the device is too stiff). You want to disprove that.';
+    document.getElementById('s7b-report').style.display='none';
+    document.getElementById('s7c-choices').style.display='none';
+  }
+  document.getElementById('hypo-sent-7b').textContent=msg;
+}
+
+// ── Station 8 unlock sequence ──
+function unlockRC(n){
+  const block=document.getElementById('rc-block-'+n);
+  if(block){block.classList.remove('locked');if(n===2){const sp=document.getElementById('rc2-lb-text');if(sp)sp.textContent=S.lb}}
+}
+function enableS8Continue(){
+  document.getElementById('s8-continue').disabled=false;
+}
+
+// ── Station 9: Debrief ──
+function initDebrief(){
+  // Populate flowchart values
+  document.getElementById('fn2-val').textContent=S.lb+' Nm';
+  document.getElementById('fn3-val').textContent=S.ub+' Nm';
+  document.getElementById('fn4-val').textContent=S.lb;
+  document.getElementById('fn5-val').textContent=S.ub;
+  document.getElementById('fn6-val').textContent=Math.round(S.power*100)+'%';
+  document.getElementById('fn7-val').textContent=S.n||'N/A';
+  // Animate flowchart
+  const nodes=['fn1','fn2','fn3','fa1','fn4','fn5','fa2','fn6','fa3','fn8','fn9','fa4','fa5','fn10'];
+  nodes.forEach((id,i)=>setTimeout(()=>{const el=document.getElementById(id);if(el)el.classList.add('vis')},i*200));
+  // Show discussion if instructor
+  if(S.instructor)document.getElementById('disc-questions').style.display='block';
+}
+
+// ── Export ──
+function exportReport(){
+  const n=S.n||20;const ci=calcCI(n);
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Test Plan Summary</title>
+  <style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:20px;color:#1a1a1a}
+  h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;color:#444;margin:24px 0 8px}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  td,th{padding:8px 12px;border:1px solid #ddd;font-size:13px}th{background:#f5f5f5;font-weight:600}
+  .pass{color:#166534;font-weight:bold}.title-bar{background:#1e1b4b;color:white;padding:16px 20px;border-radius:8px;margin-bottom:24px}
+  @media print{body{margin:0;padding:16px}}</style></head><body>
+  <div class="title-bar"><h1>The Retractor Protocol — Test Plan Summary</h1><p style="margin:4px 0 0;opacity:.8">Generated ${new Date().toLocaleDateString()} | 510(k) V&amp;V Documentation</p></div>
+  <h2>Device Information</h2>
+  <table><tr><th>Device</th><td>Cam-Lock Surgical Retractor</td></tr><tr><th>Pathway</th><td>510(k) — Substantial Equivalence</td></tr><tr><th>Test Type</th><td>One-sample, one-tailed z-test (TOST for equivalence)</td></tr></table>
+  <h2>Acceptance Criteria</h2>
+  <table><tr><th>Lower Bound Spec (μ₀)</th><td>${S.lb} Nm (clinical literature threshold)</td></tr><tr><th>Upper Bound Spec</th><td>${S.ub} Nm (95th percentile release force, human factors study)</td></tr></table>
+  <h2>Statistical Parameters</h2>
+  <table><tr><th>Significance Level (α)</th><td>0.05</td></tr><tr><th>Power (1 − β)</th><td>${Math.round(S.power*100)}%</td></tr><tr><th>Beta (β)</th><td>${Math.round((1-S.power)*100)}%</td></tr><tr><th>Sigma (σ)</th><td>1.2 Nm (from feasibility testing)</td></tr><tr><th>Required N</th><td>${n}</td></tr></table>
+  <h2>Hypotheses</h2>
+  <table><tr><th>Lower Bound H₀</th><td>μ ≤ ${S.lb} Nm</td></tr><tr><th>Lower Bound H₁</th><td>μ > ${S.lb} Nm</td></tr><tr><th>Upper Bound H₀</th><td>μ ≥ ${S.ub} Nm</td></tr><tr><th>Upper Bound H₁</th><td>μ < ${S.ub} Nm</td></tr></table>
+  <h2>Test Results (TOST)</h2>
+  <table><tr><th>Sample Mean</th><td>10.3 Nm</td></tr><tr><th>Sample SD</th><td>1.1 Nm</td></tr><tr><th>95% CI</th><td>[${ci.lo}, ${ci.hi}] Nm</td></tr>
+  <tr><th>Lower Bound Result</th><td class="pass">PASS — p = 0.003 &lt; α = 0.05</td></tr>
+  <tr><th>Upper Bound Result</th><td class="pass">PASS — p &lt; 0.001 &lt; α = 0.05</td></tr>
+  <tr><th>Overall Conclusion</th><td class="pass">Equivalence Established — device performs within ${S.lb}–${S.ub} Nm specification window at 95% CI</td></tr></table>
+  <p style="font-size:12px;color:#666;margin-top:32px">This test plan summary was generated by The Retractor Protocol simulation. All values are student-selected inputs from the simulation exercise.</p>
+  </body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),300);
+}
+
+// ── Mobile sidebar ──
+function toggleMobileSidebar(){
+  const sb=document.getElementById('sidebar');
+  const btn=document.getElementById('sidebar-toggle');
+  const isOpen=sb.style.display==='none'||(!sb.style.display&&!sb.classList.contains('open'));
+  if(isOpen){sb.style.display='';sb.classList.add('open');btn.style.display='none';}
+  else{sb.classList.remove('open');sb.style.display='none';btn.style.display='flex';}
+}
+
+// ── Init ──
+function shuffleChoiceGroups(){
+  const groupIds=['s1-choices','s6-choices','s7-choices','s7b-choices','s7c-choices','rc1-choices','rc2-choices','rc3-choices'];
+  groupIds.forEach(id=>{
+    const group=document.getElementById(id);
+    if(!group)return;
+    // Only shuffle the .choice-card buttons, leave non-button children (p tags etc) in place
+    const cards=Array.from(group.querySelectorAll(':scope > .choice-card'));
+    if(cards.length<2)return;
+    // Fisher-Yates
+    for(let i=cards.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      if(i!==j){
+        const parent=cards[i].parentNode;
+        // swap using a placeholder
+        const tmp=document.createComment('tmp');
+        parent.insertBefore(tmp,cards[i]);
+        parent.insertBefore(cards[i],cards[j]);
+        parent.insertBefore(cards[j],tmp);
+        parent.removeChild(tmp);
+        // swap in array too
+        [cards[i],cards[j]]=[cards[j],cards[i]];
+      }
+    }
+  });
+  // Also shuffle FMEA inline panels
+  ['fmea-panel-1','fmea-panel-2'].forEach(id=>{
+    const panel=document.getElementById(id);
+    if(!panel)return;
+    const cards=Array.from(panel.querySelectorAll(':scope .choice-card'));
+    if(cards.length<2)return;
+    const parent=cards[0].parentNode;
+    for(let i=cards.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      if(i!==j){
+        const tmp=document.createComment('tmp');
+        parent.insertBefore(tmp,cards[i]);
+        parent.insertBefore(cards[i],cards[j]);
+        parent.insertBefore(cards[j],tmp);
+        parent.removeChild(tmp);
+        [cards[i],cards[j]]=[cards[j],cards[i]];
+      }
+    }
+  });
+}
+// ── Konami-style instructor unlock ──
+let keyBuffer="";
+document.addEventListener("keydown",(e)=>{
+  // Ignore when typing in inputs/textareas
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  keyBuffer+=e.key.toLowerCase();
+  keyBuffer=keyBuffer.slice(-5);
+  if(keyBuffer==="emcee"){toggleInstructor();keyBuffer="";}
+});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  lucide.createIcons();
+  shuffleChoiceGroups();
+  drawNL3();
+  updateLB(2);updateUB(4);
+  updatePower(3,false);
+  document.getElementById('s5-continue').disabled=false;
+});
+</script>
+</body></html>
