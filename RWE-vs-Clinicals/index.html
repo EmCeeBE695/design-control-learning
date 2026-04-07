@@ -1,1 +1,917 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RWE vs Trials Decision Simulator</title>
+    <style>
+        :root {
+            --color-bg-base: #0f172a;
+            --color-surface: #1e293b;
+            --color-text: #f1f5f9;
+            --color-accent: #38bdf8;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--color-bg-base);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 2rem;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--color-accent); margin: 2rem 0 1rem 0; }
+        h3 { font-size: 1.25rem; margin: 1.5rem 0 1rem 0; }
+        p { margin-bottom: 1rem; }
+
+        .intro-text {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background-color: var(--color-surface);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .device-card {
+            background-color: var(--color-bg-base);
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .device-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(56, 189, 248, 0.2);
+        }
+
+        .device-card.selected {
+            border-color: var(--color-accent);
+            background-color: rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+        }
+
+        .device-name { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.75rem; color: var(--color-accent); }
+        .device-example { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem; }
+        .device-factors { font-size: 0.85rem; line-height: 1.4; }
+        .factor-line { margin-bottom: 0.5rem; padding-left: 1rem; }
+        .factor-label { color: #94a3b8; font-weight: bold; }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-group {
+            background-color: var(--color-bg-base);
+            padding: 1.5rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--color-warning);
+        }
+
+        .control-label { font-weight: bold; margin-bottom: 0.75rem; display: block; }
+
+        input[type="range"] { width: 100%; margin-bottom: 0.5rem; accent-color: var(--color-accent); }
+
+        .value-display { color: var(--color-accent); font-size: 1.5rem; font-weight: bold; text-align: center; }
+        .small-label { font-size: 0.75rem; color: #94a3b8; text-align: center; margin-top: 0.5rem; }
+
+        .input-row { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+        .input-field { flex: 1; }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: var(--color-text);
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #334155;
+            background-color: transparent;
+            color: var(--color-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .btn.active { background-color: var(--color-accent); color: #0f172a; border-color: var(--color-accent); }
+
+        .guidance-box {
+            background-color: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--color-warning);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+
+        .guidance-title { font-weight: bold; color: var(--color-warning); margin-bottom: 0.5rem; }
+
+        .hidden { display: none; }
+
+        /* ── STEP 4: PATHWAY REVEAL CARDS ── */
+        .pathway-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pathway-card {
+            background-color: var(--color-bg-base);
+            border: 2px solid #334155;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .pathway-card.revealed {
+            border-color: var(--color-accent);
+        }
+
+        .pathway-header {
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+
+        .pathway-header:hover .reveal-btn {
+            background-color: var(--color-accent);
+            color: #0f172a;
+            border-color: var(--color-accent);
+        }
+
+        .pathway-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .pathway-subtitle {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+        }
+
+        .pathway-description {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .reveal-btn {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            background-color: transparent;
+            border: 1.5px solid var(--color-accent);
+            color: var(--color-accent);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .pathway-results {
+            border-top: 1px solid #334155;
+            padding: 1.5rem;
+            background-color: #0b1220;
+            animation: slideDown 0.25s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #1e293b;
+            font-size: 0.9rem;
+        }
+
+        .result-stat:last-of-type { border-bottom: none; }
+
+        .result-stat-label { color: #94a3b8; }
+
+        .result-stat-value {
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        .big-number {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0 0.25rem;
+            line-height: 1;
+        }
+
+        .big-number-label {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .divider { height: 1px; background-color: #1e293b; margin: 1rem 0; }
+
+        .verdict-box {
+            background-color: #1e293b;
+            border-radius: 6px;
+            padding: 0.85rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .verdict-title { font-weight: bold; margin-bottom: 0.35rem; font-size: 0.9rem; }
+
+        .highlight-positive { color: var(--color-success); }
+        .highlight-negative { color: var(--color-error); }
+        .highlight-warning  { color: var(--color-warning); }
+
+        /* ── COMPARISON TABLE (Step 5) ── */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        .comparison-table th {
+            background-color: #0f172a;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 2px solid #334155;
+            color: var(--color-accent);
+        }
+
+        .comparison-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:hover td { background-color: rgba(255,255,255,0.02); }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-good  { background-color: rgba(34,197,94,0.15); color: var(--color-success); }
+        .badge-bad   { background-color: rgba(239,68,68,0.15);  color: var(--color-error); }
+        .badge-mid   { background-color: rgba(245,158,11,0.15); color: var(--color-warning); }
+
+        .total-row { display: flex; gap: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>RWE vs Clinical Trials</h1>
+        <h3 style="color: #cbd5e1; margin: 1rem 0 0 0;">Interactive Decision Simulator</h3>
+        <p class="intro-text" style="margin-top: 1.5rem;">Choose a medical device, estimate your patient population and outcomes, then explore each approval pathway one at a time.</p>
+    </header>
+
+    <!-- STEP 1: DEVICE SELECTION -->
+    <section class="section">
+        <h2>Step 1: Choose a Device</h2>
+        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Click a device to begin. Each has different characteristics that affect regulatory strategy.</p>
+        <div class="device-grid" id="deviceGrid"></div>
+    </section>
+
+    <!-- STEP 2: PATIENT POPULATION -->
+    <section class="section hidden" id="step2">
+        <h2>Step 2: Define Your Patient Population</h2>
+        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Adjust the sliders — they automatically balance to 100%.</p>
+
+        <div class="controls-grid">
+            <div class="control-group">
+                <label class="control-label">Prohibitive Risk</label>
+                <input type="range" id="prohibitiveRisk" min="0" max="100" value="10" oninput="adjustSliders('prohibitive')">
+                <div class="value-display" id="prohibitiveValue">10%</div>
+                <div class="small-label">No alternative treatment available</div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">High Risk</label>
+                <input type="range" id="highRisk" min="0" max="100" value="25" oninput="adjustSliders('high')">
+                <div class="value-display" id="highValue">25%</div>
+                <div class="small-label">Device superior to alternatives</div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Intermediate Risk</label>
+                <input type="range" id="intermediateRisk" min="0" max="100" value="35" oninput="adjustSliders('intermediate')">
+                <div class="value-display" id="intermediateValue">35%</div>
+                <div class="small-label">Similar to alternatives</div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Low Risk</label>
+                <input type="range" id="lowRisk" min="0" max="100" value="30" oninput="adjustSliders('low')">
+                <div class="value-display" id="lowValue">30%</div>
+                <div class="small-label">Alternative may be better</div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:1rem;">
+            <span style="font-size:0.9rem; color:#94a3b8;">Total:</span>
+            <span id="totalDisplay" style="font-size:1.1rem; font-weight:bold; color:var(--color-accent);">100%</span>
+            <span id="totalWarning" style="font-size:0.85rem; color:var(--color-error); display:none;">⚠ Auto-adjusting…</span>
+        </div>
+
+        <div class="guidance-box">
+            <div class="guidance-title">💡 How sliders work:</div>
+            <div>Moving one slider proportionally rescales the others to keep the total at 100%. This mirrors how real patient populations work — changing one group's share automatically shifts the others.</div>
+        </div>
+    </section>
+
+    <!-- STEP 3: MORTALITY OUTCOMES -->
+    <section class="section hidden" id="step3">
+        <h2>Step 3: Set Adverse Event Rates</h2>
+        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">For each risk category, enter the 1-year adverse event rate (%) for your device vs. the current standard of care.</p>
+        <div id="mortalityControls" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;"></div>
+        <div class="guidance-box">
+            <div class="guidance-title">💡 Guidance:</div>
+            <div id="mortalityGuidance"></div>
+        </div>
+        <button class="btn" id="proceedBtn" onclick="proceedToPathway()" style="margin-top:1.5rem; padding:1rem 2rem; font-size:1.05rem;">
+            Proceed to Pathway Comparison →
+        </button>
+    </section>
+
+    <!-- STEP 4: PATHWAY REVEAL CARDS -->
+    <section class="section hidden" id="step4">
+        <h2>Step 4: Compare Approval Pathways</h2>
+        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Click each pathway to reveal its outcomes. Results stay visible so you can compare all three side by side.</p>
+
+        <div class="pathway-grid">
+
+            <!-- RWE -->
+            <div class="pathway-card" id="pathway-rwe">
+                <div class="pathway-header" onclick="revealPathway('rwe')">
+                    <div class="pathway-title">RWE Pathway</div>
+                    <div class="pathway-subtitle">Fast approval, real-world evidence</div>
+                    <div class="pathway-description">Approve immediately using registry data. All patients receive the device from day one.</div>
+                    <div class="reveal-btn" id="btn-rwe">See Outcomes ↓</div>
+                </div>
+                <div class="pathway-results hidden" id="results-rwe"></div>
+            </div>
+
+            <!-- Clinical Trial -->
+            <div class="pathway-card" id="pathway-trial">
+                <div class="pathway-header" onclick="revealPathway('trial')">
+                    <div class="pathway-title">Clinical Trial</div>
+                    <div class="pathway-subtitle">Slower, controlled evidence</div>
+                    <div class="pathway-description">Require a 4-year prospective RCT. Patients wait; prohibitive-risk patients have no alternative.</div>
+                    <div class="reveal-btn" id="btn-trial">See Outcomes ↓</div>
+                </div>
+                <div class="pathway-results hidden" id="results-trial"></div>
+            </div>
+
+            <!-- Hybrid -->
+            <div class="pathway-card" id="pathway-hybrid">
+                <div class="pathway-header" onclick="revealPathway('hybrid')">
+                    <div class="pathway-title">Hybrid Approach</div>
+                    <div class="pathway-subtitle">Targeted fast-track + trial</div>
+                    <div class="pathway-description">Immediate access for prohibitive-risk patients. Accelerated 2-year trial for everyone else.</div>
+                    <div class="reveal-btn" id="btn-hybrid">See Outcomes ↓</div>
+                </div>
+                <div class="pathway-results hidden" id="results-hybrid"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- STEP 5: COMPARISON SUMMARY -->
+    <section class="section hidden" id="step5">
+        <h2>Comparison Summary</h2>
+        <p style="color:#cbd5e1; margin-bottom:1.5rem;">How the pathways stack up across all four risk groups.</p>
+        <div id="comparisonTableWrap"></div>
+        <button class="btn" onclick="resetSimulator()" style="margin-top: 2rem; padding: 1rem 2rem; font-size: 1.05rem;">↺ Start Over</button>
+    </section>
+
+</div>
+
+<script>
+// ── DEVICE DATA ──────────────────────────────────────────────────────────────
+const devices = {
+    tavr: {
+        name: "TAVR (Aortic Valve)",
+        example: "Transcatheter aortic valve replacement",
+        factors: [
+            { label: "Disease severity:", value: "Very high — 50% die untreated within 2–3 years" },
+            { label: "Alternatives:", value: "SAVR (surgery) works, but impossible for some" },
+            { label: "Reversibility:", value: "Partial — valve replaceable but invasive" },
+            { label: "Safety detection:", value: "Medium — large registry exists, data heterogeneous" }
+        ],
+        baseDistribution: { prohibitive: 10, high: 25, intermediate: 35, low: 30 },
+        mortalityGuidance: "TAVR trial mortality: ~1% (low-risk). Real-world: 3.1% (low-risk). SAVR: 1.4% (low-risk). Use these as defaults or adjust.",
+        defaultMortality: {
+            prohibitive: { device: 15, alternative: 50 },
+            high:         { device: 6,  alternative: 8  },
+            intermediate: { device: 4.6,alternative: 4  },
+            low:          { device: 3.1,alternative: 1.4 }
+        }
+    },
+    pacemaker: {
+        name: "Pacemaker (Advanced)",
+        example: "Next-generation implantable pacemaker",
+        factors: [
+            { label: "Disease severity:", value: "Very high — symptomatic bradycardia, sudden death risk" },
+            { label: "Alternatives:", value: "Older pacemakers exist; improvement is incremental" },
+            { label: "Reversibility:", value: "Partial — implanted, replaceable" },
+            { label: "Safety detection:", value: "Easy — device telemetry flags failures quickly" }
+        ],
+        baseDistribution: { prohibitive: 5, high: 35, intermediate: 40, low: 20 },
+        mortalityGuidance: "Pacemaker trial mortality <1%. Real-world 1–2% (comorbidities). Prior-generation device: 2–3%.",
+        defaultMortality: {
+            prohibitive: { device: 5,  alternative: 30  },
+            high:         { device: 1.5,alternative: 3   },
+            intermediate: { device: 1.8,alternative: 2.5 },
+            low:          { device: 1.2,alternative: 1.8 }
+        }
+    },
+    covidTest: {
+        name: "At-Home COVID Test",
+        example: "Rapid antigen test for self-testing",
+        factors: [
+            { label: "Disease severity:", value: "Low — mostly asymptomatic or mild cases" },
+            { label: "Alternatives:", value: "Many — PCR, other antigen tests, clinical evaluation" },
+            { label: "Reversibility:", value: "Complete — single-use, no lasting impact" },
+            { label: "Safety detection:", value: "Very easy — national performance dashboards" }
+        ],
+        baseDistribution: { prohibitive: 0, high: 0, intermediate: 30, low: 70 },
+        mortalityGuidance: "Mortality not the right metric. Use missed-diagnosis rate (%). Trial sensitivity: 95%. Real-world: 85% (operator error, variants).",
+        defaultMortality: {
+            prohibitive: { device: 0,  alternative: 0  },
+            high:         { device: 0,  alternative: 0  },
+            intermediate: { device: 15, alternative: 10 },
+            low:          { device: 15, alternative: 10 }
+        }
+    },
+    herniaMesh: {
+        name: "Hernia Mesh (New Design)",
+        example: "Surgical mesh for abdominal hernia repair",
+        factors: [
+            { label: "Disease severity:", value: "Low-moderate — painful but rarely life-threatening" },
+            { label: "Alternatives:", value: "Yes — primary suture repair is proven" },
+            { label: "Reversibility:", value: "Hard — mesh embeds in tissue, removal risky" },
+            { label: "Safety detection:", value: "Very hard — chronic pain emerges over years" }
+        ],
+        baseDistribution: { prohibitive: 0, high: 10, intermediate: 40, low: 50 },
+        mortalityGuidance: "Mortality low. Use chronic pain/complication rate (%). Trial: 5%. Real-world: 12% (technique variation). Suture repair: 3%.",
+        defaultMortality: {
+            prohibitive: { device: 0,  alternative: 0 },
+            high:         { device: 2,  alternative: 1 },
+            intermediate: { device: 8,  alternative: 5 },
+            low:          { device: 12, alternative: 3 }
+        }
+    },
+    dementiaScan: {
+        name: "AI Dementia Screening",
+        example: "AI analysis of speech & gait for early dementia",
+        factors: [
+            { label: "Disease severity:", value: "Low — early detection, no proven prevention yet" },
+            { label: "Alternatives:", value: "None — unmet clinical need" },
+            { label: "Reversibility:", value: "Complete — diagnostic tool only" },
+            { label: "Safety detection:", value: "Very hard — false positives cause lasting harm (anxiety, over-treatment)" }
+        ],
+        baseDistribution: { prohibitive: 0, high: 5, intermediate: 35, low: 60 },
+        mortalityGuidance: "Use missed-diagnosis rate (%). Trial sensitivity: 90%. Real-world: 78% (population variation, training gaps).",
+        defaultMortality: {
+            prohibitive: { device: 0,  alternative: 0  },
+            high:         { device: 10, alternative: 15 },
+            intermediate: { device: 22, alternative: 20 },
+            low:          { device: 25, alternative: 25 }
+        }
+    },
+    smartwatchBP: {
+        name: "Smartwatch BP Monitor",
+        example: "Wearable continuous blood pressure monitoring",
+        factors: [
+            { label: "Disease severity:", value: "Wellness — monitoring, not treatment" },
+            { label: "Alternatives:", value: "Many — validated cuff devices, clinical measurement" },
+            { label: "Reversibility:", value: "Complete — just a wearable" },
+            { label: "Safety detection:", value: "Very easy — accuracy metrics tracked, user feedback instant" }
+        ],
+        baseDistribution: { prohibitive: 0, high: 0, intermediate: 20, low: 80 },
+        mortalityGuidance: "Mortality irrelevant. Use accuracy error (mmHg RMSE). Trial: ±5 mmHg. Real-world: ±9 mmHg (motion artifact, skin variation).",
+        defaultMortality: {
+            prohibitive: { device: 0, alternative: 0 },
+            high:         { device: 0, alternative: 0 },
+            intermediate: { device: 8, alternative: 5 },
+            low:          { device: 8, alternative: 5 }
+        }
+    }
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentDevice   = null;
+let dist            = { prohibitive: 10, high: 25, intermediate: 35, low: 30 };
+let mort            = {};
+let revealedCount   = 0;
+const SLIDERS       = ['prohibitive','high','intermediate','low'];
+const TOTAL_PATIENTS = 400000; // 4-year cohort
+
+// ── DEVICE INIT ──────────────────────────────────────────────────────────────
+function initializeDevices() {
+    const grid = document.getElementById('deviceGrid');
+    Object.entries(devices).forEach(([key, device]) => {
+        const card = document.createElement('div');
+        card.className = 'device-card';
+        card.id = 'dcard-' + key;
+        card.innerHTML = `
+            <div class="device-name">${device.name}</div>
+            <div class="device-example">${device.example}</div>
+            <div class="device-factors">
+                ${device.factors.map(f => `
+                    <div class="factor-line">
+                        <span class="factor-label">${f.label}</span><br>${f.value}
+                    </div>`).join('')}
+            </div>`;
+        card.onclick = () => selectDevice(key);
+        grid.appendChild(card);
+    });
+}
+
+function selectDevice(key) {
+    currentDevice = key;
+    const device  = devices[key];
+    dist = { ...device.baseDistribution };
+    mort = JSON.parse(JSON.stringify(device.defaultMortality));
+
+    document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('dcard-' + key).classList.add('selected');
+
+    syncSlidersToState();
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    refreshStep3();
+}
+
+// ── SLIDER LOGIC (proportional auto-balance) ──────────────────────────────────
+function adjustSliders(movedKey) {
+    const movedVal = parseFloat(document.getElementById(movedKey + 'Risk').value);
+    const others   = SLIDERS.filter(k => k !== movedKey);
+    const prevOthersSum = others.reduce((s, k) => s + dist[k], 0);
+    const remaining = 100 - movedVal;
+
+    dist[movedKey] = movedVal;
+
+    if (prevOthersSum > 0) {
+        others.forEach(k => {
+            dist[k] = (dist[k] / prevOthersSum) * remaining;
+        });
+    } else {
+        const share = remaining / others.length;
+        others.forEach(k => { dist[k] = share; });
+    }
+
+    // Clamp to [0,100] and fix rounding so total === 100
+    SLIDERS.forEach(k => { dist[k] = Math.max(0, Math.min(100, dist[k])); });
+    const sum = SLIDERS.reduce((s, k) => s + dist[k], 0);
+    if (Math.abs(sum - 100) > 0.01) {
+        // push rounding onto movedKey
+        dist[movedKey] += (100 - sum);
+        dist[movedKey] = Math.max(0, Math.min(100, dist[movedKey]));
+    }
+
+    syncSlidersToState();
+    refreshStep3();
+}
+
+function syncSlidersToState() {
+    SLIDERS.forEach(k => {
+        const slider = document.getElementById(k + 'Risk');
+        slider.value = dist[k];
+        document.getElementById(k + 'Value').textContent = Math.round(dist[k]) + '%';
+    });
+    const total = Math.round(SLIDERS.reduce((s, k) => s + dist[k], 0));
+    document.getElementById('totalDisplay').textContent = total + '%';
+}
+
+// ── STEP 3 ───────────────────────────────────────────────────────────────────
+function refreshStep3() {
+    if (!currentDevice) return;
+    const device = devices[currentDevice];
+    document.getElementById('mortalityGuidance').innerHTML = device.mortalityGuidance;
+
+    const container = document.getElementById('mortalityControls');
+    container.innerHTML = '';
+
+    SLIDERS.forEach(cat => {
+        if (dist[cat] < 0.5) return;
+        const label = cat.charAt(0).toUpperCase() + cat.slice(1) + ' Risk (' + Math.round(dist[cat]) + '%)';
+        container.innerHTML += `
+            <div class="control-group">
+                <label class="control-label">${label}</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label style="font-size:0.85rem; color:#94a3b8;">Your Device (%)</label>
+                        <input type="number" id="mort_dev_${cat}" value="${mort[cat].device}" min="0" max="100" step="0.1">
+                    </div>
+                    <div class="input-field">
+                        <label style="font-size:0.85rem; color:#94a3b8;">Current Standard (%)</label>
+                        <input type="number" id="mort_alt_${cat}" value="${mort[cat].alternative}" min="0" max="100" step="0.1">
+                    </div>
+                </div>
+            </div>`;
+    });
+
+    document.getElementById('step3').classList.remove('hidden');
+}
+
+function proceedToPathway() {
+    // Read back user edits
+    SLIDERS.forEach(cat => {
+        const devEl = document.getElementById('mort_dev_' + cat);
+        const altEl = document.getElementById('mort_alt_' + cat);
+        if (devEl) mort[cat].device      = parseFloat(devEl.value) || 0;
+        if (altEl) mort[cat].alternative = parseFloat(altEl.value) || 0;
+    });
+
+    // Reset pathway reveal state
+    revealedCount = 0;
+    ['rwe','trial','hybrid'].forEach(p => {
+        document.getElementById('results-' + p).classList.add('hidden');
+        document.getElementById('results-' + p).innerHTML = '';
+        document.getElementById('btn-' + p).textContent = 'See Outcomes ↓';
+        document.getElementById('pathway-' + p).classList.remove('revealed');
+    });
+
+    document.getElementById('step5').classList.add('hidden');
+    document.getElementById('step4').classList.remove('hidden');
+    document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── PATHWAY CALCULATIONS ─────────────────────────────────────────────────────
+function calcPathway(type) {
+    // Returns { riskBreakdown: [{cat, patients, deaths, altDeaths}], total, altTotal }
+    const UNTREATED_ANNUAL = 0.50; // severe disease untreated: 50%/yr
+    const TRIAL_YEARS      = 4;
+    const HYBRID_YEARS     = 2;
+    const AVG_WAIT_TRIAL   = TRIAL_YEARS / 2;
+    const AVG_WAIT_HYBRID  = HYBRID_YEARS / 2;
+
+    return SLIDERS.map(cat => {
+        const pct      = dist[cat] / 100;
+        const patients = TOTAL_PATIENTS * pct;
+        const devMort  = mort[cat].device      / 100;
+        const altMort  = mort[cat].alternative / 100;
+
+        let deaths;
+        switch (type) {
+            case 'rwe':
+                // Everyone gets device immediately
+                deaths = patients * devMort;
+                break;
+
+            case 'trial':
+                if (cat === 'prohibitive') {
+                    // No alternative — die untreated during wait
+                    deaths = patients * UNTREATED_ANNUAL * AVG_WAIT_TRIAL;
+                } else {
+                    // Standard care during trial
+                    deaths = patients * altMort;
+                }
+                break;
+
+            case 'hybrid':
+                if (cat === 'prohibitive') {
+                    // Immediate device access
+                    deaths = patients * devMort;
+                } else if (cat === 'high') {
+                    // Half-wait, then device — blend: wait on alt, then get device
+                    const waitDeaths   = patients * 0.5 * altMort;        // first 2 years on alt
+                    const deviceDeaths = patients * 0.5 * devMort;        // last 2 years on device
+                    deaths = waitDeaths + deviceDeaths;
+                } else {
+                    // Full trial — standard care throughout
+                    deaths = patients * altMort;
+                }
+                break;
+        }
+
+        const altDeaths = (cat === 'prohibitive')
+            ? patients * UNTREATED_ANNUAL * AVG_WAIT_TRIAL
+            : patients * altMort;
+
+        return { cat, patients: Math.round(patients), deaths, altDeaths };
+    });
+}
+
+function totalDeaths(breakdown) {
+    return breakdown.reduce((s, r) => s + r.deaths, 0);
+}
+
+// ── REVEAL LOGIC ─────────────────────────────────────────────────────────────
+function revealPathway(type) {
+    const resultsDiv = document.getElementById('results-' + type);
+    const btn        = document.getElementById('btn-' + type);
+    const card       = document.getElementById('pathway-' + type);
+
+    if (!resultsDiv.classList.contains('hidden')) {
+        // Collapse
+        resultsDiv.classList.add('hidden');
+        btn.textContent = 'See Outcomes ↓';
+        card.classList.remove('revealed');
+        revealedCount--;
+        if (revealedCount < 1) document.getElementById('step5').classList.add('hidden');
+        return;
+    }
+
+    // Build results
+    const breakdown = calcPathway(type);
+    const total     = totalDeaths(breakdown);
+    const rweTotal  = totalDeaths(calcPathway('rwe'));
+    const trialTotal= totalDeaths(calcPathway('trial'));
+    const netVsTrial = trialTotal - total;
+
+    let color, badgeClass, verdictTitle, verdictText;
+
+    if (netVsTrial > 20000) {
+        color = 'var(--color-success)'; badgeClass = 'badge-good';
+        verdictTitle = '✓ Strong case for this pathway';
+        verdictText  = `Saves ~${fmt(Math.abs(netVsTrial))} lives vs. a delayed trial. The unmet need and disease severity strongly favor fast access.`;
+    } else if (netVsTrial > 2000) {
+        color = 'var(--color-warning)'; badgeClass = 'badge-mid';
+        verdictTitle = '⚠ Modest advantage — context matters';
+        verdictText  = `Saves ~${fmt(Math.abs(netVsTrial))} lives vs. delayed trial. Consider whether device quality is verified enough to justify limited RWE.`;
+    } else if (netVsTrial > -2000) {
+        color = 'var(--color-warning)'; badgeClass = 'badge-mid';
+        verdictTitle = '⚠ Minimal difference — lean on trial evidence';
+        verdictText  = `Near-neutral vs. trial pathway (±${fmt(Math.abs(netVsTrial))} lives). With no urgency advantage, a clinical trial is defensible.`;
+    } else {
+        color = 'var(--color-error)'; badgeClass = 'badge-bad';
+        verdictTitle = '✗ Net harm vs. delayed trial';
+        verdictText  = `This pathway causes ~${fmt(Math.abs(netVsTrial))} more deaths than waiting for a clinical trial. The device may be displacing a superior standard of care.`;
+    }
+
+    const rows = breakdown.filter(r => r.patients > 0).map(r => {
+        const diff = r.altDeaths - r.deaths;
+        const diffColor = diff > 0 ? 'var(--color-success)' : diff < 0 ? 'var(--color-error)' : '#94a3b8';
+        const sign = diff > 0 ? '▼ ' : diff < 0 ? '▲ ' : '';
+        return `
+            <div class="result-stat">
+                <span class="result-stat-label">${r.cat.charAt(0).toUpperCase()+r.cat.slice(1)} risk (${Math.round(dist[r.cat])}%)</span>
+                <span class="result-stat-value" style="color:${diffColor}">
+                    ${sign}${fmt(Math.abs(diff))} ${diff > 0 ? 'saved' : diff < 0 ? 'extra deaths' : '—'}
+                </span>
+            </div>`;
+    }).join('');
+
+    resultsDiv.innerHTML = `
+        <div class="big-number" style="color:${color}">${fmt(Math.round(total))}</div>
+        <div class="big-number-label">total adverse events (4-yr cohort)</div>
+        <div class="divider"></div>
+        ${rows}
+        <div class="divider"></div>
+        <div class="result-stat">
+            <span class="result-stat-label" style="font-weight:bold;">vs. Delayed Trial</span>
+            <span class="result-stat-value" style="color:${netVsTrial>0?'var(--color-success)':'var(--color-error)'}">
+                ${netVsTrial>0?'▼ '+fmt(netVsTrial)+' saved':'▲ '+fmt(Math.abs(netVsTrial))+' extra'}
+            </span>
+        </div>
+        <div class="verdict-box">
+            <div class="verdict-title" style="color:${color}">${verdictTitle}</div>
+            <div style="font-size:0.85rem; color:#cbd5e1;">${verdictText}</div>
+        </div>`;
+
+    resultsDiv.classList.remove('hidden');
+    btn.textContent = 'Hide Outcomes ↑';
+    card.classList.add('revealed');
+    revealedCount++;
+
+    updateComparison();
+}
+
+// ── COMPARISON TABLE ─────────────────────────────────────────────────────────
+function updateComparison() {
+    const rweB    = calcPathway('rwe');
+    const trialB  = calcPathway('trial');
+    const hybridB = calcPathway('hybrid');
+
+    const rweT    = Math.round(totalDeaths(rweB));
+    const trialT  = Math.round(totalDeaths(trialB));
+    const hybridT = Math.round(totalDeaths(hybridB));
+
+    const best = Math.min(rweT, trialT, hybridT);
+
+    function badge(val) {
+        if (val === best) return `<span class="badge badge-good">Best</span>`;
+        if (val < best * 1.1) return `<span class="badge badge-mid">Close</span>`;
+        return `<span class="badge badge-bad">Worst</span>`;
+    }
+
+    const catRows = SLIDERS.filter(cat => dist[cat] > 0.5).map(cat => {
+        const rD = Math.round(rweB.find(r=>r.cat===cat).deaths);
+        const tD = Math.round(trialB.find(r=>r.cat===cat).deaths);
+        const hD = Math.round(hybridB.find(r=>r.cat===cat).deaths);
+        const mn = Math.min(rD,tD,hD);
+        const hi = (v) => v===mn ? `<strong style="color:var(--color-success)">${fmt(v)}</strong>` : fmt(v);
+        return `<tr>
+            <td>${cat.charAt(0).toUpperCase()+cat.slice(1)} (${Math.round(dist[cat])}%)</td>
+            <td>${hi(rD)}</td><td>${hi(tD)}</td><td>${hi(hD)}</td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('comparisonTableWrap').innerHTML = `
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Risk Group</th>
+                    <th>RWE Pathway</th>
+                    <th>Clinical Trial</th>
+                    <th>Hybrid</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${catRows}
+                <tr style="border-top:2px solid #334155; font-size:1rem;">
+                    <td><strong>Total</strong></td>
+                    <td><strong>${fmt(rweT)}</strong> ${badge(rweT)}</td>
+                    <td><strong>${fmt(trialT)}</strong> ${badge(trialT)}</td>
+                    <td><strong>${fmt(hybridT)}</strong> ${badge(hybridT)}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:0.75rem;">
+            Bold green = lowest adverse events in that row. "Best" badge = lowest overall total.
+        </p>`;
+
+    document.getElementById('step5').classList.remove('hidden');
+}
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function fmt(n) { return Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0}); }
+
+function resetSimulator() {
+    currentDevice = null; revealedCount = 0;
+    dist = { prohibitive:10, high:25, intermediate:35, low:30 };
+    mort = {};
+    document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
+    ['step2','step3','step4','step5'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    ['rwe','trial','hybrid'].forEach(p => {
+        document.getElementById('results-'+p).classList.add('hidden');
+        document.getElementById('results-'+p).innerHTML = '';
+        document.getElementById('btn-'+p).textContent = 'See Outcomes ↓';
+        document.getElementById('pathway-'+p).classList.remove('revealed');
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('load', initializeDevices);
+</script>
+</body>
+</html>
