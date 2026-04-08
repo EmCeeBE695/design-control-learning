@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,10 +39,11 @@
         p { margin-bottom: 1rem; }
 
         .intro-text {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: #cbd5e1;
             max-width: 900px;
             margin: 0 auto;
+            line-height: 1.7;
         }
 
         .section {
@@ -87,6 +87,33 @@
         .device-factors { font-size: 0.85rem; line-height: 1.4; }
         .factor-line { margin-bottom: 0.5rem; padding-left: 1rem; }
         .factor-label { color: #94a3b8; font-weight: bold; }
+
+        /* Expandable factor explanation */
+        .factor-why-toggle {
+            font-size: 0.75rem;
+            color: var(--color-accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 0 0 1rem;
+            margin-top: 0.1rem;
+            display: block;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .factor-why-toggle:hover { opacity: 1; }
+        .factor-why-text {
+            display: none;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            background: rgba(56,189,248,0.05);
+            border-left: 2px solid var(--color-accent);
+            padding: 0.5rem 0.75rem;
+            margin: 0.4rem 0 0.4rem 1rem;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.5;
+        }
+        .factor-why-text.open { display: block; }
 
         .controls-grid {
             display: grid;
@@ -147,6 +174,113 @@
 
         .guidance-title { font-weight: bold; color: var(--color-warning); margin-bottom: 0.5rem; }
 
+        /* Info box — blue/teal tint, used for educational explainers */
+        .info-box {
+            background-color: rgba(56, 189, 248, 0.07);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 1.1rem 1.25rem;
+            border-radius: 6px;
+            margin: 1rem 0 1.5rem 0;
+            font-size: 0.9rem;
+            line-height: 1.65;
+            color: #cbd5e1;
+        }
+        .info-box .info-title {
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .info-box ul { padding-left: 1.25rem; margin-top: 0.4rem; }
+        .info-box li { margin-bottom: 0.35rem; }
+        .info-box strong { color: #e2e8f0; }
+
+        /* Risk glossary */
+        .risk-glossary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 0.75rem 0 1.25rem 0;
+        }
+        .risk-glossary-item {
+            background: rgba(56,189,248,0.06);
+            border: 1px solid rgba(56,189,248,0.2);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+        }
+        .risk-glossary-item .risk-tier-name {
+            font-weight: bold;
+            color: var(--color-accent);
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+        .risk-glossary-item .risk-tier-def {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        /* Decision framework box */
+        .decision-framework {
+            background-color: rgba(56, 189, 248, 0.07);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 1.25rem;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.65;
+        }
+        .decision-framework .df-title {
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        .decision-framework .df-factors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .decision-framework .df-factor {
+            background: rgba(15,23,42,0.6);
+            border-radius: 5px;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.83rem;
+        }
+        .decision-framework .df-factor strong { color: #e2e8f0; display: block; margin-bottom: 0.2rem; }
+
+        /* Historical case boxes */
+        .case-boxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .case-box {
+            border-radius: 6px;
+            padding: 1rem 1.1rem;
+            font-size: 0.83rem;
+            line-height: 1.55;
+        }
+        .case-box.case-good {
+            background: rgba(34,197,94,0.08);
+            border: 1px solid rgba(34,197,94,0.3);
+        }
+        .case-box.case-bad {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+        .case-box .case-label {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+        .case-box.case-good .case-label { color: var(--color-success); }
+        .case-box.case-bad .case-label { color: var(--color-error); }
+        .case-box p { margin-bottom: 0; color: #94a3b8; }
+
         .hidden { display: none; }
 
         /* ── STEP 4: PATHWAY REVEAL CARDS ── */
@@ -164,9 +298,7 @@
             transition: border-color 0.3s;
         }
 
-        .pathway-card.revealed {
-            border-color: var(--color-accent);
-        }
+        .pathway-card.revealed { border-color: var(--color-accent); }
 
         .pathway-header {
             padding: 1.5rem;
@@ -193,11 +325,23 @@
         }
 
         .pathway-description {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #cbd5e1;
-            margin-bottom: 1.25rem;
-            line-height: 1.5;
+            margin-bottom: 0.75rem;
+            line-height: 1.55;
         }
+
+        .pathway-procedural {
+            font-size: 0.8rem;
+            color: #64748b;
+            background: rgba(56,189,248,0.04);
+            border: 1px solid rgba(56,189,248,0.15);
+            border-radius: 5px;
+            padding: 0.65rem 0.85rem;
+            margin-bottom: 1.1rem;
+            line-height: 1.55;
+        }
+        .pathway-procedural strong { color: #94a3b8; }
 
         .reveal-btn {
             width: 100%;
@@ -235,13 +379,8 @@
         }
 
         .result-stat:last-of-type { border-bottom: none; }
-
         .result-stat-label { color: #94a3b8; }
-
-        .result-stat-value {
-            font-weight: bold;
-            font-size: 1.05rem;
-        }
+        .result-stat-value { font-weight: bold; font-size: 1.05rem; }
 
         .big-number {
             font-size: 2rem;
@@ -272,6 +411,17 @@
         }
 
         .verdict-title { font-weight: bold; margin-bottom: 0.35rem; font-size: 0.9rem; }
+
+        /* Implication lines inside verdict box */
+        .verdict-implication {
+            margin-top: 0.65rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid #334155;
+            font-size: 0.8rem;
+            line-height: 1.55;
+            color: #94a3b8;
+        }
+        .verdict-implication strong { color: #cbd5e1; }
 
         .highlight-positive { color: var(--color-success); }
         .highlight-negative { color: var(--color-error); }
@@ -322,20 +472,48 @@
     <header>
         <h1>RWE vs Clinical Trials</h1>
         <h3 style="color: #cbd5e1; margin: 1rem 0 0 0;">Interactive Decision Simulator</h3>
-        <p class="intro-text" style="margin-top: 1.5rem;">Choose a medical device, estimate your patient population and outcomes, then explore each approval pathway one at a time.</p>
+        <div class="intro-text" style="margin-top: 1.5rem;">
+            <p><strong style="color: var(--color-accent);">Real-World Evidence (RWE)</strong> is data collected outside a controlled study — patient registries, electronic health records, insurance claims. A <strong style="color: var(--color-accent);">prospective clinical trial</strong> uses a pre-specified protocol, controlled enrollment, and often randomization to generate evidence under controlled conditions.</p>
+            <p>What's at stake: FDA approval determines whether a device reaches patients. The evidence standard you choose affects both <em>how quickly</em> that happens and <em>how confidently</em> we know the device is safe and effective. Getting it wrong in either direction has real consequences — delayed access kills patients who needed the device sooner; premature approval harms patients when the device turns out to be worse than expected.</p>
+            <p style="font-size:0.85rem; color:#64748b; margin-bottom:0;">This simulator uses simplified models — real approval decisions involve dozens of additional factors — but the core tradeoffs are drawn from published cases and actual FDA precedent.</p>
+        </div>
     </header>
 
     <!-- STEP 1: DEVICE SELECTION -->
     <section class="section">
         <h2>Step 1: Choose a Device</h2>
-        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Click a device to begin. Each has different characteristics that affect regulatory strategy.</p>
+        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Click a device to begin. Each has different characteristics that affect regulatory strategy. Expand any factor to understand <em>why</em> it's rated the way it is.</p>
         <div class="device-grid" id="deviceGrid"></div>
     </section>
 
     <!-- STEP 2: PATIENT POPULATION -->
     <section class="section hidden" id="step2">
         <h2>Step 2: Define Your Patient Population</h2>
-        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">Adjust the sliders — they automatically balance to 100%.</p>
+        <p style="color: #cbd5e1; margin-bottom: 1rem;">Adjust the sliders — they automatically balance to 100%.</p>
+
+        <div class="info-box">
+            <div class="info-title">📖 What do these risk tiers mean?</div>
+            <p style="margin-bottom:0.5rem;">These categories come from cardiac surgery risk scoring (the STS score) and are used here as a general proxy for how much a patient needs this device versus having viable alternatives.</p>
+            <div class="risk-glossary">
+                <div class="risk-glossary-item">
+                    <div class="risk-tier-name">Prohibitive Risk</div>
+                    <div class="risk-tier-def">Cannot survive the procedure, or has no surgical/treatment alternative at all. For non-cardiac devices: patients with no equivalent diagnostic option.</div>
+                </div>
+                <div class="risk-glossary-item">
+                    <div class="risk-tier-name">High Risk</div>
+                    <div class="risk-tier-def">Eligible for existing treatment, but mortality or morbidity risk is substantial. The device offers a meaningful advantage over the alternative.</div>
+                </div>
+                <div class="risk-glossary-item">
+                    <div class="risk-tier-name">Intermediate Risk</div>
+                    <div class="risk-tier-def">Borderline candidate for existing treatment. The benefit-risk balance between the new device and the standard of care is genuinely uncertain.</div>
+                </div>
+                <div class="risk-glossary-item">
+                    <div class="risk-tier-name">Low Risk</div>
+                    <div class="risk-tier-def">Healthy enough that existing treatment is routine and low-risk. The new device needs to prove it's at least as good — and preferably better.</div>
+                </div>
+            </div>
+            <p style="font-size:0.8rem; color:#64748b; margin-bottom:0;" id="riskReframeNote"></p>
+        </div>
 
         <div class="controls-grid">
             <div class="control-group">
@@ -379,7 +557,19 @@
     <!-- STEP 3: MORTALITY OUTCOMES -->
     <section class="section hidden" id="step3">
         <h2>Step 3: Set Adverse Event Rates</h2>
-        <p style="color: #cbd5e1; margin-bottom: 1.5rem;">For each risk category, enter the 1-year adverse event rate (%) for your device vs. the current standard of care.</p>
+        <p style="color: #cbd5e1; margin-bottom: 1rem;">For each risk category, enter the 1-year adverse event rate (%) for your device vs. the current standard of care.</p>
+
+        <div class="info-box">
+            <div class="info-title">📖 Why do real-world rates almost always exceed trial rates?</div>
+            <p style="margin-bottom:0.6rem;">This gap is not a coincidence — it has three structural causes that every device engineer should understand:</p>
+            <ul>
+                <li><strong>Selection bias:</strong> Trials enroll healthier patients who meet strict eligibility criteria. Real-world registries include everyone — older patients, sicker patients, and those with comorbidities that trials excluded. The same device performs worse in a broader, sicker population.</li>
+                <li><strong>Operator variation:</strong> Trials are performed at high-volume expert centers with protocol-mandated technique. Real-world use spans community hospitals where procedure volumes are lower and outcomes are consistently worse. This is especially true for implantable devices and surgical procedures.</li>
+                <li><strong>Surveillance intensity:</strong> Trial patients are followed on a fixed schedule with mandated imaging and lab work. Real-world patients miss follow-ups, switch providers, or have complications attributed to other causes — meaning real-world adverse event rates are often undercounted, not overcounted.</li>
+            </ul>
+            <p style="margin-top:0.6rem; margin-bottom:0;"><strong>Note on "standard of care":</strong> This is not "no treatment" — it's the currently approved and reimbursed treatment. For TAVR it's open-heart surgery (SAVR). For COVID testing it's PCR. For dementia screening it's clinical neuropsychological assessment. A new device has to beat or match that bar, not beat nothing.</p>
+        </div>
+
         <div id="mortalityControls" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;"></div>
         <div class="guidance-box">
             <div class="guidance-title">💡 Guidance:</div>
@@ -402,7 +592,10 @@
                 <div class="pathway-header" onclick="revealPathway('rwe')">
                     <div class="pathway-title">RWE Pathway</div>
                     <div class="pathway-subtitle">Fast approval, real-world evidence</div>
-                    <div class="pathway-description">Approve immediately using registry data. All patients receive the device from day one.</div>
+                    <div class="pathway-description">Approve immediately using existing registry data. All patients receive the device from day one, without waiting for a prospective study.</div>
+                    <div class="pathway-procedural">
+                        <strong>What this actually looks like:</strong> The manufacturer submits existing registry data — for example, the STS/ACC TVT Registry for cardiac devices — as the primary evidence package. The FDA evaluates data quality, sample size, completeness, and potential confounding. Approval can happen in months rather than years. Post-market surveillance requirements are typically attached as a condition of approval, but enforcement has historically been weak. There is no control arm, no randomization, and no pre-specified primary endpoint in the traditional sense.
+                    </div>
                     <div class="reveal-btn" id="btn-rwe">See Outcomes ↓</div>
                 </div>
                 <div class="pathway-results hidden" id="results-rwe"></div>
@@ -413,7 +606,10 @@
                 <div class="pathway-header" onclick="revealPathway('trial')">
                     <div class="pathway-title">Clinical Trial</div>
                     <div class="pathway-subtitle">Slower, controlled evidence</div>
-                    <div class="pathway-description">Require a 4-year prospective RCT. Patients wait; prohibitive-risk patients have no alternative.</div>
+                    <div class="pathway-description">Require a 4-year prospective IDE trial. Patients wait for the device; prohibitive-risk patients, who have no alternative, receive the device immediately.</div>
+                    <div class="pathway-procedural">
+                        <strong>What this actually looks like:</strong> The manufacturer submits an Investigational Device Exemption (IDE) application to the FDA. After approval, the trial requires IRB sign-off at each enrolling site, informed consent from every patient, randomization to treatment vs. control arms, pre-specified primary endpoints (typically all-cause mortality or major adverse events at 2 years), and an independent Data Safety Monitoring Board that can halt the trial early. Enrollment itself takes 1–2 years before follow-up even begins — that's where most of the delay comes from, not the follow-up period.
+                    </div>
                     <div class="reveal-btn" id="btn-trial">See Outcomes ↓</div>
                 </div>
                 <div class="pathway-results hidden" id="results-trial"></div>
@@ -424,7 +620,10 @@
                 <div class="pathway-header" onclick="revealPathway('hybrid')">
                     <div class="pathway-title">Hybrid Approach</div>
                     <div class="pathway-subtitle">Targeted fast-track + trial</div>
-                    <div class="pathway-description">Immediate access for prohibitive-risk patients. Accelerated 2-year trial for everyone else.</div>
+                    <div class="pathway-description">Immediate access for prohibitive-risk patients who have no alternative. An accelerated 2-year trial for all other risk groups.</div>
+                    <div class="pathway-procedural">
+                        <strong>What this actually looks like:</strong> The trial isn't simply shortened arbitrarily — the FDA accepts a smaller, more focused trial because the highest-need population (prohibitive risk) already satisfies the benefit-risk threshold without further study. The remaining populations enroll in a streamlined IDE trial with a 2-year primary endpoint, often with a single-arm design or a registry-controlled comparison. Broader expansion to low-risk populations waits for full trial data. This mirrors FDA's Breakthrough Device Designation program, which accelerates review for devices serving serious conditions without adequate alternatives.
+                    </div>
                     <div class="reveal-btn" id="btn-hybrid">See Outcomes ↓</div>
                 </div>
                 <div class="pathway-results hidden" id="results-hybrid"></div>
@@ -438,6 +637,44 @@
         <h2>Comparison Summary</h2>
         <p style="color:#cbd5e1; margin-bottom:1.5rem;">How the pathways stack up across all four risk groups.</p>
         <div id="comparisonTableWrap"></div>
+
+        <div class="decision-framework">
+            <div class="df-title">🧭 When the numeric winner isn't the right answer</div>
+            <p style="margin-bottom:0.75rem;">The pathway with the lowest adverse event count is not automatically the right choice. Regulators and engineers must also weigh:</p>
+            <div class="df-factors">
+                <div class="df-factor">
+                    <strong>Is the harm reversible?</strong>
+                    An implanted mesh that causes chronic pain cannot be easily removed. A wearable BP monitor that gives inaccurate readings can simply be turned off. Irreversibility raises the bar for how confident you need to be before approving.
+                </div>
+                <div class="df-factor">
+                    <strong>Does a proven alternative exist?</strong>
+                    If patients have a safe, effective alternative, the new device must demonstrate clear superiority — not just equivalence — before RWE alone is sufficient to justify approval.
+                </div>
+                <div class="df-factor">
+                    <strong>Can post-market surveillance realistically catch signals?</strong>
+                    Telemetry-enabled pacemakers generate continuous performance data. Hernia mesh complications emerge as chronic pain over years, in patients who've switched providers and may not connect their pain to the implant. The FDA's ability to "course-correct" after approval depends entirely on this.
+                </div>
+                <div class="df-factor">
+                    <strong>Is the benefit-risk ratio above FDA's implicit threshold?</strong>
+                    FDA doesn't publish a numeric threshold, but reviewers apply a "reasonable assurance of safety and effectiveness" standard. For life-threatening conditions with no alternatives, that bar is lower. For wellness devices with many competitors, it's higher.
+                </div>
+            </div>
+
+            <div style="margin-top:0.75rem;">
+                <div style="font-weight:bold; color:#e2e8f0; margin-bottom:0.6rem; font-size:0.9rem;">Historical anchors:</div>
+                <div class="case-boxes">
+                    <div class="case-box case-good">
+                        <div class="case-label">✓ RWE done right — TAVR (2011–2019)</div>
+                        <p>TAVR was approved for prohibitive-risk patients in 2011 using a single RCT (PARTNER 1B), then expanded incrementally to high, intermediate, and low-risk patients as evidence accumulated. Each expansion used a combination of RCT and registry data. The FDA matched evidence requirements to patient need — the most urgent patients got access first, lower-risk patients waited for stronger evidence. This staged approach is now the model for major structural heart devices.</p>
+                    </div>
+                    <div class="case-box case-bad">
+                        <div class="case-label">✗ RWE done wrong — Surgical Mesh (1990s–2010s)</div>
+                        <p>Hernia mesh and pelvic floor mesh devices were cleared through the 510(k) pathway — which required only substantial equivalence to a predicate device, not clinical trial evidence of safety. By the time chronic pain, erosion, and organ perforation data accumulated in registries, hundreds of thousands of patients had already been implanted. The FDA issued safety communications in 2008, 2010, and 2011, and ultimately reclassified pelvic mesh as a Class III device in 2016 — but could not undo the harm already done. This case is the primary reason the FDA tightened mesh requirements and is frequently cited in design control training.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <button class="btn" onclick="resetSimulator()" style="margin-top: 2rem; padding: 1rem 2rem; font-size: 1.05rem;">↺ Start Over</button>
     </section>
 
@@ -450,11 +687,30 @@ const devices = {
         name: "TAVR (Aortic Valve)",
         example: "Transcatheter aortic valve replacement",
         factors: [
-            { label: "Disease severity:", value: "Very high — 50% die untreated within 2–3 years" },
-            { label: "Alternatives:", value: "SAVR (surgery) works, but impossible for some" },
-            { label: "Reversibility:", value: "Partial — valve replaceable but invasive" },
-            { label: "Safety detection:", value: "Medium — large registry exists, data heterogeneous" }
+            { label: "Disease severity:", value: "Very high — 50% die untreated within 2–3 years", why: "Severe aortic stenosis is a mechanical problem: the valve stiffens and restricts blood flow out of the heart. Without intervention, the heart works against increasing resistance until it fails. The 50% two-year mortality figure comes from the landmark PARTNER trial's natural history arm and is the single most important number in TAVR's regulatory story — it's why prohibitive-risk patients couldn't ethically be randomized to a 'no treatment' control group." },
+            { label: "Alternatives:", value: "SAVR (surgery) works, but impossible for some", why: "Surgical aortic valve replacement (SAVR) is the gold standard and has 50+ years of outcome data. It's highly effective — but requires open-heart surgery, cardiopulmonary bypass, and a sternotomy. For patients with severe lung disease, prior chest surgery, porcelain aorta, or frailty, the surgical risk itself exceeds the risk of the disease. That subset — 'prohibitive surgical risk' — is where TAVR created its initial market and where the RWE argument was strongest." },
+            { label: "Reversibility:", value: "Partial — valve replaceable but invasive", why: "A TAVR valve can be replaced ('valve-in-valve' procedure) if it fails or degenerates. However, this is itself a major procedure, not a simple fix. The current generation of TAVR valves is expected to last 10–15 years based on accelerated durability testing, but long-term real-world data beyond 10 years is still accumulating. This uncertainty about long-term durability became a key issue when TAVR expanded to younger, lower-risk patients." },
+            { label: "Safety detection:", value: "Medium — large registry exists, data heterogeneous", why: "The STS/ACC TVT Registry captures nearly every TAVR procedure performed in the US — a massive post-market surveillance infrastructure. However, 'large' doesn't mean 'clean': the registry includes patients from 700+ sites with varying skill levels, different valve generations, and inconsistent follow-up. Stroke rates, for instance, are systematically underreported in community settings compared to clinical trials. This heterogeneity is what makes TAVR 'medium' rather than 'easy' for safety detection." }
         ],
+        riskReframe: null,
+        verdictImplications: {
+            strong: {
+                regulatory: "Your benefit-risk narrative should lead with unmet need and the mortality cost of delay for prohibitive and high-risk patients. FDA reviewers will expect robust post-market surveillance commitments — specifically, mandatory enrollment in the TVT Registry and annual reporting of stroke, pacemaker implantation, and valve-in-valve rates.",
+                design: "If real-world outcomes are materially worse than trial outcomes, operator dependency is likely the driver. Consider whether design changes — delivery system refinements, sizing algorithms, or deployment feedback mechanisms — can compress the performance gap between expert and community centers."
+            },
+            modest: {
+                regulatory: "With a modest numerical advantage, your benefit-risk submission must do more work. Emphasize the quality of your registry data, the completeness of follow-up, and any subgroup analyses showing which patient populations benefit most. Expect FDA to push for a post-approval study with a pre-specified primary endpoint.",
+                design: "A modest RWE advantage often signals that real-world operator variation is eroding the device's clinical benefit. Audit your training program: are implanting physicians receiving adequate proctoring, and are low-volume sites being monitored separately from high-volume centers?"
+            },
+            neutral: {
+                regulatory: "Near-neutral results shift the burden of proof toward the trial pathway. Without a compelling numerical argument, FDA reviewers will question whether the registry data is sufficiently complete and unconfounded. A prospective IDE trial with a pre-specified primary endpoint becomes the more defensible path.",
+                design: "Neutral outcomes suggest the device may not be differentiated enough from SAVR for intermediate and low-risk patients. Before investing in a large trial, conduct a formative human factors study to understand whether the device's real-world performance gap can be closed through design iteration."
+            },
+            harm: {
+                regulatory: "Net harm relative to delayed trial is a serious finding. Before any regulatory submission, you need to understand whether this reflects a design flaw, a patient selection problem, or a data artifact. An FDA pre-submission meeting is essential — arriving at the FDA with a submission that shows net harm without a clear explanation will severely damage your credibility.",
+                design: "A net harm result is a design controls red flag. Re-examine your risk management file (ISO 14971): has every known failure mode been characterized? Are your use-related risks fully assessed? Consider whether the device is being used in populations outside your original intended use."
+            }
+        },
         baseDistribution: { prohibitive: 10, high: 25, intermediate: 35, low: 30 },
         mortalityGuidance: "TAVR trial mortality: ~1% (low-risk). Real-world: 3.1% (low-risk). SAVR: 1.4% (low-risk). Use these as defaults or adjust.",
         defaultMortality: {
@@ -468,11 +724,30 @@ const devices = {
         name: "Pacemaker (Advanced)",
         example: "Next-generation implantable pacemaker",
         factors: [
-            { label: "Disease severity:", value: "Very high — symptomatic bradycardia, sudden death risk" },
-            { label: "Alternatives:", value: "Older pacemakers exist; improvement is incremental" },
-            { label: "Reversibility:", value: "Partial — implanted, replaceable" },
-            { label: "Safety detection:", value: "Easy — device telemetry flags failures quickly" }
+            { label: "Disease severity:", value: "Very high — symptomatic bradycardia, sudden death risk", why: "Bradycardia (abnormally slow heart rate) due to complete heart block is immediately life-threatening — the heart may simply stop. However, 'next-generation' pacemakers are typically incremental improvements on an established device category, not first-in-class. This distinction matters enormously for regulatory strategy: the disease is severe, but the question isn't 'device vs. nothing' — it's 'new device vs. existing device that already works well.'" },
+            { label: "Alternatives:", value: "Older pacemakers exist; improvement is incremental", why: "Pacemakers have been implanted since the 1950s and the current generation has excellent outcomes. A next-generation device might offer longer battery life, MRI compatibility, leadless design, or better arrhythmia detection — real improvements, but not transformative. This incremental nature means FDA scrutiny focuses on 'is it at least as good as what we already have?' rather than 'does it fill an unmet need?' The regulatory bar for incremental improvement is different from first-in-class." },
+            { label: "Reversibility:", value: "Partial — implanted, replaceable", why: "Unlike TAVR, pacemakers are routinely replaced at end-of-battery-life (typically 7–12 years) through a well-established procedure. This replaceability somewhat reduces the risk of a long-term problem, because a device that underperforms can be swapped out at the next generator change. However, lead extraction — removing the pacing leads threaded through the heart — carries significant risk, which is why leadless pacemakers are an area of active development." },
+            { label: "Safety detection:", value: "Easy — device telemetry flags failures quickly", why: "This is the key differentiator for pacemakers. Modern devices transmit performance data wirelessly to clinic monitoring systems (Medtronic CareLink, Abbott Merlin.net, etc.) on a daily or weekly basis. Battery voltage, lead impedance, pacing thresholds, and arrhythmia episodes are all captured automatically. This telemetry infrastructure makes the FDA's post-market surveillance job much easier — problems surface quickly through remote monitoring rather than requiring a patient to present with symptoms." }
         ],
+        riskReframe: null,
+        verdictImplications: {
+            strong: {
+                regulatory: "Even with a strong numerical case, FDA will scrutinize whether your next-generation device's improvements justify the evidentiary approach. Emphasize your telemetry data infrastructure in the submission — remote monitoring data as a post-market surveillance tool is a compelling argument for why real-world safety signals will be caught quickly.",
+                design: "If real-world outcomes are notably worse than trial outcomes for an incremental device, operator familiarity is likely the cause. Assess whether your implant training program adequately bridges the gap between the new device and the prior generation — especially if programming interfaces or implant techniques have changed."
+            },
+            modest: {
+                regulatory: "A modest advantage for an incremental device raises questions about whether the improvement is clinically meaningful. FDA reviewers may ask for a minimal clinically important difference (MCID) analysis: what does a 2,000-life difference actually mean for individual patients? Prepare a benefit-risk analysis that contextualizes the aggregate outcome data with individual-level endpoint data.",
+                design: "Modest improvements in aggregate outcomes often mask meaningful subgroup differences. Analyze your simulation data by age, comorbidity burden, and implanting physician volume — you may find that the benefit is concentrated in specific populations where your device's features (e.g., MRI compatibility, longer battery) matter most."
+            },
+            neutral: {
+                regulatory: "A neutral result for an incremental device is a strong argument for a traditional 510(k) or PMA pathway with clinical trial data. Without a numerical advantage, RWE alone won't carry a submission for an implantable Class III device. FDA will expect a well-powered non-inferiority trial with 2-year follow-up.",
+                design: "Neutral outcomes for a next-generation device suggest the performance gap versus the prior generation may be smaller than expected in real-world use. Before proceeding with a large trial, validate your use-related risk analysis — are physicians using the new features as intended, or reverting to familiar programming patterns from the prior device?"
+            },
+            harm: {
+                regulatory: "Net harm for an incremental pacemaker is a product development stop sign. Given that effective prior-generation devices exist, FDA will not approve a device that demonstrates net harm versus delayed access to existing devices. Convene a design review board, audit your risk management file, and conduct root-cause analysis before any regulatory interaction.",
+                design: "Immediate action required on your design controls process. Map every new design feature against the adverse event data — is the harm concentrated in patients using specific features (e.g., automatic threshold management, MRI mode)? Your ISO 14971 risk acceptability matrix needs to be revisited with post-market data."
+            }
+        },
         baseDistribution: { prohibitive: 5, high: 35, intermediate: 40, low: 20 },
         mortalityGuidance: "Pacemaker trial mortality <1%. Real-world 1–2% (comorbidities). Prior-generation device: 2–3%.",
         defaultMortality: {
@@ -486,11 +761,30 @@ const devices = {
         name: "At-Home COVID Test",
         example: "Rapid antigen test for self-testing",
         factors: [
-            { label: "Disease severity:", value: "Low — mostly asymptomatic or mild cases" },
-            { label: "Alternatives:", value: "Many — PCR, other antigen tests, clinical evaluation" },
-            { label: "Reversibility:", value: "Complete — single-use, no lasting impact" },
-            { label: "Safety detection:", value: "Very easy — national performance dashboards" }
+            { label: "Disease severity:", value: "Low — mostly asymptomatic or mild cases", why: "For the general population, COVID-19 is mild or asymptomatic in the vast majority of cases. The regulatory harm model for a rapid antigen test is therefore not mortality — it's transmission. A false negative sends an infectious person back into circulation, potentially infecting vulnerable individuals. This is a fundamentally different harm model than a cardiac device, and it means the relevant performance metric is sensitivity (what fraction of true positives does the test catch?), not survival." },
+            { label: "Alternatives:", value: "Many — PCR, other antigen tests, clinical evaluation", why: "PCR is the gold standard: it's highly sensitive, highly specific, and laboratory-validated. Rapid antigen tests trade sensitivity for speed and convenience. At the time of COVID test authorization, many competing rapid tests existed, each with different sensitivity profiles against different variants. This crowded competitive landscape means any new test must demonstrate clear performance equivalence or superiority — simply being 'another rapid test' isn't sufficient differentiation." },
+            { label: "Reversibility:", value: "Complete — single-use, no lasting impact", why: "Unlike an implanted device, a COVID test leaves no physical trace. The harm from a single false result is real but bounded — a false positive leads to unnecessary isolation; a false negative leads to potential transmission. Neither harm is permanent, which is why EUA (Emergency Use Authorization) pathways were appropriate for COVID tests: the reversibility of the harm justified faster access." },
+            { label: "Safety detection:", value: "Very easy — national performance dashboards", why: "During the pandemic, the FDA and CDC maintained real-time dashboards tracking rapid test performance across manufacturers, variants, and population settings. Performance data was updated as new variants emerged (Delta, Omicron) and some tests were removed from authorized lists when their sensitivity dropped below acceptable thresholds. This represents near-ideal post-market surveillance infrastructure — the kind that justifies RWE-based authorization when a disease outbreak creates urgent need." }
         ],
+        riskReframe: "For this device, interpret 'prohibitive risk' as patients with absolutely no diagnostic alternative (e.g., no access to PCR testing infrastructure), and 'low risk' as patients with easy access to multiple equivalent or superior options.",
+        verdictImplications: {
+            strong: {
+                regulatory: "A strong case for fast authorization here means emphasizing the transmission-reduction benefit at the population level, not just individual patient outcomes. Your EUA submission should include real-world validation data across variants and user populations — FDA performance dashboards will compare your test against all authorized competitors, so your sensitivity and specificity data needs to be current.",
+                design: "If real-world missed-diagnosis rates substantially exceed trial performance, the culprit is almost always operator error in self-testing — incorrect swabbing technique, inadequate dwell time, misreading results. Conduct user validation studies with lay users across age groups and literacy levels. Instructions for Use (IFU) design is a critical risk mitigation tool for OTC diagnostic devices."
+            },
+            modest: {
+                regulatory: "A modest numerical case for an at-home test is weaker than it sounds, because FDA's authorization standard includes a 'public health need' component. If PCR is readily available and your test's sensitivity is meaningfully lower, FDA may ask whether the convenience benefit justifies the sensitivity trade-off. Prepare a risk-benefit analysis that explicitly quantifies the transmission risk of missed diagnoses.",
+                design: "Modest real-world advantages often reflect user variability in self-testing. Before your next design iteration, conduct a human factors study using FDA's guidance on applying human factors and usability engineering. Your failure mode analysis should specifically address user error as a use-related risk."
+            },
+            neutral: {
+                regulatory: "A neutral result suggests your test's performance advantage over existing alternatives is minimal. For a diagnostic device with many competitors, FDA will question the public health rationale for authorization. Consider narrowing your intended use to a specific population or clinical context where your test does show clear benefit.",
+                design: "Neutral outcomes for a diagnostic device often indicate that analytical performance (lab validation) doesn't translate to real-world performance. Re-examine your clinical validation study design: were your test conditions representative of how users actually perform the test at home, at various stages of illness, and across demographic groups?"
+            },
+            harm: {
+                regulatory: "Net harm for a COVID test means your missed-diagnosis rate is high enough that patients who test negative and return to normal activity are driving more transmission than the delay from waiting for PCR. This is a serious finding. Immediate voluntary market withdrawal and FDA notification is the appropriate response. Do not resubmit without redesigned validation studies.",
+                design: "A net harm result for an at-home test almost always traces to sensitivity failures in specific conditions — early infection (low viral load), specific variants, or specific user populations. Your design risk analysis must be updated to reflect these failure modes as known risks, and mitigation strategies (better IFU, performance claims restricted to symptomatic patients, etc.) must be evaluated."
+            }
+        },
         baseDistribution: { prohibitive: 0, high: 0, intermediate: 30, low: 70 },
         mortalityGuidance: "Mortality not the right metric. Use missed-diagnosis rate (%). Trial sensitivity: 95%. Real-world: 85% (operator error, variants).",
         defaultMortality: {
@@ -504,11 +798,30 @@ const devices = {
         name: "Hernia Mesh (New Design)",
         example: "Surgical mesh for abdominal hernia repair",
         factors: [
-            { label: "Disease severity:", value: "Low-moderate — painful but rarely life-threatening" },
-            { label: "Alternatives:", value: "Yes — primary suture repair is proven" },
-            { label: "Reversibility:", value: "Hard — mesh embeds in tissue, removal risky" },
-            { label: "Safety detection:", value: "Very hard — chronic pain emerges over years" }
+            { label: "Disease severity:", value: "Low-moderate — painful but rarely life-threatening", why: "Inguinal and abdominal hernias cause significant pain and functional limitation, but mortality is rare except in cases of incarceration or strangulation — acute emergencies that are treated regardless of device design. The primary clinical endpoint for hernia mesh is recurrence and chronic pain, not mortality. This matters for regulatory strategy: when mortality isn't the primary harm metric, patient-reported outcomes (PROs) become central to the benefit-risk calculation, and PRO data is notoriously hard to collect in registries." },
+            { label: "Alternatives:", value: "Yes — primary suture repair is proven", why: "Primary suture repair (closing the hernia with sutures alone, no mesh) has been performed for over a century. It has higher recurrence rates than mesh repair (roughly 10–15% vs. 1–5% at 5 years) but zero risk of mesh-related complications. This creates a genuine clinical trade-off: mesh wins on recurrence, suture wins on avoiding chronic pain and erosion. A new mesh design must demonstrate it's better than both existing mesh AND suture — not just equivalent to old mesh — to justify its approval." },
+            { label: "Reversibility:", value: "Hard — mesh embeds in tissue, removal risky", why: "Polypropylene mesh integrates into the surrounding tissue through fibrous ingrowth — this is intentional, as ingrowth is what provides long-term mechanical support. But it also means removal is extremely difficult. Mesh explantation surgery carries significant complication risk (bowel injury, bleeding, nerve damage) and often cannot fully remove all embedded material. This irreversibility is the central reason the mesh crisis became so severe: once patients had complications, there was no good remedy. The FDA's failure to anticipate this — approving mesh without long-term safety data — is the defining regulatory failure in this device category." },
+            { label: "Safety detection:", value: "Very hard — chronic pain emerges over years", why: "Chronic pain from mesh complications typically presents 1–5 years after implantation, long after patients have been discharged from surgical follow-up. By that time, the patient may have moved, switched primary care providers, or attributed the pain to other causes. Registry capture requires active long-term follow-up that most surgical registries don't mandate. The FDA's own analysis found that chronic pain data in MAUDE (the FDA's adverse event database) was systematically undercounted for mesh products — meaning the true complication rate was higher than reported. This is the strongest possible argument for requiring prospective clinical trial data before approval, not RWE." }
         ],
+        riskReframe: null,
+        verdictImplications: {
+            strong: {
+                regulatory: "A strong numerical case for fast approval should be viewed skeptically for hernia mesh, given the category's regulatory history. FDA reviewers will apply heightened scrutiny. Your benefit-risk submission must address long-term safety explicitly: what is your plan to detect chronic pain complications at 3, 5, and 10 years? Post-approval studies with mandatory patient follow-up, not voluntary registry enrollment, are the expected commitment.",
+                design: "If real-world complication rates are meaningfully higher than trial rates for a mesh device, technique variation is only part of the story. Re-examine your mesh design: pore size, weight, polymer composition, and coating all affect the inflammatory response and ingrowth behavior. Your biocompatibility testing (ISO 10993) should be reviewed to confirm it reflects long-term in-vivo conditions, not just short-term bench testing."
+            },
+            modest: {
+                regulatory: "A modest advantage for a new mesh design against existing mesh is a difficult regulatory story to tell, given that the entire mesh category is under enhanced scrutiny. FDA will want to understand what specifically is different about your design, why that difference reduces chronic pain risk, and how you'll detect failures in real-world use. A mandatory post-approval study with patient-reported outcome measures (e.g., validated pain scales at 12, 24, and 60 months) is the expected condition of approval.",
+                design: "A modest improvement over existing mesh likely reflects a design change that reduces one failure mode while leaving others intact. Map every design modification against a corresponding risk reduction in your ISO 14971 risk file. If you cannot clearly articulate which specific design feature reduces chronic pain risk and by what mechanism, your design controls process needs more work before regulatory submission."
+            },
+            neutral: {
+                regulatory: "Neutral outcomes for a new mesh design versus existing mesh — and against suture repair — make a compelling argument for the suture repair option. FDA may question why a new mesh device with no demonstrated benefit over existing options should be approved at all. Re-examine your intended use: is there a specific patient population, hernia type, or clinical setting where your device does show benefit?",
+                design: "Neutral outcomes are a product development signal to stop and reassess. Given the mesh category's history, a device that performs no better than existing products is not commercially viable. Return to your needs-finding: what specific unmet need does your design address? Conduct a formative usability study with surgeons to understand whether the intended design benefits are being realized in practice."
+            },
+            harm: {
+                regulatory: "Net harm for a hernia mesh device relative to delayed approval is the most serious possible finding in a category that has already produced major patient harm. Immediate escalation to senior regulatory affairs leadership and outside regulatory counsel is warranted. Do not submit to FDA without a comprehensive root-cause analysis, design remediation plan, and voluntary reporting of your findings under 21 CFR Part 803 if there are reportable adverse events.",
+                design: "This result requires a full design review under your Quality Management System. Invoke your corrective and preventive action (CAPA) process. The harm must be characterized by type (recurrence vs. chronic pain vs. erosion), timing (early vs. late post-implant), and patient population before any design remediation can be targeted. Engaging an independent clinical expert panel is strongly advisable."
+            }
+        },
         baseDistribution: { prohibitive: 0, high: 10, intermediate: 40, low: 50 },
         mortalityGuidance: "Mortality low. Use chronic pain/complication rate (%). Trial: 5%. Real-world: 12% (technique variation). Suture repair: 3%.",
         defaultMortality: {
@@ -522,11 +835,30 @@ const devices = {
         name: "AI Dementia Screening",
         example: "AI analysis of speech & gait for early dementia",
         factors: [
-            { label: "Disease severity:", value: "Low — early detection, no proven prevention yet" },
-            { label: "Alternatives:", value: "None — unmet clinical need" },
-            { label: "Reversibility:", value: "Complete — diagnostic tool only" },
-            { label: "Safety detection:", value: "Very hard — false positives cause lasting harm (anxiety, over-treatment)" }
+            { label: "Disease severity:", value: "Low — early detection, no proven prevention yet", why: "This is the most counterintuitive rating in the simulator. Early dementia detection sounds high-stakes, but 'severity' here reflects the clinical actionability of a positive result. There is currently no FDA-approved treatment that prevents or meaningfully slows Alzheimer's progression at the mild cognitive impairment (MCI) stage. A positive screening result doesn't trigger a treatment that saves the patient — it triggers further evaluation, lifestyle counseling, and family planning. The absence of an effective treatment dramatically changes the benefit-risk calculation for an early screening tool." },
+            { label: "Alternatives:", value: "None — unmet clinical need", why: "Clinical neuropsychological assessment (NPA) — conducted by a trained neuropsychologist using validated batteries like the MMSE or MoCA — is the current standard for cognitive screening, but it requires specialized professionals, takes 2–4 hours, and is expensive. Primary care providers have no validated, practical tool for routine cognitive screening. An AI tool that can flag at-risk patients during a routine visit, at scale, is a genuinely new capability. This unmet need is the device's strongest regulatory argument." },
+            { label: "Reversibility:", value: "Complete — diagnostic tool only", why: "The device itself causes no physical harm — it doesn't implant anything, doesn't deliver energy, doesn't administer drugs. However, 'reversibility' for a diagnostic device must account for the consequences of the diagnosis, not just the test itself. A false positive diagnosis of early dementia is not reversible in the way a wearable's inaccurate reading is reversible. It can lead to loss of driving privileges, employment discrimination, insurance consequences, unnecessary medication trials, and profound psychological harm to both the patient and family. This is the core harm model for AI diagnostic devices." },
+            { label: "Safety detection:", value: "Very hard — false positives cause lasting harm (anxiety, over-treatment)", why: "Unlike device failures that show up as clinical events (hospitalizations, procedures), the harms from false positive dementia diagnoses manifest as behavioral and social consequences that are almost never captured in clinical registries. A patient who loses their driver's license based on a false positive diagnosis, then clears clinical neuropsychological assessment, may never appear in any adverse event database. This surveillance gap is why the FDA requires robust pre-market clinical validation for AI diagnostic devices — the post-market safety net simply doesn't exist for this harm type." }
         ],
+        riskReframe: "For this device, interpret 'prohibitive risk' as patients with no access to neuropsychological assessment (rural, uninsured, or in systems with specialist shortages). 'Low risk' means patients with full access to gold-standard clinical evaluation and who are actively engaged in cognitive monitoring.",
+        verdictImplications: {
+            strong: {
+                regulatory: "A strong case for fast approval of an AI dementia screening tool must engage directly with the false positive harm model — not just the missed diagnosis rate. Your De Novo or 510(k) submission should include a prospective clinical validation study with diverse patient populations (age, race, language, education level) and report both sensitivity and specificity separately. FDA's 2021 AI/ML action plan requires discussion of how your algorithm's performance will be monitored and updated over time.",
+                design: "If your AI model performs well in trial but poorly in real-world primary care settings, the cause is almost always training data bias — the model was trained on academic medical center patients who don't represent the speech and gait patterns of a diverse community population. Your algorithm validation plan (AVP) should explicitly address demographic subgroup performance and include a bias mitigation strategy."
+            },
+            modest: {
+                regulatory: "A modest advantage requires a careful framing strategy. Your submission must address the question FDA reviewers will inevitably ask: 'Is this device better than simply referring everyone who fails a 2-minute MoCA to a neuropsychologist?' If your device is less accurate than clinical assessment but faster and cheaper, the benefit-risk case rests on access and scale — argue it explicitly, with health economics data.",
+                design: "Modest real-world performance often reflects edge cases the algorithm hasn't been trained on — accents, speech disorders, movement disabilities that affect gait patterns for non-dementia reasons. Audit your false positive rate by demographic subgroup before submission. An algorithm that performs well on average but poorly for specific populations will face FDA scrutiny under the new AI/ML guidance."
+            },
+            neutral: {
+                regulatory: "Neutral outcomes for an AI diagnostic tool against clinical assessment means the device's speed and accessibility benefit is not translating into meaningfully better patient outcomes at the population level. FDA may question whether the risk of false positives is justified by the marginal improvement in access. Consider restricting your intended use to settings where neuropsychological assessment is genuinely unavailable, rather than positioning as a general population screening tool.",
+                design: "Neutral outcomes suggest your algorithm's real-world performance gap from clinical assessment is larger than your bench validation predicted. This is common for AI devices and is why FDA's guidance emphasizes real-world performance data, not just analytical validation. Redesign your validation protocol to prospectively capture performance across the full intended use population before the next regulatory submission."
+            },
+            harm: {
+                regulatory: "Net harm from an AI dementia screening tool means your false positive rate in real-world use is high enough that the downstream harms (unnecessary workup, diagnosis anxiety, life disruption) outweigh the benefit of earlier true positive detection. This is a serious finding that requires voluntary reporting to FDA under your adverse event reporting obligations, and likely requires market withdrawal until the algorithm is retrained and revalidated.",
+                design: "Immediate algorithm remediation required. Identify the specific input features (speech characteristics, gait parameters) driving false positives in the real-world population. If your training data didn't adequately represent the population you're now testing in, your algorithm needs to be retrained with representative data — not just tuned. Engage your IRB and clinical advisory board before continuing patient testing."
+            }
+        },
         baseDistribution: { prohibitive: 0, high: 5, intermediate: 35, low: 60 },
         mortalityGuidance: "Use missed-diagnosis rate (%). Trial sensitivity: 90%. Real-world: 78% (population variation, training gaps).",
         defaultMortality: {
@@ -540,11 +872,30 @@ const devices = {
         name: "Smartwatch BP Monitor",
         example: "Wearable continuous blood pressure monitoring",
         factors: [
-            { label: "Disease severity:", value: "Wellness — monitoring, not treatment" },
-            { label: "Alternatives:", value: "Many — validated cuff devices, clinical measurement" },
-            { label: "Reversibility:", value: "Complete — just a wearable" },
-            { label: "Safety detection:", value: "Very easy — accuracy metrics tracked, user feedback instant" }
+            { label: "Disease severity:", value: "Wellness — monitoring, not treatment", why: "Hypertension is serious and a major cardiovascular risk factor — but a wearable BP monitor doesn't treat it, it measures it. The clinical value of the device depends entirely on whether accurate readings lead to better treatment decisions. If the readings are inaccurate, the harm isn't acute — it's a patient who believes their BP is controlled when it isn't, or who gets unnecessary medication adjustments. This chain of causation (inaccurate reading → clinical decision → patient harm) is longer and harder to measure than direct device harms, which affects how the FDA thinks about evidence requirements." },
+            { label: "Alternatives:", value: "Many — validated cuff devices, clinical measurement", why: "Validated oscillometric cuff devices (Omron, Withings, etc.) have been on the market for decades, meet international accuracy standards (ISO 81060-2), and cost $30–100. Clinical office measurement and 24-hour ambulatory BP monitoring (ABPM) are the gold standards. A cuffless wrist-based monitor must demonstrate comparable accuracy to these existing validated methods — but notably, no cuffless device had been validated to ISO 81060-2 accuracy standards as of early 2026, which is part of why FDA's January 2026 guidance on this category was significant." },
+            { label: "Reversibility:", value: "Complete — just a wearable", why: "This is the strongest reversibility profile in the simulator. The device is worn, not implanted or ingested. If a user stops using it, the risk stops immediately. If a batch is found to be inaccurate, a software update can change the algorithm (unlike hardware-based medical devices). This reversibility, combined with the indirect harm pathway, is why FDA's recent guidance moved toward treating certain cuffless BP monitors as wellness devices rather than medical devices — acknowledging that the post-market course-correction ability is much stronger than for implantable or therapeutic devices." },
+            { label: "Safety detection:", value: "Very easy — accuracy metrics tracked, user feedback instant", why: "Consumer wearables generate enormous volumes of user data and are compared constantly against clinical measurements by both users and researchers. Any systematic inaccuracy surfaces quickly through consumer reviews, clinical publications, and insurance payer data. Apple, Samsung, and Fitbit have internal accuracy monitoring programs, and independent researchers publish validation studies within months of new device releases. This real-time feedback loop is why RWE-based oversight is well-suited to this device category — the surveillance infrastructure exists and is fast." }
         ],
+        riskReframe: "For this device, the harm model is indirect: inaccurate readings lead to clinical decisions (adjusting medication, ignoring symptoms) that cause harm. Interpret 'prohibitive risk' as patients who have no access to any validated BP measurement and rely entirely on this device for hypertension management. 'Low risk' means patients who use this as a supplement to regular clinical measurement.",
+        verdictImplications: {
+            strong: {
+                regulatory: "Strong numerical performance for a cuffless BP monitor should be accompanied by an accuracy validation study meeting or exceeding ISO 81060-2 (the international standard for non-invasive BP measurement devices). FDA's January 2026 guidance on this category created a de facto accuracy threshold — your submission should directly address how your device performs against that standard, and include a software update protocol for maintaining accuracy across device firmware versions.",
+                design: "If real-world accuracy error significantly exceeds trial performance, motion artifact and skin tone variation are the two most common culprits for optical wrist-based sensors. Your design validation should include accuracy testing across Fitzpatrick skin tone scale levels 1–6 and should report performance during ambulation and exercise separately from resting measurements. The FDA's recent emphasis on demographic equity in device validation applies directly to optical sensors."
+            },
+            modest: {
+                regulatory: "A modest accuracy advantage over existing cuff devices is a nuanced regulatory story. FDA's January 2026 guidance intentionally exempted certain cuffless monitors from device regulation as a policy decision — acknowledging the accuracy limitations but concluding that the convenience and engagement benefits outweigh the risk for wellness monitoring. Your submission strategy should clarify your intended use: wellness monitoring (lower regulatory bar) vs. clinical decision support (higher bar, needs ISO 81060-2 validation).",
+                design: "Modest real-world accuracy often reflects the fact that cuffless optical sensors are highly sensitive to fit, placement, and motion — variables that are controlled in a clinical validation study but not in daily use. Consider whether your device needs active user feedback mechanisms (fit alerts, motion rejection, placement guidance) to maintain accuracy in real-world conditions. These are use-related risk mitigations, not just UX improvements."
+            },
+            neutral: {
+                regulatory: "Neutral outcomes versus validated cuff devices are actually the expected finding for most cuffless wearable monitors, based on published validation literature. FDA's policy decision to exempt certain devices acknowledges this accuracy gap. Your regulatory strategy should be honest about this trade-off: if you're seeking wellness device positioning, document the intended use clearly and do not make clinical diagnostic claims. If you're seeking a clinical indication, a prospective validation study against ABPM is required.",
+                design: "Neutral outcomes against validated cuffs suggest the cuffless measurement approach has not yet solved the fundamental accuracy challenge — the photoplethysmography (PPG) waveform alone provides insufficient information to reliably estimate blood pressure without a calibration cuff. Consider whether your design should incorporate periodic cuff-based calibration, accelerometer-based motion rejection, or multi-wavelength PPG to close the accuracy gap."
+            },
+            harm: {
+                regulatory: "Net harm for a BP monitoring device — where the accuracy error is large enough that patients relying on it make worse clinical decisions than those using no device at all — triggers mandatory adverse event reporting obligations if device-related patient harm has occurred. For a software-based device, issue an immediate software update to include accuracy confidence intervals in user-facing displays, so users understand the measurement uncertainty. Notify FDA under your 510(k) or De Novo special controls obligations.",
+                design: "A net harm result means your accuracy error in real-world use exceeds the clinical decision threshold — readings are off by enough to matter for antihypertensive dosing decisions. This is a human factors failure as much as a sensor failure: your IFU and app interface must communicate measurement uncertainty clearly. Conduct an immediate use-related risk analysis and implement mandatory accuracy disclaimers before continued market deployment."
+            }
+        },
         baseDistribution: { prohibitive: 0, high: 0, intermediate: 20, low: 80 },
         mortalityGuidance: "Mortality irrelevant. Use accuracy error (mmHg RMSE). Trial: ±5 mmHg. Real-world: ±9 mmHg (motion artifact, skin variation).",
         defaultMortality: {
@@ -562,7 +913,7 @@ let dist            = { prohibitive: 10, high: 25, intermediate: 35, low: 30 };
 let mort            = {};
 let revealedCount   = 0;
 const SLIDERS       = ['prohibitive','high','intermediate','low'];
-const TOTAL_PATIENTS = 400000; // 4-year cohort
+const TOTAL_PATIENTS = 400000;
 
 // ── DEVICE INIT ──────────────────────────────────────────────────────────────
 function initializeDevices() {
@@ -571,18 +922,39 @@ function initializeDevices() {
         const card = document.createElement('div');
         card.className = 'device-card';
         card.id = 'dcard-' + key;
+
+        const factorsHTML = device.factors.map((f, i) => `
+            <div class="factor-line">
+                <span class="factor-label">${f.label}</span><br>${f.value}
+                ${f.why ? `
+                <button class="factor-why-toggle" onclick="toggleWhy(event, '${key}', ${i})">▸ Why does this matter?</button>
+                <div class="factor-why-text" id="why-${key}-${i}">${f.why}</div>` : ''}
+            </div>`).join('');
+
         card.innerHTML = `
             <div class="device-name">${device.name}</div>
             <div class="device-example">${device.example}</div>
-            <div class="device-factors">
-                ${device.factors.map(f => `
-                    <div class="factor-line">
-                        <span class="factor-label">${f.label}</span><br>${f.value}
-                    </div>`).join('')}
-            </div>`;
-        card.onclick = () => selectDevice(key);
+            <div class="device-factors">${factorsHTML}</div>`;
+        card.onclick = (e) => {
+            // don't select card if clicking a why-toggle
+            if (e.target.classList.contains('factor-why-toggle')) return;
+            selectDevice(key);
+        };
         grid.appendChild(card);
     });
+}
+
+function toggleWhy(event, deviceKey, factorIdx) {
+    event.stopPropagation();
+    const el = document.getElementById(`why-${deviceKey}-${factorIdx}`);
+    const btn = event.target;
+    if (el.classList.contains('open')) {
+        el.classList.remove('open');
+        btn.textContent = '▸ Why does this matter?';
+    } else {
+        el.classList.add('open');
+        btn.textContent = '▾ Hide explanation';
+    }
 }
 
 function selectDevice(key) {
@@ -594,13 +966,23 @@ function selectDevice(key) {
     document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('dcard-' + key).classList.add('selected');
 
+    // Update risk reframe note for non-cardiac devices
+    const reframeEl = document.getElementById('riskReframeNote');
+    if (device.riskReframe) {
+        reframeEl.textContent = '⚠ ' + device.riskReframe;
+        reframeEl.style.display = 'block';
+    } else {
+        reframeEl.textContent = '';
+        reframeEl.style.display = 'none';
+    }
+
     syncSlidersToState();
     document.getElementById('step2').classList.remove('hidden');
     document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
     refreshStep3();
 }
 
-// ── SLIDER LOGIC (proportional auto-balance) ──────────────────────────────────
+// ── SLIDER LOGIC ──────────────────────────────────────────────────────────────
 function adjustSliders(movedKey) {
     const movedVal = parseFloat(document.getElementById(movedKey + 'Risk').value);
     const others   = SLIDERS.filter(k => k !== movedKey);
@@ -618,11 +1000,9 @@ function adjustSliders(movedKey) {
         others.forEach(k => { dist[k] = share; });
     }
 
-    // Clamp to [0,100] and fix rounding so total === 100
     SLIDERS.forEach(k => { dist[k] = Math.max(0, Math.min(100, dist[k])); });
     const sum = SLIDERS.reduce((s, k) => s + dist[k], 0);
     if (Math.abs(sum - 100) > 0.01) {
-        // push rounding onto movedKey
         dist[movedKey] += (100 - sum);
         dist[movedKey] = Math.max(0, Math.min(100, dist[movedKey]));
     }
@@ -673,7 +1053,6 @@ function refreshStep3() {
 }
 
 function proceedToPathway() {
-    // Read back user edits
     SLIDERS.forEach(cat => {
         const devEl = document.getElementById('mort_dev_' + cat);
         const altEl = document.getElementById('mort_alt_' + cat);
@@ -681,7 +1060,6 @@ function proceedToPathway() {
         if (altEl) mort[cat].alternative = parseFloat(altEl.value) || 0;
     });
 
-    // Reset pathway reveal state
     revealedCount = 0;
     ['rwe','trial','hybrid'].forEach(p => {
         document.getElementById('results-' + p).classList.add('hidden');
@@ -697,12 +1075,10 @@ function proceedToPathway() {
 
 // ── PATHWAY CALCULATIONS ─────────────────────────────────────────────────────
 function calcPathway(type) {
-    // Returns { riskBreakdown: [{cat, patients, deaths, altDeaths}], total, altTotal }
-    const UNTREATED_ANNUAL = 0.50; // severe disease untreated: 50%/yr
+    const UNTREATED_ANNUAL = 0.50;
     const TRIAL_YEARS      = 4;
     const HYBRID_YEARS     = 2;
     const AVG_WAIT_TRIAL   = TRIAL_YEARS / 2;
-    const AVG_WAIT_HYBRID  = HYBRID_YEARS / 2;
 
     return SLIDERS.map(cat => {
         const pct      = dist[cat] / 100;
@@ -713,31 +1089,23 @@ function calcPathway(type) {
         let deaths;
         switch (type) {
             case 'rwe':
-                // Everyone gets device immediately
                 deaths = patients * devMort;
                 break;
-
             case 'trial':
                 if (cat === 'prohibitive') {
-                    // No alternative — die untreated during wait
                     deaths = patients * UNTREATED_ANNUAL * AVG_WAIT_TRIAL;
                 } else {
-                    // Standard care during trial
                     deaths = patients * altMort;
                 }
                 break;
-
             case 'hybrid':
                 if (cat === 'prohibitive') {
-                    // Immediate device access
                     deaths = patients * devMort;
                 } else if (cat === 'high') {
-                    // Half-wait, then device — blend: wait on alt, then get device
-                    const waitDeaths   = patients * 0.5 * altMort;        // first 2 years on alt
-                    const deviceDeaths = patients * 0.5 * devMort;        // last 2 years on device
+                    const waitDeaths   = patients * 0.5 * altMort;
+                    const deviceDeaths = patients * 0.5 * devMort;
                     deaths = waitDeaths + deviceDeaths;
                 } else {
-                    // Full trial — standard care throughout
                     deaths = patients * altMort;
                 }
                 break;
@@ -762,7 +1130,6 @@ function revealPathway(type) {
     const card       = document.getElementById('pathway-' + type);
 
     if (!resultsDiv.classList.contains('hidden')) {
-        // Collapse
         resultsDiv.classList.add('hidden');
         btn.textContent = 'See Outcomes ↓';
         card.classList.remove('revealed');
@@ -771,32 +1138,40 @@ function revealPathway(type) {
         return;
     }
 
-    // Build results
-    const breakdown = calcPathway(type);
-    const total     = totalDeaths(breakdown);
-    const rweTotal  = totalDeaths(calcPathway('rwe'));
-    const trialTotal= totalDeaths(calcPathway('trial'));
+    const breakdown  = calcPathway(type);
+    const total      = totalDeaths(breakdown);
+    const rweTotal   = totalDeaths(calcPathway('rwe'));
+    const trialTotal = totalDeaths(calcPathway('trial'));
     const netVsTrial = trialTotal - total;
 
-    let color, badgeClass, verdictTitle, verdictText;
+    const device = devices[currentDevice];
+    const impls  = device.verdictImplications;
+
+    let color, badgeClass, verdictTitle, verdictText, verdictTier;
 
     if (netVsTrial > 20000) {
         color = 'var(--color-success)'; badgeClass = 'badge-good';
         verdictTitle = '✓ Strong case for this pathway';
         verdictText  = `Saves ~${fmt(Math.abs(netVsTrial))} lives vs. a delayed trial. The unmet need and disease severity strongly favor fast access.`;
+        verdictTier  = 'strong';
     } else if (netVsTrial > 2000) {
         color = 'var(--color-warning)'; badgeClass = 'badge-mid';
         verdictTitle = '⚠ Modest advantage — context matters';
         verdictText  = `Saves ~${fmt(Math.abs(netVsTrial))} lives vs. delayed trial. Consider whether device quality is verified enough to justify limited RWE.`;
+        verdictTier  = 'modest';
     } else if (netVsTrial > -2000) {
         color = 'var(--color-warning)'; badgeClass = 'badge-mid';
         verdictTitle = '⚠ Minimal difference — lean on trial evidence';
-        verdictText  = `Near-neutral vs. trial pathway (±${fmt(Math.abs(netVsTrial))} lives). With no urgency advantage, a clinical trial is defensible.`;
+        verdictText  = `Near-neutral vs. trial pathway (±${fmt(Math.abs(netVsTrial))} events). With no urgency advantage, a clinical trial is defensible.`;
+        verdictTier  = 'neutral';
     } else {
         color = 'var(--color-error)'; badgeClass = 'badge-bad';
         verdictTitle = '✗ Net harm vs. delayed trial';
-        verdictText  = `This pathway causes ~${fmt(Math.abs(netVsTrial))} more deaths than waiting for a clinical trial. The device may be displacing a superior standard of care.`;
+        verdictText  = `This pathway causes ~${fmt(Math.abs(netVsTrial))} more adverse events than waiting for a clinical trial. The device may be displacing a superior standard of care.`;
+        verdictTier  = 'harm';
     }
+
+    const impl = impls[verdictTier];
 
     const rows = breakdown.filter(r => r.patients > 0).map(r => {
         const diff = r.altDeaths - r.deaths;
@@ -806,7 +1181,7 @@ function revealPathway(type) {
             <div class="result-stat">
                 <span class="result-stat-label">${r.cat.charAt(0).toUpperCase()+r.cat.slice(1)} risk (${Math.round(dist[r.cat])}%)</span>
                 <span class="result-stat-value" style="color:${diffColor}">
-                    ${sign}${fmt(Math.abs(diff))} ${diff > 0 ? 'saved' : diff < 0 ? 'extra deaths' : '—'}
+                    ${sign}${fmt(Math.abs(diff))} ${diff > 0 ? 'saved' : diff < 0 ? 'extra events' : '—'}
                 </span>
             </div>`;
     }).join('');
@@ -825,19 +1200,24 @@ function revealPathway(type) {
         </div>
         <div class="verdict-box">
             <div class="verdict-title" style="color:${color}">${verdictTitle}</div>
-            <div style="font-size:0.85rem; color:#cbd5e1;">${verdictText}</div>
+            <div style="font-size:0.85rem; color:#94a3b8;">${verdictText}</div>
+            <div class="verdict-implication">
+                <strong>📋 Regulatory implication:</strong> ${impl.regulatory}
+            </div>
+            <div class="verdict-implication">
+                <strong>🔧 Design implication:</strong> ${impl.design}
+            </div>
         </div>`;
 
     resultsDiv.classList.remove('hidden');
     btn.textContent = 'Hide Outcomes ↑';
     card.classList.add('revealed');
     revealedCount++;
-
-    updateComparison();
+    buildComparisonTable();
 }
 
 // ── COMPARISON TABLE ─────────────────────────────────────────────────────────
-function updateComparison() {
+function buildComparisonTable() {
     const rweB    = calcPathway('rwe');
     const trialB  = calcPathway('trial');
     const hybridB = calcPathway('hybrid');
@@ -887,7 +1267,7 @@ function updateComparison() {
             </tbody>
         </table>
         <p style="font-size:0.8rem; color:#64748b; margin-top:0.75rem;">
-            Bold green = lowest adverse events in that row. "Best" badge = lowest overall total.
+            Bold green = lowest adverse events in that row. "Best" badge = lowest overall total. Remember: the lowest number is not always the right answer — see the Decision Framework below.
         </p>`;
 
     document.getElementById('step5').classList.remove('hidden');
