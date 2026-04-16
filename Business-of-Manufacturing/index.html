@@ -1,1 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Business of Manufacturing — BE 695</title>
+<style>
+  :root {
+    --teal:       #0d9488;
+    --teal-dark:  #0f766e;
+    --teal-faint: #f0fdfa;
+    --teal-light: #ccfbf1;
+    --slate:      #0f172a;
+    --slate-700:  #334155;
+    --slate-500:  #64748b;
+    --slate-300:  #cbd5e1;
+    --slate-100:  #f1f5f9;
+    --slate-50:   #f8fafc;
+    --white:      #ffffff;
+    --amber:      #d97706;
+    --red:        #dc2626;
+    --green:      #16a34a;
+    --purple:     #7c3aed;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--slate-100);
+    color: var(--slate);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
 
+  /* ── Header ── */
+  header {
+    background: var(--slate);
+    color: #fff;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .header-text .course { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--slate-300); }
+  .header-text .suite  { font-size: 1.1rem; font-weight: 800; color: #fff; }
+  .header-spacer { flex: 1; }
+  .header-badge {
+    font-size: .7rem; font-weight: 700; padding: 4px 12px;
+    background: var(--teal); color: #fff;
+    border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, var(--slate) 0%, #1e3a5f 100%);
+    color: #fff;
+    padding: 56px 32px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(13,148,136,.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(13,148,136,.12) 0%, transparent 60%);
+  }
+  .hero-inner { position: relative; max-width: 680px; margin: 0 auto; }
+  .hero-eyebrow {
+    font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--teal-light); margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 2.4rem; font-weight: 900; line-height: 1.15;
+    margin-bottom: 16px; color: #fff;
+  }
+  .hero h1 span { color: var(--teal-light); }
+  .hero p {
+    font-size: .95rem; color: rgba(255,255,255,.78);
+    max-width: 520px; margin: 0 auto 28px; line-height: 1.65;
+  }
+  .hero-tags { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 0; }
+  .hero-tag {
+    background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.18);
+    color: rgba(255,255,255,.85); font-size: .75rem; font-weight: 600;
+    padding: 5px 14px; border-radius: 999px; letter-spacing: .02em;
+  }
+
+  /* ── Main grid ── */
+  .main { max-width: 960px; margin: 0 auto; padding: 40px 24px 60px; }
+  .section-label {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--slate-500); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--slate-300);
+  }
+
+  /* ── App Cards ── */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .app-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.07);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .18s, transform .18s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .app-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    transform: translateY(-2px);
+  }
+  .app-card-top {
+    padding: 22px 22px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .app-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .app-num {
+    font-size: .65rem; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--slate-500); margin-bottom: 3px;
+  }
+  .app-title { font-size: 1.05rem; font-weight: 800; color: var(--slate); }
+  .app-subtitle { font-size: .8rem; color: var(--slate-500); margin-top: 2px; font-style: italic; }
+
+  .app-card-body { padding: 14px 22px 0; }
+  .app-desc { font-size: .82rem; color: var(--slate-700); line-height: 1.6; }
+
+  .app-card-meta {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 12px 22px 0;
+  }
+  .meta-pill {
+    font-size: .68rem; font-weight: 600; padding: 3px 10px;
+    border-radius: 999px; letter-spacing: .03em;
+  }
+  .pill-time   { background: #eff6ff; color: #1e40af; }
+  .pill-nodes  { background: #f5f3ff; color: #5b21b6; }
+  .pill-device { background: #f0fdf4; color: #166534; }
+  .pill-req    { background: #fef3c7; color: #92400e; }
+
+  .app-card-footer {
+    padding: 16px 22px 20px;
+    margin-top: auto;
+  }
+  .app-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px;
+    font-size: .83rem; font-weight: 700;
+    text-decoration: none; transition: background .15s;
+    border: none; cursor: pointer; width: 100%; justify-content: center;
+  }
+  .app-btn-primary { background: var(--teal); color: #fff; }
+  .app-btn-primary:hover { background: var(--teal-dark); }
+
+  /* Card accent strips */
+  .app-card.app1 { border-top: 3px solid var(--teal); }
+  .app-card.app2 { border-top: 3px solid var(--purple); }
+  .app-card.app3 { border-top: 3px solid var(--amber); }
+  .app-card.app4 { border-top: 3px solid var(--red); }
+
+  .icon-app1 { background: var(--teal-faint); }
+  .icon-app2 { background: #f5f3ff; }
+  .icon-app3 { background: #fffbeb; }
+  .icon-app4 { background: #fef2f2; }
+
+  /* ── Sequence callout ── */
+  .sequence-bar {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .seq-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .seq-text { font-size: .83rem; color: var(--slate-700); line-height: 1.5; }
+  .seq-text strong { color: var(--slate); }
+  .seq-steps {
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px;
+  }
+  .seq-step {
+    font-size: .72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 999px; white-space: nowrap;
+  }
+  .seq-step.s1 { background: var(--teal-faint); color: var(--teal-dark); border: 1px solid var(--teal); }
+  .seq-step.s2 { background: #f5f3ff; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .seq-step.s3 { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+  .seq-step.s4 { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+  .seq-arrow { color: var(--slate-300); font-weight: 700; font-size: .9rem; }
+  .seq-note  { font-size: .72rem; color: var(--slate-500); margin-top: 6px; }
+
+  /* ── Concepts footer ── */
+  .concepts {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .concepts-title { font-size: .85rem; font-weight: 700; color: var(--slate); margin-bottom: 14px; }
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .concept-item {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: 7px;
+    padding: 10px 13px;
+    font-size: .77rem;
+    color: var(--slate-700);
+    line-height: 1.4;
+  }
+  .concept-item strong { display: block; font-size: .8rem; color: var(--slate); margin-bottom: 2px; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: .75rem;
+    color: var(--slate-500);
+    border-top: 1px solid var(--slate-300);
+    background: var(--white);
+  }
+
+  @media (max-width: 600px) {
+    .apps-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 36 36" width="36" height="36" fill="none" aria-label="Suite logo">
+      <rect width="36" height="36" rx="8" fill="#0d9488"/>
+      <path d="M5 18h5l3-7 5 14 4-10 3 3h6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="header-text">
+      <div class="course">BE 695 · Boston University</div>
+      <div class="suite">The Business of Manufacturing</div>
+    </div>
+  </div>
+  <div class="header-spacer"></div>
+  <span class="header-badge">4-App Suite</span>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Graduate Simulation Suite</div>
+    <h1>Learn by <span>Consequence</span></h1>
+    <p>Four interactive simulations covering the complete E2E medical device supply chain — from design decisions to commercial scale-up. Every choice has a cost. Every tradeoff is real.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">Design for Manufacturability</span>
+      <span class="hero-tag">Capacity Planning</span>
+      <span class="hero-tag">Supply Chain Resilience</span>
+      <span class="hero-tag">E2E Strategy</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Sequence recommendation -->
+  <div class="sequence-bar">
+    <span class="seq-icon">💡</span>
+    <div class="seq-text">
+      <strong>Recommended sequence</strong> — each app builds on the concepts of the previous, but all four can be played in any order.
+      <div class="seq-steps">
+        <span class="seq-step s1">1 · DFM Workshop</span>
+        <span class="seq-arrow">→</span>
+        <span class="seq-step s2">2 · Scale-Up Solver</span>
+        <span class="seq-arrow">→</span>
+        <span class="seq-step s3">3 · Supply Chain Crisis</span>
+        <span class="seq-arrow">→</span>
+        <span class="seq-step s4">4 · MedDevice CEO</span>
+      </div>
+      <div class="seq-note">Apps 1 &amp; 2 are conceptual prerequisites for App 4. App 3 is fully standalone.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Four Simulations</div>
+
+  <div class="apps-grid">
+
+    <!-- App 1 -->
+    <a class="app-card app1" href="dfm-workshop.html">
+      <div class="app-card-top">
+        <div class="app-icon icon-app1">
+          <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#f0fdfa"/>
+            <path d="M8 22l4-8 4 5 3-4 5 7" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="24" cy="10" r="3" stroke="#0d9488" stroke-width="2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="app-num">App 1 · 20 min</div>
+          <div class="app-title">DFM Workshop</div>
+          <div class="app-subtitle">"Design It Right the First Time"</div>
+        </div>
+      </div>
+      <div class="app-card-body">
+        <p class="app-desc">Make 8 sequential design decisions for a single-use hemostasis valve and watch your unit economics update in real time. Discover how material selection, tolerances, and assembly method lock in your cost structure — and your regulatory flexibility — for the life of the product.</p>
+      </div>
+      <div class="app-card-meta">
+        <span class="meta-pill pill-nodes">8 Decision Nodes</span>
+        <span class="meta-pill pill-device">Hemostasis Valve</span>
+        <span class="meta-pill pill-time">~20 min</span>
+      </div>
+      <div class="app-card-footer">
+        <span class="app-btn app-btn-primary">Launch App 1 →</span>
+      </div>
+    </a>
+
+    <!-- App 2 -->
+    <a class="app-card app2" href="scale-up-solver.html">
+      <div class="app-card-top">
+        <div class="app-icon icon-app2">
+          <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#f5f3ff"/>
+            <path d="M6 24V14M11 24V10M16 24V16M21 24V8M26 24V12" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="app-num">App 2 · 15 min</div>
+          <div class="app-title">Scale-Up Solver</div>
+          <div class="app-subtitle">"5× the Demand, the Same Factory"</div>
+        </div>
+      </div>
+      <div class="app-card-body">
+        <p class="app-desc">ClearPath Medical has 510(k) clearance and a sudden 5× demand surge. You have a $2M budget and 12 months to reach 1,000,000 units/year. Mix and match shifts, lines, automation, and CMO outsourcing — but watch out for regulatory traps that can blow your timeline.</p>
+      </div>
+      <div class="app-card-meta">
+        <span class="meta-pill pill-nodes">8 Scale-Up Options</span>
+        <span class="meta-pill pill-device">HemoSeal Valve</span>
+        <span class="meta-pill pill-time">~15 min</span>
+      </div>
+      <div class="app-card-footer">
+        <span class="app-btn" style="background:#7c3aed;color:#fff;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:.83rem;font-weight:700;width:100%;justify-content:center;">Launch App 2 →</span>
+      </div>
+    </a>
+
+    <!-- App 3 -->
+    <a class="app-card app3" href="supply-chain-crisis.html">
+      <div class="app-card-top">
+        <div class="app-icon icon-app3">
+          <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#fffbeb"/>
+            <path d="M16 8v8M16 20v2" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="16" cy="16" r="11" stroke="#d97706" stroke-width="2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="app-num">App 3 · 20 min</div>
+          <div class="app-title">Supply Chain Crisis</div>
+          <div class="app-subtitle">"Something Just Broke. What Do You Do?"</div>
+        </div>
+      </div>
+      <div class="app-card-body">
+        <p class="app-desc">You're VP of Supply Chain at OrthAlign Surgical. Over 3 rounds of 5 disruption events each — supplier failures, logistics shocks, tariff spikes, MDR surges — you'll discover that resilience must be built before the crisis hits, not during it.</p>
+      </div>
+      <div class="app-card-meta">
+        <span class="meta-pill pill-nodes">3 Rounds · 15 Events</span>
+        <span class="meta-pill pill-device">Orthopedic Instrument Set</span>
+        <span class="meta-pill pill-time">~20 min</span>
+        <span class="meta-pill pill-req">Standalone</span>
+      </div>
+      <div class="app-card-footer">
+        <span class="app-btn" style="background:#d97706;color:#fff;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:.83rem;font-weight:700;width:100%;justify-content:center;">Launch App 3 →</span>
+      </div>
+    </a>
+
+    <!-- App 4 -->
+    <a class="app-card app4" href="meddevice-ceo.html">
+      <div class="app-card-top">
+        <div class="app-icon icon-app4">
+          <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#fef2f2"/>
+            <path d="M5 18h4l3-6 4 12 3-8 3 2h5" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="app-num">App 4 · 45–60 min</div>
+          <div class="app-title">MedDevice CEO</div>
+          <div class="app-subtitle">"Design It, Make It, Sell It, Survive It"</div>
+        </div>
+      </div>
+      <div class="app-card-body">
+        <p class="app-desc">The capstone. As co-founder of NovaTech Medical, navigate all 5 phases of a CGM patch startup: DFM design, FDA regulatory strategy, manufacturing setup, commercial launch, and 2M-unit scale-up. $8M in funding, 36 months, or the company fails.</p>
+      </div>
+      <div class="app-card-meta">
+        <span class="meta-pill pill-nodes">5 Phases · 20+ Decisions</span>
+        <span class="meta-pill pill-device">CGM Patch (Class II)</span>
+        <span class="meta-pill pill-time">45–60 min</span>
+        <span class="meta-pill pill-req">Recommended Last</span>
+      </div>
+      <div class="app-card-footer">
+        <span class="app-btn" style="background:#dc2626;color:#fff;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:.83rem;font-weight:700;width:100%;justify-content:center;">Launch App 4 →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Core concepts -->
+  <div class="section-label">Core Concepts Covered</div>
+  <div class="concepts">
+    <div class="concepts-grid">
+      <div class="concept-item"><strong>COGS & Gross Margin</strong>Materials + Labor + OH + Packaging + Sterilization</div>
+      <div class="concept-item"><strong>LOH Rate</strong>OH Rate = Annual OH ÷ Earned Hours; spreads fixed cost over volume</div>
+      <div class="concept-item"><strong>DFM Principles</strong>Design changes are cheap early, catastrophically expensive post-clearance</div>
+      <div class="concept-item"><strong>Economies of Scale</strong>Fixed costs spread over more units → unit cost drops as volume grows</div>
+      <div class="concept-item"><strong>Make vs. Buy</strong>Internal manufacturing vs. CMO — CapEx, control, IP, unit cost tradeoffs</div>
+      <div class="concept-item"><strong>Regulatory Impact</strong>510(k), De Novo, PMA; when design changes require re-submission</div>
+      <div class="concept-item"><strong>Supply Chain Resilience</strong>Dual-sourcing, safety stock, alternate logistics modes</div>
+      <div class="concept-item"><strong>Process Validation</strong>IQ/OQ/PQ; why manufacturing changes require re-validation</div>
+      <div class="concept-item"><strong>Total Cost to Serve</strong>COGS + freight + DC costs + service costs + warranty</div>
+      <div class="concept-item"><strong>Disruption Response</strong>Absorb vs. mitigate vs. avoid — financial impact of each posture</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  The Business of Manufacturing · BE 695 · Boston University · Standalone web apps, no login required
+</footer>
+
+</body>
+</html>

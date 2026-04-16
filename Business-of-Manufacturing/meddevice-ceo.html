@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedDevice CEO — The Business of Manufacturing</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ── Design Tokens ─────────────────────────────────────── */
+  :root {
+    --teal:       #0d9488;
+    --teal-dark:  #0f766e;
+    --teal-light: #ccfbf1;
+    --teal-faint: #f0fdfa;
+    --slate:      #0f172a;
+    --slate-700:  #334155;
+    --slate-500:  #64748b;
+    --slate-300:  #cbd5e1;
+    --slate-100:  #f1f5f9;
+    --slate-50:   #f8fafc;
+    --white:      #ffffff;
+    --amber:      #d97706;
+    --amber-bg:   #fffbeb;
+    --red:        #dc2626;
+    --red-bg:     #fef2f2;
+    --green:      #16a34a;
+    --green-bg:   #f0fdf4;
+    --purple:     #7c3aed;
+    --purple-bg:  #f5f3ff;
+    --radius:     8px;
+    --radius-lg:  12px;
+    --shadow:     0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md:  0 4px 12px rgba(0,0,0,.10);
+  }
+
+  /* ── Reset ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--slate-100);
+    color: var(--slate);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── Top Header ─────────────────────────────────────────── */
+  #top-header {
+    background: var(--slate);
+    color: var(--white);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .logo-svg { flex-shrink: 0; }
+  .header-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--slate-300); }
+  .header-subtitle { font-size: 1.05rem; font-weight: 700; }
+  .header-spacer { flex: 1; }
+  .app-badge {
+    background: var(--teal);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Dashboard Bar ──────────────────────────────────────── */
+  #dashboard {
+    background: var(--white);
+    border-bottom: 1px solid var(--slate-300);
+    padding: 10px 24px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: stretch;
+    flex-shrink: 0;
+  }
+  .dash-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    min-width: 110px;
+    flex: 1;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+  }
+  .dash-label {
+    font-size: .65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--slate-500);
+    white-space: nowrap;
+  }
+  .dash-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--slate);
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .dash-card.highlight { background: var(--teal-faint); border-color: var(--teal); }
+  .dash-card.highlight .dash-value { color: var(--teal-dark); }
+  .reg-risk-low  { color: var(--green)  !important; }
+  .reg-risk-med  { color: var(--amber)  !important; }
+  .reg-risk-high { color: var(--red)    !important; }
+
+  /* ── Phase Track ────────────────────────────────────────── */
+  #phase-track {
+    background: var(--white);
+    border-bottom: 1px solid var(--slate-300);
+    padding: 10px 24px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+  .phase-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 0;
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--slate-500);
+    white-space: nowrap;
+    cursor: default;
+    position: relative;
+  }
+  .phase-step:not(:last-child)::after {
+    content: '→';
+    margin-left: 14px;
+    color: var(--slate-300);
+  }
+  .phase-step.active { color: var(--teal-dark); font-weight: 700; }
+  .phase-step.done   { color: var(--green); }
+  .phase-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 800;
+    background: var(--slate-300);
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .phase-step.active .phase-num { background: var(--teal); }
+  .phase-step.done   .phase-num { background: var(--green); }
+
+  /* ── Main Content ───────────────────────────────────────── */
+  #main { flex: 1; padding: 28px 24px; max-width: 820px; margin: 0 auto; width: 100%; }
+
+  /* ── Cards ──────────────────────────────────────────────── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-sub {
+    font-size: .82rem;
+    color: var(--slate-500);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .section-header {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: .85rem;
+    color: var(--slate-500);
+    margin-bottom: 20px;
+  }
+
+  /* ── Decision Options ───────────────────────────────────── */
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 2px solid var(--slate-300);
+    border-radius: var(--radius);
+    background: var(--white);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--teal);
+    background: var(--teal-faint);
+    box-shadow: 0 0 0 3px rgba(13,148,136,.08);
+  }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.selected {
+    border-color: var(--teal);
+    background: var(--teal-faint);
+  }
+  .option-letter {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--slate-100);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 800;
+    color: var(--slate-500);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .option-btn.selected .option-letter { background: var(--teal); color: #fff; }
+  .option-title { font-size: .88rem; font-weight: 700; color: var(--slate); display: block; }
+  .option-detail { font-size: .78rem; color: var(--slate-500); margin-top: 3px; display: block; line-height: 1.45; }
+  .option-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .tag {
+    font-size: .67rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .tag-cost    { background: #fef3c7; color: #92400e; }
+  .tag-risk    { background: #fee2e2; color: #991b1b; }
+  .tag-speed   { background: #dcfce7; color: #166534; }
+  .tag-quality { background: #ede9fe; color: #5b21b6; }
+  .tag-neutral { background: var(--slate-100); color: var(--slate-700); }
+
+  /* ── Explanation Panel ──────────────────────────────────── */
+  .explanation {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--teal-faint);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: .82rem;
+    line-height: 1.55;
+    color: var(--slate-700);
+    display: none;
+  }
+  .explanation.visible { display: block; }
+  .explanation strong { color: var(--teal-dark); }
+
+  /* ── Alert / Info boxes ─────────────────────────────────── */
+  .alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: .82rem;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .alert-info   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+  .alert-warn   { background: var(--amber-bg); border: 1px solid #fcd34d; color: #92400e; }
+  .alert-danger { background: var(--red-bg); border: 1px solid #fca5a5; color: #991b1b; }
+  .alert-success{ background: var(--green-bg); border: 1px solid #86efac; color: #166534; }
+
+  /* ── Buttons ────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    border-radius: var(--radius);
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: opacity .15s, transform .1s;
+    letter-spacing: .02em;
+    text-decoration: none;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn-primary  { background: var(--teal); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--teal-dark); }
+  .btn-outline  { background: #fff; color: var(--teal); border: 2px solid var(--teal); }
+  .btn-outline:hover:not(:disabled) { background: var(--teal-faint); }
+  .btn-danger   { background: var(--red); color: #fff; }
+  .btn-sm { padding: 6px 14px; font-size: .78rem; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+  /* ── Charts ─────────────────────────────────────────────── */
+  .chart-wrap { position: relative; height: 220px; margin-top: 14px; }
+  .chart-wrap-tall { position: relative; height: 280px; margin-top: 14px; }
+
+  /* ── Metric Grid ────────────────────────────────────────── */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .metric-box {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .metric-label { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--slate-500); }
+  .metric-value { font-size: 1.15rem; font-weight: 800; color: var(--slate); margin-top: 3px; }
+  .metric-note  { font-size: .72rem; color: var(--slate-500); margin-top: 2px; }
+  .metric-good  { color: var(--green) !important; }
+  .metric-warn  { color: var(--amber) !important; }
+  .metric-bad   { color: var(--red)   !important; }
+
+  /* ── Timeline / Turn display ────────────────────────────── */
+  .turn-indicator {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .turn-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--slate-300);
+  }
+  .turn-dot.done   { background: var(--green); }
+  .turn-dot.active { background: var(--teal); }
+
+  /* ── Final Score ────────────────────────────────────────── */
+  .score-table { width: 100%; border-collapse: collapse; font-size: .85rem; margin-top: 14px; }
+  .score-table th { background: var(--slate-100); padding: 8px 12px; text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-500); border-bottom: 1px solid var(--slate-300); }
+  .score-table td { padding: 10px 12px; border-bottom: 1px solid var(--slate-100); vertical-align: middle; }
+  .score-table tr:last-child td { border-bottom: none; }
+  .score-pass { color: var(--green); font-weight: 700; }
+  .score-fail { color: var(--red); font-weight: 700; }
+  .verdict-banner {
+    text-align: center;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+  }
+  .verdict-win  { background: var(--green-bg); border: 2px solid var(--green); }
+  .verdict-lose { background: var(--red-bg); border: 2px solid var(--red); }
+  .verdict-acq  { background: var(--purple-bg); border: 2px solid var(--purple); }
+  .verdict-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+  .verdict-desc  { font-size: .88rem; color: var(--slate-700); }
+
+  /* ── Debrief comparison ─────────────────────────────────── */
+  .debrief-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .debrief-col {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .debrief-col.actual { border-color: var(--teal); background: var(--teal-faint); }
+  .debrief-col-title  { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-500); margin-bottom: 8px; }
+  .debrief-col.actual .debrief-col-title { color: var(--teal-dark); }
+  .debrief-item { font-size: .78rem; color: var(--slate-700); margin-bottom: 4px; line-height: 1.4; }
+  .debrief-item strong { color: var(--slate); }
+
+  /* ── Splash / Intro ─────────────────────────────────────── */
+  .splash {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 0;
+  }
+  .splash-logo { text-align: center; margin-bottom: 20px; }
+  .splash h1 { font-size: 1.8rem; font-weight: 900; color: var(--slate); text-align: center; line-height: 1.2; margin-bottom: 8px; }
+  .splash p  { font-size: .88rem; color: var(--slate-500); text-align: center; line-height: 1.6; margin-bottom: 14px; }
+  .splash-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .splash-fact {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: .8rem;
+    color: var(--slate-700);
+  }
+  .splash-fact strong { display: block; font-size: 1rem; font-weight: 800; color: var(--slate); }
+
+  /* ── Divider ────────────────────────────────────────────── */
+  .divider { border: none; border-top: 1px solid var(--slate-300); margin: 20px 0; }
+
+  /* ── Responsive ─────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    #dashboard { gap: 6px; }
+    .dash-card { min-width: 80px; padding: 6px 8px; }
+    .dash-value { font-size: .9rem; }
+    #main { padding: 16px 12px; }
+    .debrief-row { grid-template-columns: 1fr; }
+  }
+
+  /* ── Print ──────────────────────────────────────────────── */
+  @media print {
+    #top-header, #phase-track { display: none; }
+    .btn { display: none; }
+  }
+
+  /* ── Utility ────────────────────────────────────────────── */
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .flex-gap { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .tag-group { display: flex; gap: 6px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Top Header ── -->
+  <header id="top-header">
+    <svg class="logo-svg" aria-label="NovaTech Medical logo" viewBox="0 0 36 36" width="36" height="36" fill="none">
+      <rect width="36" height="36" rx="8" fill="#0d9488"/>
+      <path d="M8 18h4l3-7 5 14 4-10 3 3h4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div class="header-title">The Business of Manufacturing · App 4</div>
+      <div class="header-subtitle">MedDevice CEO</div>
+    </div>
+    <div class="header-spacer"></div>
+    <span class="app-badge">NovaTech Medical</span>
+  </header>
+
+  <!-- ── Dashboard Bar (hidden until game starts) ── -->
+  <div id="dashboard" class="hidden">
+    <div class="dash-card highlight">
+      <span class="dash-label">Month</span>
+      <span class="dash-value" id="db-month">1 / 36</span>
+    </div>
+    <div class="dash-card">
+      <span class="dash-label">Cash Remaining</span>
+      <span class="dash-value" id="db-cash">$8.00M</span>
+    </div>
+    <div class="dash-card">
+      <span class="dash-label">Est. Unit COGS</span>
+      <span class="dash-value" id="db-cogs">—</span>
+    </div>
+    <div class="dash-card">
+      <span class="dash-label">GM% @ $95 ASP</span>
+      <span class="dash-value" id="db-gm">—</span>
+    </div>
+    <div class="dash-card">
+      <span class="dash-label">Reg Risk</span>
+      <span class="dash-value" id="db-reg">Low</span>
+    </div>
+    <div class="dash-card">
+      <span class="dash-label">Phase</span>
+      <span class="dash-value" id="db-phase">—</span>
+    </div>
+  </div>
+
+  <!-- ── Phase Track (hidden until game starts) ── -->
+  <div id="phase-track" class="hidden">
+    <div class="phase-step" id="pt-1"><span class="phase-num">1</span>Design</div>
+    <div class="phase-step" id="pt-2"><span class="phase-num">2</span>Regulatory</div>
+    <div class="phase-step" id="pt-3"><span class="phase-num">3</span>Manufacturing</div>
+    <div class="phase-step" id="pt-4"><span class="phase-num">4</span>Launch</div>
+    <div class="phase-step" id="pt-5"><span class="phase-num">5</span>Scale-Up</div>
+    <div class="phase-step" id="pt-end"><span class="phase-num">★</span>Results</div>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <main id="main"></main>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   GAME STATE
+   ════════════════════════════════════════════════════ */
+const ASP = 95;   // Average Selling Price
+const INITIAL_CASH = 8_000_000;
+const LOH_OVERHEAD_BASE = 1_000_000; // annual factory overhead (base)
+
+const state = {
+  phase: 0,           // 0=splash, 1-5=phases, 6=results
+  month: 1,
+  cash: INITIAL_CASH,
+  regRisk: 0,         // 0-10; 0-3 low, 4-6 med, 7+ high
+  decisions: {},      // keyed by decision id
+  // Derived
+  unitCOGS: null,
+  gmPct: null,
+  launchMonth: null,
+  launchVolume: null,
+  supplyResilience: 0,
+  // Phase 4 events resolved
+  p4Events: [],
+  p4Turn: 0,
+  p4Revenue: 0,
+  yearOneOpIncome: null,
+};
+
+/* ════════════════════════════════════════════════════
+   DECISION DEFINITIONS
+   ════════════════════════════════════════════════════ */
+const DECISIONS = {
+
+  /* ── Phase 1 ── */
+  biosensor: {
+    phase: 1, id: 'biosensor',
+    title: 'Biosensor Component',
+    context: 'The core sensing element determines accuracy and your supply chain dependencies.',
+    options: [
+      {
+        key: 'A', label: 'Custom ASIC Chip',
+        detail: 'Proprietary, high performance. 1 supplier. $14.00/unit.',
+        tags: [['Quality','quality'],['High Cost','cost'],['Supply Risk','risk']],
+        materialCost: 14.00, supplierCount: 1, regRiskDelta: 0,
+        explanation: 'Custom ASICs give you best-in-class performance and IP protection — but single-source dependency is a serious supply chain vulnerability. One factory fire or quality hold can stop your production entirely.'
+      },
+      {
+        key: 'B', label: 'Licensed Off-the-Shelf Module',
+        detail: '$8.00/unit. 5 suppliers. Slight performance tradeoff.',
+        tags: [['Lower Cost','cost'],['Multi-source','speed'],['Flexibility','quality']],
+        materialCost: 8.00, supplierCount: 5, regRiskDelta: 0,
+        explanation: 'Commodity sensor modules dramatically lower cost and give you negotiating leverage across 5 qualified suppliers. The slight performance gap vs. a custom ASIC rarely matters clinically for a CGM patch at this price point.'
+      }
+    ]
+  },
+
+  adhesive: {
+    phase: 1, id: 'adhesive',
+    title: 'Adhesive Backing',
+    context: 'The adhesive keeps the patch on skin for 14 days — comfort and regulatory implications vary widely.',
+    options: [
+      {
+        key: 'A', label: 'Medical-grade Acrylate',
+        detail: 'Commodity. 3-day cure validation needed. $2.20/unit.',
+        tags: [['Low Cost','cost'],['Proven','quality'],['Common Suppliers','speed']],
+        materialCost: 2.20, supplierCount: 3, regRiskDelta: 0,
+        explanation: 'Acrylate adhesives have decades of skin-contact safety data and broad supplier availability. The 3-day cure validation is a minor process step that is well understood by most CMOs.'
+      },
+      {
+        key: 'B', label: 'Proprietary Hydrogel',
+        detail: 'Custom formulation required. $5.10/unit. Superior wear comfort.',
+        tags: [['High Cost','cost'],['IP Moat','quality'],['Custom Validation','risk']],
+        materialCost: 5.10, supplierCount: 1, regRiskDelta: 1,
+        explanation: 'Hydrogels can meaningfully improve patient comfort and reduce skin irritation complaints — but they require a custom formulation from a single supplier, specialized validation, and add regulatory complexity around biocompatibility testing.'
+      }
+    ]
+  },
+
+  encapsulation: {
+    phase: 1, id: 'encapsulation',
+    title: 'Electronics Encapsulation',
+    context: 'Encapsulation protects the electronics from body moisture and mechanical stress during 14-day wear.',
+    options: [
+      {
+        key: 'A', label: 'Custom Overmold',
+        detail: '$200K tooling CapEx. $1.10/unit at scale. Excellent IP protection.',
+        tags: [['CapEx','cost'],['Low Unit Cost','speed'],['IP Protection','quality']],
+        materialCost: 1.10, capex: 200_000, supplierCount: 3, regRiskDelta: 0,
+        explanation: 'Injection-molded overmolding locks in your form factor and is very cost-effective at volume. The $200K tooling investment pays back quickly once volume exceeds ~50K units/year. Changing the mold later is a significant engineering event.'
+      },
+      {
+        key: 'B', label: 'Potting Compound',
+        detail: 'No tooling required. $2.80/unit. Less elegant but fast to start.',
+        tags: [['No CapEx','speed'],['Higher Unit Cost','cost'],['Flexible','quality']],
+        materialCost: 2.80, capex: 0, supplierCount: 5, regRiskDelta: 0,
+        explanation: 'Potting is a proven, flexible approach — no tooling lead time, easy to switch formulations. It costs more per unit and is harder to automate, making it better suited for low-volume early production than a scaling strategy.'
+      }
+    ]
+  },
+
+  wireless: {
+    phase: 1, id: 'wireless',
+    title: 'Wireless Transmission',
+    context: 'The wireless chipset transmits glucose readings to the patient\'s phone or reader every 5 minutes.',
+    options: [
+      {
+        key: 'A', label: 'Bluetooth 5.0 (Commodity)',
+        detail: 'Widely available. $3.50/unit. 5+ suppliers.',
+        tags: [['Low Cost','cost'],['Multi-source','speed'],['Proven','quality']],
+        materialCost: 3.50, supplierCount: 5, regRiskDelta: 0,
+        explanation: 'BT 5.0 is the industry standard for CGM connectivity. Interoperability with all modern smartphones is a feature, not a limitation. Broad supplier availability protects you from disruptions.'
+      },
+      {
+        key: 'B', label: 'Proprietary Low-Energy RF',
+        detail: '$7.20/unit. Better battery life. 1 supplier.',
+        tags: [['High Cost','cost'],['Battery Life','quality'],['Single Source','risk']],
+        materialCost: 7.20, supplierCount: 1, regRiskDelta: 1,
+        explanation: 'Proprietary RF can extend battery life and improve range — but it requires a custom reader or phone dongle, which adds cost-to-serve and limits your addressable market. Single-source dependency is a red flag for investors and supply chain auditors.'
+      }
+    ]
+  },
+
+  assembly: {
+    phase: 1, id: 'assembly',
+    title: 'Assembly Model',
+    context: 'How you build the device determines your labor cost, scalability ceiling, and CapEx requirement.',
+    options: [
+      {
+        key: 'A', label: 'Fully Manual',
+        detail: '0.45 hrs/unit. Low CapEx. Hard to scale beyond ~200K units/yr.',
+        tags: [['Low CapEx','speed'],['High Labor Cost','cost'],['Scale Limit','risk']],
+        stdHrs: 0.45, capex: 0, regRiskDelta: 0,
+        explanation: 'Manual assembly is the fastest way to start production and requires no capital. But at 0.45 hrs/unit, labor cost is high and your line capacity tops out around 200K units/year — a real constraint if demand takes off.'
+      },
+      {
+        key: 'B', label: 'Semi-Automated',
+        detail: '0.20 hrs/unit. $350K CapEx. Balances cost and flexibility.',
+        tags: [['Moderate CapEx','cost'],['Efficient','quality'],['Scalable','speed']],
+        stdHrs: 0.20, capex: 350_000, regRiskDelta: 0,
+        explanation: 'Semi-automation roughly halves your labor hours per unit versus fully manual, with a manageable capital investment. This is the "Goldilocks" choice for a startup expecting to scale from 50K to 500K units over 3–5 years.'
+      },
+      {
+        key: 'C', label: 'Fully Automated',
+        detail: '0.08 hrs/unit. $1.2M CapEx. 8-month validation required.',
+        tags: [['High CapEx','cost'],['Lowest Labor','quality'],['Slow to Start','risk']],
+        stdHrs: 0.08, capex: 1_200_000, regRiskDelta: 0,
+        explanation: 'Full automation delivers the lowest possible labor cost per unit — ideal for volumes above 1M units/year. The catch: $1.2M upfront, an 8-month process validation timeline before you can produce a single commercial unit, and limited flexibility for design changes.'
+      }
+    ]
+  },
+
+  /* ── Phase 2 ── */
+  pathway: {
+    phase: 2, id: 'pathway',
+    title: 'Regulatory Pathway',
+    context: 'Your choice determines review time, cost, and long-term IP strategy.',
+    options: [
+      {
+        key: 'A', label: '510(k) — Substantial Equivalence',
+        detail: '6–12 month review. ~$300K regulatory spend. Standard for Class II.',
+        tags: [['Faster','speed'],['Lower Cost','cost'],['Proven Path','quality']],
+        regCost: 300_000, monthsAdded: 9, regRiskDelta: 0,
+        explanation: 'The 510(k) is the right tool here. A wearable CGM patch with a predicate device (Dexcom ONE, FreeStyle Libre) is a textbook substantial equivalence case. Choosing De Novo when a predicate exists wastes 6+ months and $300K for no strategic benefit.'
+      },
+      {
+        key: 'B', label: 'De Novo — Novel Device',
+        detail: '12–18 month review. $600K spend. Establishes your device as a predicate.',
+        tags: [['Slower','risk'],['High Cost','cost'],['Strategic IP','quality']],
+        regCost: 600_000, monthsAdded: 15, regRiskDelta: 2,
+        explanation: 'De Novo makes sense if you genuinely lack a predicate — but CGM patches have clear predicates on the market. Pursuing De Novo here is a $300K premium and 6-month delay for a marginal strategic benefit. It raises your regulatory risk score because FDA may question the rationale.',
+      }
+    ]
+  },
+
+  designLock: {
+    phase: 2, id: 'designLock',
+    title: 'Design Lock Timing',
+    context: 'Locking design triggers your FDA submission clock — but manufacturing changes after clearance are costly.',
+    options: [
+      {
+        key: 'A', label: 'Lock Now (Month 5)',
+        detail: 'File immediately. Faster to clearance, but post-clearance DFM changes risk re-submission.',
+        tags: [['Faster','speed'],['Higher Post-Clear Risk','risk']],
+        monthsAdded: 0, regRiskDelta: 1,
+        explanation: 'Locking now gets the submission clock started immediately — but any manufacturing optimization after FDA clearance (process changes, supplier substitutions, assembly modifications) requires a formal change assessment and potentially a new 510(k). This can cost $200K–$500K per change event.'
+      },
+      {
+        key: 'B', label: 'Optimize First (+3 months)',
+        detail: '3-month DFM review before filing. Lower post-clearance risk. Costs $80K in engineering time.',
+        tags: [['Lower Long-term Risk','quality'],['Brief Delay','risk']],
+        monthsAdded: 3, regRiskDelta: -1, extraCost: 80_000,
+        explanation: 'A 3-month DFM review before locking typically saves far more than it costs. The engineering time (~$80K) is trivial compared to a post-clearance design change ($500K–$2M+). In most scenarios, this is the financially correct decision.'
+      }
+    ]
+  },
+
+  clinicalEvidence: {
+    phase: 2, id: 'clinicalEvidence',
+    title: 'Clinical Evidence Strategy',
+    context: 'FDA needs evidence of substantial equivalence — the question is how much clinical data you\'ll include.',
+    options: [
+      {
+        key: 'A', label: 'Published Literature + Bench Testing',
+        detail: 'Faster and cheaper. 30% chance FDA sends an Additional Information request.',
+        tags: [['Faster','speed'],['Lower Cost','cost'],['FDA Risk','risk']],
+        extraCost: 0, monthsAdded: 0, regRiskDelta: 1,
+        explanation: 'Literature-supported submissions work well when the predicate comparison is clear. The risk: FDA may find gaps in your bench data and send an AI (Additional Information) request — pausing your timeline for up to 90 days and raising your regulatory risk score.'
+      },
+      {
+        key: 'B', label: 'Small Clinical Study',
+        detail: '4-month delay. $400K additional cost. Stronger submission, lower AI request risk.',
+        tags: [['Stronger Data','quality'],['Higher Cost','cost'],['4-Month Delay','risk']],
+        extraCost: 400_000, monthsAdded: 4, regRiskDelta: -1,
+        explanation: 'Clinical data is the gold standard for CGM accuracy claims. A prospective study adds $400K and 4 months, but meaningfully strengthens your submission and reduces the chance of an AI request from FDA — preserving your timeline and your Regulatory Risk score.'
+      }
+    ]
+  },
+
+  /* ── Phase 3 ── */
+  makeOrBuy: {
+    phase: 3, id: 'makeOrBuy',
+    title: 'Make or Buy Decision',
+    context: 'Where and how you manufacture determines your cost structure, CapEx, and supply chain control.',
+    options: [
+      {
+        key: 'A', label: 'Build Internal Manufacturing Line',
+        detail: '$800K CapEx. 8-month setup. Full control. 300K units/yr capacity.',
+        tags: [['High CapEx','cost'],['Full Control','quality'],['IP Protection','quality']],
+        capex: 800_000, cmoUnitCost: 0, monthsAdded: 8, capacity: 300_000, regRiskDelta: 0,
+        explanation: 'Internal manufacturing gives you full process control, IP protection, and the lowest per-unit cost at scale. The $800K and 8-month setup are significant for a startup — but if volume justifies it, internal capacity is the most profitable long-term posture.'
+      },
+      {
+        key: 'B', label: 'Contract Manufacturer (CMO)',
+        detail: '$150K qualification. Faster to launch. +$7.00/unit CMO fee. Flexible capacity.',
+        tags: [['Low CapEx','speed'],['Faster Launch','speed'],['Higher Unit Cost','cost']],
+        capex: 150_000, cmoUnitCost: 7.00, monthsAdded: 3, capacity: 999_999, regRiskDelta: 0,
+        explanation: 'CMOs get you to market faster with lower capital at risk — critical for a startup conserving cash. The +$7/unit cost is real, but at 150K units/year it represents ~$1M/yr in additional COGS. Weigh that against the capital you preserve and the speed-to-market advantage.'
+      },
+      {
+        key: 'C', label: 'Hybrid (Internal + CMO)',
+        detail: '$400K CapEx + $100K CMO qualification. 150K internal + 150K CMO capacity.',
+        tags: [['Balanced','quality'],['Dual Capacity','speed'],['Moderate Cost','cost']],
+        capex: 500_000, cmoUnitCost: 3.50, monthsAdded: 6, capacity: 300_000, regRiskDelta: 0,
+        explanation: 'A hybrid strategy hedges your bets: internal capacity for cost-sensitive core volume, CMO for surge and geographic flexibility. This is the preferred structure for medical device companies scaling from 100K to 500K+ units — but it requires managing two validated production environments simultaneously.'
+      }
+    ]
+  },
+
+  supplierStrategy: {
+    phase: 3, id: 'supplierStrategy',
+    title: 'Supplier Strategy (Biosensor)',
+    context: 'A supply disruption event will occur in Phase 4. Your choice here determines how you absorb it.',
+    options: [
+      {
+        key: 'A', label: 'Single-Source',
+        detail: 'No additional qualification cost. Full supply disruption risk.',
+        tags: [['No Extra Cost','speed'],['High Risk','risk']],
+        qualCost: 0, unitCostDelta: 0, resilience: 0, regRiskDelta: 1,
+        explanation: 'Single-sourcing saves you the ~$80K second-source qualification — but in Phase 4, a supplier quality event will hit. If you have only one source, you will face a forced production hold or expensive incoming inspection. The savings rarely justify the risk.'
+      },
+      {
+        key: 'B', label: 'Dual-Source',
+        detail: '$80K second-source qualification. +$0.80/unit average cost. Full disruption protection.',
+        tags: [['Resilient','quality'],['Low Extra Cost','cost'],['Best Practice','speed']],
+        qualCost: 80_000, unitCostDelta: 0.80, resilience: 30, regRiskDelta: -1,
+        explanation: 'Dual-sourcing is the industry standard for critical components in Class II medical devices. The qualification cost is a one-time investment. In Phase 4, a supplier quality event will occur — dual-sourced companies absorb it at zero cost and zero delay. It is almost always the right call.'
+      }
+    ]
+  },
+
+  qms: {
+    phase: 3, id: 'qms',
+    title: 'Quality Management System',
+    context: 'Your QMS determines your FDA compliance posture, complaint rate, and cost-to-serve.',
+    options: [
+      {
+        key: 'A', label: 'Minimal QMS',
+        detail: '$120K setup. Meets FDA 21 CFR 820. $1.20/unit QC cost.',
+        tags: [['Low Setup Cost','speed'],['Higher QC Risk','risk']],
+        setupCost: 120_000, qcUnitCost: 1.20, regRiskDelta: 1,
+        explanation: 'A minimal QMS keeps upfront costs low but exposes you to higher field complaint rates, more MDRs, and audit findings. In a Class II wearable, skin reactions or inaccurate glucose readings generate complaints fast — and complaint handling costs $300–$800 per event.'
+      },
+      {
+        key: 'B', label: 'Robust QMS with Automated In-line Testing',
+        detail: '$280K setup. $0.80/unit QC cost at scale. Lower complaint rate.',
+        tags: [['Strong Compliance','quality'],['Lower Long-term Cost','cost'],['Audit-ready','quality']],
+        setupCost: 280_000, qcUnitCost: 0.80, regRiskDelta: -1,
+        explanation: 'Automated in-line testing catches defects before they reach patients, reducing complaint rates by 40–60% in comparable devices. The additional $160K upfront pays back in Year 1 through avoided MDR response costs, CAPA investigations, and potential field actions.'
+      }
+    ]
+  },
+
+  launchVolume: {
+    phase: 3, id: 'launchVolume',
+    title: 'Initial Production Volume',
+    context: 'Your launch volume determines your unit economics and cash commitment at the moment of commercial launch.',
+    options: [
+      {
+        key: 'A', label: '50,000 units/year',
+        detail: 'Low risk. Proves the manufacturing line. Limited revenue.',
+        tags: [['Low Risk','quality'],['Minimal Cash Commit','speed']],
+        volume: 50_000, regRiskDelta: 0,
+        explanation: 'Launching at 50K units is capital-conservative and lets you prove your manufacturing process and quality system before committing to large inventory. The downside: at low volume, fixed costs are spread over fewer units, keeping your COGS elevated.'
+      },
+      {
+        key: 'B', label: '150,000 units/year',
+        detail: 'Moderate CapEx. Meaningful revenue. Balanced risk.',
+        tags: [['Balanced','quality'],['Good Unit Economics','cost']],
+        volume: 150_000, regRiskDelta: 0,
+        explanation: '150K units/year is the sweet spot for most Class II device launches — enough volume to get meaningful cost reduction from overhead absorption while not over-committing cash to inventory. This is the most common launch volume for startup medtech commercialization.'
+      },
+      {
+        key: 'C', label: '300,000 units/year',
+        detail: 'Requires full line or large CMO commitment. High cash commitment.',
+        tags: [['Aggressive','risk'],['Best Unit Economics','cost'],['Demand Risk','risk']],
+        volume: 300_000, regRiskDelta: 0,
+        explanation: 'Launching at 300K units maximizes your unit cost reduction through overhead absorption — but requires either a fully-staffed internal line or a large CMO commitment. If market adoption is slower than forecast, you risk excess inventory and cash burn. Only appropriate if you have strong pre-orders or a GPO contract in hand.'
+      }
+    ]
+  },
+
+  /* ── Phase 4 Events (selected randomly each turn) ── */
+
+  /* ── Phase 5 ── */
+  scaleUp: {
+    phase: 5, id: 'scaleUp',
+    title: 'Scale-Up Strategy to 2M Units/Year',
+    context: 'Investors have secured $3M in additional funding. Your earlier decisions now constrain or expand your options.',
+    options: [
+      {
+        key: 'A', label: 'Expand Internal Capacity',
+        detail: 'Add a second internal line. $1.2M CapEx. Maximum control and lowest long-term COGS.',
+        tags: [['Max Control','quality'],['High CapEx','cost'],['Highest Margin','quality']],
+        capex: 1_200_000,
+        explanation: 'Expanding internal capacity is the right long-term play if you have the capital. At 2M units/year, the overhead absorption rate drops dramatically — and your gross margin can approach 65–70%. Capital-intensive, but the path to sustained profitability.'
+      },
+      {
+        key: 'B', label: 'Scale Through CMO Network',
+        detail: 'Add 2–3 qualified CMOs globally. $600K qualification costs. Fastest ramp.',
+        tags: [['Fast Ramp','speed'],['Geographic Flex','quality'],['Higher Per-Unit','cost']],
+        capex: 600_000,
+        explanation: 'A CMO network gets you to 2M units/year fastest and with global geographic diversity — which is increasingly important in a world of tariff volatility and geopolitical risk. The per-unit CMO fee compresses margins, but speed-to-scale may be worth the tradeoff if competition is intensifying.'
+      },
+      {
+        key: 'C', label: 'Joint Venture with Strategic Partner',
+        detail: '$400K deal costs. Shared manufacturing investment. Partner gains licensing rights.',
+        tags: [['Capital Efficient','cost'],['Shared Risk','quality'],['IP Tradeoff','risk']],
+        capex: 400_000,
+        explanation: 'A JV with a large medtech manufacturer gives you access to their production infrastructure, global distribution, and regulatory expertise — in exchange for licensing fees or equity. This can be the fastest path to profitability, but you surrender some IP control and pricing power.'
+      }
+    ]
+  }
+};
+
+/* ════════════════════════════════════════════════════
+   FINANCIAL CALCULATIONS
+   ════════════════════════════════════════════════════ */
+function calcUnitCOGS(vol) {
+  const d = state.decisions;
+  if (!d.biosensor || !d.adhesive || !d.encapsulation || !d.wireless || !d.assembly) return null;
+
+  const materials =
+    DECISIONS.biosensor.options.find(o=>o.key===d.biosensor).materialCost +
+    DECISIONS.adhesive.options.find(o=>o.key===d.adhesive).materialCost +
+    DECISIONS.encapsulation.options.find(o=>o.key===d.encapsulation).materialCost +
+    DECISIONS.wireless.options.find(o=>o.key===d.wireless).materialCost;
+
+  const asmOpt   = DECISIONS.assembly.options.find(o=>o.key===d.assembly);
+  const stdHrs   = asmOpt.stdHrs;
+  const DL_RATE  = 35; // $/hr direct labor
+
+  // Overhead
+  const annualOH = LOH_OVERHEAD_BASE + (d.qms ? DECISIONS.qms.options.find(o=>o.key===d.qms).setupCost * 0.15 : 0);
+  const earnedHrs = (vol||150_000) * stdHrs;
+  const ohRate   = annualOH / earnedHrs;
+  const lohRate  = DL_RATE + ohRate;
+  const laborOH  = lohRate * stdHrs;
+
+  // QC cost
+  const qcCost = d.qms ? DECISIONS.qms.options.find(o=>o.key===d.qms).qcUnitCost : 1.20;
+
+  // CMO cost
+  let cmoCost = 0;
+  if (d.makeOrBuy) {
+    const mobOpt = DECISIONS.makeOrBuy.options.find(o=>o.key===d.makeOrBuy);
+    cmoCost = mobOpt.cmoUnitCost || 0;
+    if (d.makeOrBuy === 'C') {
+      // hybrid: half units via CMO
+      cmoCost = mobOpt.cmoUnitCost * 0.5;
+    }
+  }
+
+  // Supplier cost delta
+  const supplierDelta = (d.supplierStrategy && d.supplierStrategy==='B') ? 0.80 : 0;
+
+  const pkg         = 1.50;
+  const sterilization= 2.20;
+  const freightOut  = 1.80;
+
+  const total = materials + laborOH + qcCost + cmoCost + supplierDelta + pkg + sterilization + freightOut;
+  return Math.round(total * 100) / 100;
+}
+
+function calcGM(cogs) {
+  if (cogs === null) return null;
+  return Math.round(((ASP - cogs) / ASP) * 1000) / 10;
+}
+
+function calcScalabilityCOGS() {
+  return [100_000, 500_000, 2_000_000].map(v => ({ vol: v, cogs: calcUnitCOGS(v) }));
+}
+
+function updateDashboard() {
+  const cogs = calcUnitCOGS(state.launchVolume || 150_000);
+  const gm   = calcGM(cogs);
+  state.unitCOGS = cogs;
+  state.gmPct    = gm;
+
+  document.getElementById('db-month').textContent = `${state.month} / 36`;
+  document.getElementById('db-cash').textContent  = formatMoney(state.cash);
+  document.getElementById('db-cogs').textContent  = cogs !== null ? `$${cogs.toFixed(2)}` : '—';
+
+  const gmEl = document.getElementById('db-gm');
+  gmEl.textContent = gm !== null ? `${gm}%` : '—';
+  gmEl.className   = 'dash-value ' + (gm === null ? '' : gm >= 58 ? 'metric-good' : gm >= 45 ? 'metric-warn' : 'metric-bad');
+
+  const riskLabel = state.regRisk <= 3 ? 'Low' : state.regRisk <= 6 ? 'Medium' : 'High';
+  const riskEl    = document.getElementById('db-reg');
+  riskEl.textContent = riskLabel;
+  riskEl.className   = 'dash-value ' + (state.regRisk <= 3 ? 'reg-risk-low' : state.regRisk <= 6 ? 'reg-risk-med' : 'reg-risk-high');
+
+  const phaseNames = ['—','Design','Regulatory','Manufacturing','Launch','Scale-Up','Results'];
+  document.getElementById('db-phase').textContent = phaseNames[state.phase] || '—';
+
+  // Phase track
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`pt-${i}`);
+    if (!el) continue;
+    el.className = 'phase-step' + (i < state.phase ? ' done' : i === state.phase ? ' active' : '');
+  }
+  const endEl = document.getElementById('pt-end');
+  if (endEl) endEl.className = 'phase-step' + (state.phase === 6 ? ' active' : '');
+}
+
+function formatMoney(n) {
+  if (Math.abs(n) >= 1_000_000) return `$${(n/1_000_000).toFixed(2)}M`;
+  if (Math.abs(n) >= 1_000)     return `$${(n/1_000).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+}
+
+/* ════════════════════════════════════════════════════
+   RENDERING ENGINE
+   ════════════════════════════════════════════════════ */
+const main = document.getElementById('main');
+
+function render(html) { main.innerHTML = html; }
+
+function showDashboard(show) {
+  document.getElementById('dashboard').classList.toggle('hidden', !show);
+  document.getElementById('phase-track').classList.toggle('hidden', !show);
+}
+
+/* ─── Decision Card ─── */
+function decisionCard(defId, onSelect) {
+  const def  = DECISIONS[defId];
+  const chosen = state.decisions[defId] || null;
+
+  const optionsHTML = def.options.map(opt => {
+    const isSelected = chosen === opt.key;
+    const tagsHTML   = opt.tags.map(([label, cls]) => `<span class="tag tag-${cls}">${label}</span>`).join('');
+    return `
+      <button class="option-btn ${isSelected ? 'selected' : ''}"
+              data-def="${defId}" data-key="${opt.key}"
+              ${chosen ? 'disabled' : ''}>
+        <span class="option-letter">${opt.key}</span>
+        <div>
+          <span class="option-title">${opt.label}</span>
+          <span class="option-detail">${opt.detail}</span>
+          <div class="option-tags mt-8">${tagsHTML}</div>
+        </div>
+      </button>`;
+  }).join('');
+
+  const expId = `exp-${defId}`;
+  const expHTML = chosen ? (() => {
+    const opt = def.options.find(o => o.key === chosen);
+    return `<div class="explanation visible" id="${expId}"><strong>Why it matters:</strong> ${opt.explanation}</div>`;
+  })() : `<div class="explanation" id="${expId}"></div>`;
+
+  return `
+    <div class="card" id="card-${defId}">
+      <div class="card-title">${def.title}</div>
+      <div class="card-sub">${def.context}</div>
+      <div class="options-grid">${optionsHTML}</div>
+      ${expHTML}
+    </div>`;
+}
+
+function attachDecisionListeners(defIds, onAllDone) {
+  defIds.forEach(defId => {
+    document.querySelectorAll(`[data-def="${defId}"]`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const def = DECISIONS[defId];
+        const opt = def.options.find(o => o.key === key);
+
+        state.decisions[defId] = key;
+
+        // Apply cost / risk effects
+        if (opt.regRiskDelta)  state.regRisk  = Math.max(0, state.regRisk + opt.regRiskDelta);
+        if (opt.capex)         state.cash     -= opt.capex;
+        if (opt.qualCost)      state.cash     -= opt.qualCost;
+        if (opt.setupCost)     state.cash     -= opt.setupCost;
+        if (opt.extraCost)     state.cash     -= opt.extraCost;
+        if (opt.regCost)       state.cash     -= opt.regCost;
+        if (opt.monthsAdded)   state.month    += opt.monthsAdded;
+
+        updateDashboard();
+
+        // Re-render just this card's buttons as locked + selected
+        document.querySelectorAll(`[data-def="${defId}"]`).forEach(b => {
+          b.disabled = true;
+          if (b.dataset.key === key) b.classList.add('selected');
+          else b.classList.remove('selected');
+          b.querySelector('.option-letter').style.background = b.dataset.key === key ? 'var(--teal)' : '';
+          b.querySelector('.option-letter').style.color      = b.dataset.key === key ? '#fff' : '';
+        });
+
+        // Show explanation
+        const expEl = document.getElementById(`exp-${defId}`);
+        if (expEl) {
+          expEl.innerHTML = `<strong>Why it matters:</strong> ${opt.explanation}`;
+          expEl.classList.add('visible');
+        }
+
+        if (onAllDone && defIds.every(id => state.decisions[id])) onAllDone();
+      });
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   SCREENS
+   ════════════════════════════════════════════════════ */
+
+/* ─── Splash ─── */
+function showSplash() {
+  state.phase = 0;
+  showDashboard(false);
+  render(`
+    <div class="splash">
+      <div class="splash-logo">
+        <svg viewBox="0 0 60 60" width="60" height="60" fill="none" aria-label="NovaTech Medical">
+          <rect width="60" height="60" rx="14" fill="#0f172a"/>
+          <path d="M12 30h7l5-12 8 24 7-17 5 5h6" stroke="#0d9488" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>MedDevice CEO</h1>
+      <p style="font-size:1rem;color:var(--slate);font-weight:600;margin-bottom:4px;">Design It. Make It. Sell It. Survive It.</p>
+      <p>You are co-founder and Head of Operations at <strong>NovaTech Medical</strong>, a startup developing a Class II wearable continuous glucose monitor (CGM) patch. You have $8M in investor funding and 36 months to reach commercial launch — or the company fails.</p>
+
+      <div class="splash-facts">
+        <div class="splash-fact"><strong>$8M</strong>Starting capital</div>
+        <div class="splash-fact"><strong>36 months</strong>Launch deadline</div>
+        <div class="splash-fact"><strong>$95/unit</strong>Target selling price</div>
+        <div class="splash-fact"><strong>5 Phases</strong>45–60 minute simulation</div>
+      </div>
+
+      <div class="alert alert-info">
+        <strong>Your mission:</strong> Achieve commercial launch by Month 30, hit ≥58% gross margin, stay cash-positive, and keep your Regulatory Risk score low. Every decision has consequences — you will feel the cost of a bad choice.
+      </div>
+
+      <div class="alert alert-warn" style="margin-top:0">
+        <strong>Learning objectives:</strong> Integrate E2E supply chain concepts — DFM, regulatory strategy, manufacturing setup, and financial metrics — in a single realistic startup simulation.
+      </div>
+
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn btn-primary" id="btn-start" style="font-size:1rem;padding:14px 36px;">
+          Begin Simulation →
+        </button>
+      </div>
+    </div>`);
+
+  document.getElementById('btn-start').onclick = () => showPhase1();
+}
+
+/* ─── Phase 1: Design Decisions ─── */
+function showPhase1() {
+  state.phase = 1;
+  state.month = 1;
+  showDashboard(true);
+  updateDashboard();
+
+  const defIds = ['biosensor','adhesive','encapsulation','wireless','assembly'];
+
+  render(`
+    <div class="section-header">Phase 1 — Design Decisions</div>
+    <div class="section-sub">Months 1–6 · Make 5 DFM decisions that set the foundation for all subsequent phases. Each choice is locked once made.</div>
+
+    <div class="alert alert-info">
+      <strong>Context:</strong> You are designing a disposable 14-day wearable CGM patch. These design choices will determine your unit cost, regulatory risk, and manufacturing scalability for the life of the product.
+    </div>
+
+    ${defIds.map(id => decisionCard(id, null)).join('')}
+
+    <div id="p1-cta" class="hidden">
+      <div class="card" id="card-scalability">
+        <div class="card-title">📊 Scalability Forecast</div>
+        <div class="card-sub">Projected unit COGS at different production volumes based on your design choices. Overhead is spread over more units as volume grows — this is economies of scale in action.</div>
+        <div class="chart-wrap"><canvas id="chart-scalability"></canvas></div>
+        <div class="metric-grid" id="scalability-metrics"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-p2">Continue to Phase 2: Regulatory Strategy →</button>
+        </div>
+      </div>
+    </div>`);
+
+  attachDecisionListeners(defIds, () => {
+    // All 5 decisions made
+    state.month = 6;
+    updateDashboard();
+    document.getElementById('p1-cta').classList.remove('hidden');
+    renderScalabilityChart();
+    document.getElementById('btn-p2').onclick = showPhase2;
+    document.getElementById('card-scalability').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function renderScalabilityChart() {
+  const data = calcScalabilityCOGS();
+  const labels = data.map(d => d.vol >= 1_000_000 ? `${(d.vol/1_000_000).toFixed(1)}M` : `${(d.vol/1_000).toFixed(0)}K`);
+  const values = data.map(d => d.cogs);
+  const gms    = data.map(d => calcGM(d.cogs));
+
+  const metricsHTML = data.map((d, i) => `
+    <div class="metric-box">
+      <div class="metric-label">@ ${labels[i]} units/yr</div>
+      <div class="metric-value">$${values[i].toFixed(2)}</div>
+      <div class="metric-note ${gms[i]>=58?'metric-good':gms[i]>=45?'metric-warn':'metric-bad'}">GM: ${gms[i]}%</div>
+    </div>`).join('');
+  document.getElementById('scalability-metrics').innerHTML = metricsHTML;
+
+  const ctx = document.getElementById('chart-scalability').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Unit COGS ($)',
+          data: values,
+          backgroundColor: ['#0d9488cc','#0d9488aa','#0d9488'],
+          borderRadius: 6,
+          yAxisID: 'y'
+        },
+        {
+          label: 'GM%',
+          data: gms,
+          type: 'line',
+          borderColor: '#d97706',
+          backgroundColor: 'transparent',
+          pointBackgroundColor: '#d97706',
+          tension: 0.3,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y:  { title: { display: true, text: 'Unit COGS ($)' }, beginAtZero: false, grid: { color: '#f1f5f9' } },
+        y2: { title: { display: true, text: 'GM%' }, position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+}
+
+/* ─── Phase 2: Regulatory Strategy ─── */
+function showPhase2() {
+  state.phase = 2;
+  state.month = 6;
+  updateDashboard();
+
+  const defIds = ['pathway','designLock','clinicalEvidence'];
+
+  render(`
+    <div class="section-header">Phase 2 — Regulatory Strategy</div>
+    <div class="section-sub">Months 4–10 · Navigate FDA clearance. Your choices here affect your launch timeline and post-launch manufacturing flexibility.</div>
+
+    <div class="alert alert-warn">
+      <strong>Reminder:</strong> Any design change post-FDA clearance requires a formal change assessment and may trigger a new 510(k) submission. Think carefully before locking the design.
+    </div>
+
+    ${defIds.map(id => decisionCard(id, null)).join('')}
+
+    <div id="p2-cta" class="hidden"></div>`);
+
+  attachDecisionListeners(defIds, () => {
+    // Random FDA AI request event (30% chance if chose literature+bench)
+    let aiEvent = false;
+    const cevChoice = state.decisions.clinicalEvidence;
+    if (cevChoice === 'A' && Math.random() < 0.30) {
+      aiEvent = true;
+      state.month  += 3;
+      state.regRisk = Math.min(10, state.regRisk + 1);
+      state.cash   -= 50_000;
+    }
+
+    // FDA rejection risk if reg risk ≥ 7
+    let rejected = false;
+    if (state.regRisk >= 7 && Math.random() < 0.25) {
+      rejected = true;
+      state.month += 6;
+      state.cash  -= 200_000;
+      state.regRisk = Math.min(10, state.regRisk + 1);
+    }
+
+    updateDashboard();
+
+    const ctaEl = document.getElementById('p2-cta');
+    let eventHTML = '';
+    if (aiEvent) {
+      eventHTML += `
+        <div class="alert alert-warn" style="margin-bottom:10px">
+          <strong>⚠️ FDA Additional Information (AI) Request!</strong><br>
+          FDA identified gaps in your clinical evidence package and sent an AI request. You responded within 90 days. 
+          <strong>+3 months delay, −$50K, Regulatory Risk +1.</strong>
+        </div>`;
+    }
+    if (rejected) {
+      eventHTML += `
+        <div class="alert alert-danger" style="margin-bottom:10px">
+          <strong>🚨 FDA Refused to Accept!</strong><br>
+          Your Regulatory Risk score was high enough that FDA flagged deficiencies in your submission. Resubmission required. 
+          <strong>+6 months, −$200K, Regulatory Risk +1.</strong>
+        </div>`;
+    }
+    if (!aiEvent && !rejected) {
+      eventHTML = `<div class="alert alert-success" style="margin-bottom:10px"><strong>✅ Smooth Clearance!</strong> No FDA issues. Your submission was accepted without additional requests.</div>`;
+    }
+
+    const cogs = calcUnitCOGS(150_000);
+    ctaEl.classList.remove('hidden');
+    ctaEl.innerHTML = `
+      <div class="card">
+        <div class="card-title">📋 Clearance Summary</div>
+        ${eventHTML}
+        <div class="metric-grid">
+          <div class="metric-box">
+            <div class="metric-label">Current Month</div>
+            <div class="metric-value">${state.month}</div>
+            <div class="metric-note">${36 - state.month} months to deadline</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Cash Remaining</div>
+            <div class="metric-value">${formatMoney(state.cash)}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Est. Unit COGS</div>
+            <div class="metric-value">${cogs !== null ? '$'+cogs.toFixed(2) : '—'}</div>
+            <div class="metric-note metric-${calcGM(cogs)>=58?'good':calcGM(cogs)>=45?'warn':'bad'}">GM: ${calcGM(cogs) ?? '—'}%</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Reg Risk Score</div>
+            <div class="metric-value reg-risk-${state.regRisk<=3?'low':state.regRisk<=6?'med':'high'}">${state.regRisk}/10</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-p3">Continue to Phase 3: Manufacturing Setup →</button>
+        </div>
+      </div>`;
+    document.getElementById('btn-p3').onclick = showPhase3;
+    ctaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+/* ─── Phase 3: Manufacturing Setup ─── */
+function showPhase3() {
+  state.phase = 3;
+  updateDashboard();
+
+  const defIds = ['makeOrBuy','supplierStrategy','qms','launchVolume'];
+
+  render(`
+    <div class="section-header">Phase 3 — Manufacturing Setup</div>
+    <div class="section-sub">Months 10–20 · Configure your manufacturing operation. These decisions determine your true cost structure at launch.</div>
+
+    <div class="alert alert-info">
+      <strong>FDA Cleared!</strong> You now have regulatory clearance to manufacture and sell your CGM patch. Your next decisions define how — and where — you'll make it.
+    </div>
+
+    ${defIds.map(id => decisionCard(id, null)).join('')}
+
+    <div id="p3-cta" class="hidden"></div>`);
+
+  attachDecisionListeners(defIds, () => {
+    // Apply manufacturing setup months
+    const mobOpt = DECISIONS.makeOrBuy.options.find(o=>o.key===state.decisions.makeOrBuy);
+    state.month += mobOpt.monthsAdded;
+    state.launchVolume = DECISIONS.launchVolume.options.find(o=>o.key===state.decisions.launchVolume).volume;
+
+    updateDashboard();
+
+    const cogs  = calcUnitCOGS(state.launchVolume);
+    const gm    = calcGM(cogs);
+    const volLabel = state.launchVolume >= 1_000_000 ?
+      `${(state.launchVolume/1_000_000).toFixed(1)}M` :
+      `${(state.launchVolume/1_000).toFixed(0)}K`;
+
+    const ctaEl = document.getElementById('p3-cta');
+    ctaEl.classList.remove('hidden');
+    ctaEl.innerHTML = `
+      <div class="card">
+        <div class="card-title">🏭 Manufacturing Line Validated</div>
+        <div class="card-sub">Your production line has completed IQ/OQ/PQ validation. You are ready to launch.</div>
+        <div class="metric-grid">
+          <div class="metric-box">
+            <div class="metric-label">Launch Month</div>
+            <div class="metric-value ${state.month<=30?'metric-good':'metric-bad'}">${state.month}</div>
+            <div class="metric-note">${state.month<=30?'✓ On track':'⚠ Behind schedule'}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Launch Volume</div>
+            <div class="metric-value">${volLabel} / yr</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Unit COGS @ Launch</div>
+            <div class="metric-value">$${cogs.toFixed(2)}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Gross Margin</div>
+            <div class="metric-value metric-${gm>=58?'good':gm>=45?'warn':'bad'}">${gm}%</div>
+            <div class="metric-note">Target: ≥58%</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Cash Remaining</div>
+            <div class="metric-value">${formatMoney(state.cash)}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Reg Risk</div>
+            <div class="metric-value reg-risk-${state.regRisk<=3?'low':state.regRisk<=6?'med':'high'}">${state.regRisk <= 3 ? 'Low' : state.regRisk <= 6 ? 'Medium' : 'High'}</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-cogs-breakdown"></canvas></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-p4">Continue to Phase 4: Commercial Launch →</button>
+        </div>
+      </div>`;
+
+    renderCOGSBreakdown(cogs);
+    document.getElementById('btn-p4').onclick = showPhase4;
+    ctaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function renderCOGSBreakdown(totalCogs) {
+  const d = state.decisions;
+  const materials =
+    DECISIONS.biosensor.options.find(o=>o.key===d.biosensor).materialCost +
+    DECISIONS.adhesive.options.find(o=>o.key===d.adhesive).materialCost +
+    DECISIONS.encapsulation.options.find(o=>o.key===d.encapsulation).materialCost +
+    DECISIONS.wireless.options.find(o=>o.key===d.wireless).materialCost;
+
+  const asmOpt  = DECISIONS.assembly.options.find(o=>o.key===d.assembly);
+  const stdHrs  = asmOpt.stdHrs;
+  const vol     = state.launchVolume || 150_000;
+  const annualOH= LOH_OVERHEAD_BASE + DECISIONS.qms.options.find(o=>o.key===d.qms).setupCost * 0.15;
+  const ohRate  = annualOH / (vol * stdHrs);
+  const lohRate = 35 + ohRate;
+  const laborOH = lohRate * stdHrs;
+
+  const qcCost  = DECISIONS.qms.options.find(o=>o.key===d.qms).qcUnitCost;
+  const mobOpt  = DECISIONS.makeOrBuy.options.find(o=>o.key===d.makeOrBuy);
+  let cmoCost   = mobOpt.cmoUnitCost || 0;
+  if (d.makeOrBuy === 'C') cmoCost *= 0.5;
+  const supDelta= d.supplierStrategy === 'B' ? 0.80 : 0;
+  const other   = 1.50 + 2.20 + 1.80; // pkg + sterilization + freight
+
+  const ctx = document.getElementById('chart-cogs-breakdown').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Materials','Labor & OH','QC','CMO Fee','Supplier Delta','Pkg/Steril/Freight'],
+      datasets: [{
+        label: '$/unit',
+        data: [materials, laborOH, qcCost, cmoCost, supDelta, other].map(v => Math.round(v*100)/100),
+        backgroundColor: ['#0d9488','#0f766e','#7c3aed','#d97706','#dc2626','#64748b'],
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, title: { display: true, text: 'Unit COGS Breakdown ($/unit)' } },
+      scales: { x: { beginAtZero: true, grid: { color: '#f1f5f9' } } }
+    }
+  });
+}
+
+/* ─── Phase 4: Commercial Launch ─── */
+const P4_EVENTS = [
+  {
+    id: 'supplier_quality',
+    title: '⚠️ Biosensor Supplier Quality Issue',
+    desc: '15% of incoming biosensor components are failing incoming inspection. Every day of delay costs you $25K in lost revenue.',
+    options: [
+      {
+        key: 'A', label: 'Hold Production — Investigate',
+        detail: 'Pause production for 3 weeks while your team investigates root cause.',
+        effect: s => { s.cash -= 75_000; },
+        outcome: 'Production held 3 weeks. Root cause identified and corrected. Cost: $75K in lost margin.',
+        resilienceEffect: 0
+      },
+      {
+        key: 'B', label: '100% Incoming Inspection',
+        detail: 'Inspect every component. +$2.10/unit indefinitely until resolved.',
+        effect: s => { s.cash -= 60_000; s.unitCOGS = (s.unitCOGS||30) + 2.10; },
+        outcome: 'All defective parts caught. But inspection cost adds $2.10/unit to COGS permanently until supplier is corrected.',
+        resilienceEffect: 0
+      },
+      {
+        key: 'C', label: 'Switch to Second Source (Dual-source only)',
+        detail: 'Only available if you dual-sourced in Phase 3. Zero production impact.',
+        dualSourceOnly: true,
+        effect: s => {},
+        outcome: '✅ Switched to second source immediately. Zero delay, zero extra cost. This is why you dual-source.',
+        resilienceEffect: 10
+      }
+    ]
+  },
+  {
+    id: 'demand_spike',
+    title: '📈 Demand Spike — Hospital System Pilot',
+    desc: 'A major hospital system wants to order 5× your current monthly volume for a 90-day pilot program. This could be your biggest single customer.',
+    options: [
+      {
+        key: 'A', label: 'Decline',
+        detail: 'Safe, but miss the opportunity and the revenue.',
+        effect: s => {},
+        outcome: 'You declined. The hospital signed with a competitor. Opportunity cost: ~$800K in potential pilot revenue.',
+        resilienceEffect: 0
+      },
+      {
+        key: 'B', label: 'Accept and Scramble',
+        detail: 'Attempt to fulfill at current capacity. Risk service failures to other customers.',
+        effect: s => { s.cash += 600_000; s.regRisk = Math.min(10, s.regRisk + 1); },
+        outcome: 'You fulfilled most of the order but had 3-week delays for 2 existing customers, generating complaints. Revenue: +$600K. Regulatory Risk +1.',
+        resilienceEffect: -5
+      },
+      {
+        key: 'C', label: 'Accept with 90-Day Ramp',
+        detail: 'Commit with a 90-day ramp timeline. Requires CMO surge capacity.',
+        effect: s => { s.cash += 750_000; s.cash -= 80_000; },
+        outcome: 'CMO surge capacity secured ($80K). Hospital pilot launched on schedule. Net revenue gain: +$670K. Strong relationship established.',
+        resilienceEffect: 10
+      }
+    ]
+  },
+  {
+    id: 'competitor',
+    title: '🏁 Competitor Launches Lower-Priced Product',
+    desc: 'A well-funded competitor has launched a CGM patch at $79/unit — $16 below your ASP. They are targeting your hospital distribution channel.',
+    options: [
+      {
+        key: 'A', label: 'Hold Price',
+        detail: 'Protect your margin. Risk losing volume to the competitor.',
+        effect: s => { s.cash -= 50_000; },
+        outcome: 'You held price. Lost ~15% of hospital channel volume. Revenue impact: −$200K. Margin protected at current level.',
+        resilienceEffect: 0
+      },
+      {
+        key: 'B', label: 'Cut Price to Match',
+        detail: 'Protect volume. Gross margin compresses immediately.',
+        effect: s => { s.gmPct = Math.max(0, (s.gmPct||50) - 8); },
+        outcome: 'Price matched at $79. Volume held, but GM% dropped ~8 points. Recovery requires significant volume growth to compensate through overhead absorption.',
+        resilienceEffect: -5
+      },
+      {
+        key: 'C', label: 'Differentiate on Service',
+        detail: 'Invest $150K in field clinical support. Justify premium with outcomes data.',
+        effect: s => { s.cash -= 150_000; s.supplyResilience += 15; },
+        outcome: 'Field clinical team in place. Customer retention strong. Outcomes data being collected for next submission cycle. Cost: $150K. Long-term positioning: stronger.',
+        resilienceEffect: 15
+      }
+    ]
+  }
+];
+
+function showPhase4() {
+  state.phase = 4;
+  state.p4Turn = 0;
+  state.p4Events = [];
+  // Shuffle events so each playthrough is different
+  const shuffled = [...P4_EVENTS].sort(() => Math.random() - 0.5);
+  state._p4Queue = shuffled;
+  state.launchMonth = state.month;
+  showPhase4Turn();
+}
+
+function showPhase4Turn() {
+  const turn = state.p4Turn;
+  if (turn >= 3) { showPhase5(); return; }
+
+  const event   = state._p4Queue[turn];
+  const monthStart = state.month;
+  state.month   = state.launchMonth + turn * 3;
+  updateDashboard();
+
+  const dotsHTML = [0,1,2].map(i =>
+    `<div class="turn-dot ${i < turn ? 'done' : i === turn ? 'active' : ''}"></div>`
+  ).join('');
+
+  const isDualSource = state.decisions.supplierStrategy === 'B';
+
+  const optionsHTML = event.options.map(opt => {
+    const disabled = opt.dualSourceOnly && !isDualSource;
+    return `
+      <button class="option-btn ${disabled ? '' : ''}"
+              data-event="${event.id}" data-key="${opt.key}"
+              ${disabled ? 'disabled style="opacity:.4"' : ''}>
+        <span class="option-letter">${opt.key}</span>
+        <div>
+          <span class="option-title">${opt.label}${disabled ? ' <em style="font-weight:400;font-size:.75rem;color:#dc2626">(requires dual-source)</em>' : ''}</span>
+          <span class="option-detail">${opt.detail}</span>
+        </div>
+      </button>`;
+  }).join('');
+
+  render(`
+    <div class="section-header">Phase 4 — Commercial Launch</div>
+    <div class="section-sub">Months ${state.launchMonth}–${state.launchMonth+9} · Three turns of 3 months each. Each turn brings a disruption event and a financial review.</div>
+
+    <div class="flex-gap" style="margin-bottom:16px">
+      <div class="turn-indicator">${dotsHTML}</div>
+      <span style="font-size:.82rem;color:var(--slate-500)">Turn ${turn+1} of 3 · Month ${state.month}</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">${event.title}</div>
+      <div class="card-sub" style="margin-bottom:14px">${event.desc}</div>
+      <div class="options-grid">${optionsHTML}</div>
+      <div id="p4-event-outcome" class="explanation"></div>
+    </div>
+
+    <div id="p4-commercial" class="hidden">
+      <div class="card">
+        <div class="card-title">📦 Commercial Decision — Turn ${turn+1}</div>
+        <div class="card-sub">Beyond the disruption, how do you want to grow this quarter?</div>
+        <div class="options-grid">
+          <button class="option-btn" data-comm="gpho">
+            <span class="option-letter">1</span>
+            <div>
+              <span class="option-title">Join Hospital GPO</span>
+              <span class="option-detail">Negotiate group purchasing contract. +$180K revenue, small margin tradeoff (−2% GM).</span>
+            </div>
+          </button>
+          <button class="option-btn" data-comm="direct">
+            <span class="option-letter">2</span>
+            <div>
+              <span class="option-title">Expand Direct Sales</span>
+              <span class="option-detail">Hire 2 reps, target endocrinology clinics. +$120K revenue, +$40K SG&A cost.</span>
+            </div>
+          </button>
+          <button class="option-btn" data-comm="intl">
+            <span class="option-letter">3</span>
+            <div>
+              <span class="option-title">International Expansion (EU CE Mark)</span>
+              <span class="option-detail">File CE Mark. $200K regulatory, 6-month timeline, opens €3M market.</span>
+            </div>
+          </button>
+        </div>
+        <div id="p4-comm-outcome" class="explanation"></div>
+      </div>
+    </div>
+
+    <div id="p4-financial" class="hidden">
+      <div class="card">
+        <div class="card-title">💰 Financial Review — Turn ${turn+1}</div>
+        <div class="metric-grid" id="p4-fin-metrics"></div>
+        <div class="chart-wrap"><canvas id="chart-p4-revenue"></canvas></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-p4-next">${turn < 2 ? 'Next Turn →' : 'Continue to Phase 5: Scale-Up →'}</button>
+        </div>
+      </div>
+    </div>`);
+
+  // Event decision listener
+  document.querySelectorAll(`[data-event="${event.id}"]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.key;
+      const opt = event.options.find(o => o.key === key);
+      opt.effect(state);
+      state.supplyResilience = Math.max(0, Math.min(100, (state.supplyResilience||30) + (opt.resilienceEffect||0)));
+      updateDashboard();
+
+      document.querySelectorAll(`[data-event="${event.id}"]`).forEach(b => {
+        b.disabled = true;
+        if (b.dataset.key === key) b.classList.add('selected');
+      });
+
+      const outEl = document.getElementById('p4-event-outcome');
+      outEl.innerHTML = `<strong>Outcome:</strong> ${opt.outcome}`;
+      outEl.classList.add('visible');
+
+      document.getElementById('p4-commercial').classList.remove('hidden');
+      document.getElementById('p4-commercial').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+
+  // Commercial decision listener
+  document.querySelectorAll('[data-comm]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const comm = btn.dataset.comm;
+      let outcome = '';
+      if (comm === 'gpho')   { state.cash += 180_000; state.gmPct = Math.max(0,(state.gmPct||50)-2); outcome = 'GPO contract signed. Revenue +$180K. GM% −2 pts due to volume pricing.'; }
+      if (comm === 'direct') { state.cash += 80_000; outcome = 'Direct sales expanded. Net revenue +$80K after $40K SG&A.'; }
+      if (comm === 'intl')   { state.cash -= 200_000; state.supplyResilience = Math.min(100,(state.supplyResilience||30)+5); outcome = 'CE Mark filed. $200K regulatory spend. EU market opening in 6 months.'; }
+
+      state.p4Revenue += state.launchVolume * (ASP - (state.unitCOGS||30)) * 0.25; // quarterly contribution
+
+      updateDashboard();
+      document.querySelectorAll('[data-comm]').forEach(b => { b.disabled=true; if(b.dataset.comm===comm) b.classList.add('selected'); });
+      const outEl = document.getElementById('p4-comm-outcome');
+      outEl.innerHTML = `<strong>Outcome:</strong> ${outcome}`;
+      outEl.classList.add('visible');
+
+      renderP4Financial(turn);
+      document.getElementById('p4-financial').classList.remove('hidden');
+      document.getElementById('p4-financial').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+}
+
+function renderP4Financial(turn) {
+  const cogs    = state.unitCOGS || calcUnitCOGS(state.launchVolume);
+  const gm      = state.gmPct    || calcGM(cogs);
+  const qtrRev  = state.launchVolume * ASP * 0.25;
+  const qtrCOGS = state.launchVolume * cogs * 0.25;
+  const qtrGross= qtrRev - qtrCOGS;
+
+  const metricsHTML = `
+    <div class="metric-box">
+      <div class="metric-label">Qtr Revenue</div>
+      <div class="metric-value">${formatMoney(qtrRev)}</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">Qtr Gross Profit</div>
+      <div class="metric-value metric-${qtrGross>0?'good':'bad'}">${formatMoney(qtrGross)}</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">GM%</div>
+      <div class="metric-value metric-${gm>=58?'good':gm>=45?'warn':'bad'}">${typeof gm==='number'?gm.toFixed(1):gm}%</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">Cash Remaining</div>
+      <div class="metric-value metric-${state.cash>500_000?'good':state.cash>0?'warn':'bad'}">${formatMoney(state.cash)}</div>
+    </div>`;
+
+  document.getElementById('p4-fin-metrics').innerHTML = metricsHTML;
+
+  // Waterfall-style revenue chart
+  const ctx = document.getElementById('chart-p4-revenue').getContext('2d');
+  const opex = qtrRev * 0.20; // ~20% opex estimate
+  const opIncome = qtrGross - opex;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Revenue','COGS','Gross Profit','OpEx (est.)','Op. Income'],
+      datasets: [{
+        data: [qtrRev, -qtrCOGS, qtrGross, -opex, opIncome],
+        backgroundColor: [
+          '#0d9488','#dc2626','#16a34a','#d97706',
+          opIncome >= 0 ? '#16a34a' : '#dc2626'
+        ],
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: { display: true, text: `Quarter ${turn+1} P&L Snapshot ($)` },
+        tooltip: {
+          callbacks: {
+            label: ctx => formatMoney(Math.abs(ctx.raw)) + (ctx.raw < 0 ? ' (cost)' : '')
+          }
+        }
+      },
+      scales: { y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => formatMoney(v) } } }
+    }
+  });
+
+  document.getElementById('btn-p4-next').onclick = () => {
+    state.p4Turn++;
+    state.p4Events.push({ turn, eventId: state._p4Queue[turn].id });
+    showPhase4Turn();
+  };
+}
+
+/* ─── Phase 5: Scale-Up ─── */
+function showPhase5() {
+  state.phase = 5;
+  state.month = 30;
+  updateDashboard();
+
+  const defId = 'scaleUp';
+  const def   = DECISIONS[defId];
+
+  // Contextual constraints based on prior decisions
+  const hasManualAssembly   = state.decisions.assembly   === 'A';
+  const hasTightTolerances  = state.decisions.biosensor  === 'A' && state.decisions.wireless === 'B';
+  const hasCMO              = state.decisions.makeOrBuy  === 'B';
+  const hasHighRegRisk      = state.regRisk >= 7;
+
+  let constraintHTML = '';
+  if (hasManualAssembly)  constraintHTML += `<div class="alert alert-warn">⚠️ <strong>Assembly constraint:</strong> You chose fully manual assembly in Phase 1. Scaling to 2M units requires a major automation investment on top of the scale-up CapEx.</div>`;
+  if (hasTightTolerances) constraintHTML += `<div class="alert alert-warn">⚠️ <strong>Supplier constraint:</strong> Your custom ASIC and proprietary RF chip leave you with limited supplier pool for high-volume expansion.</div>`;
+  if (hasCMO)             constraintHTML += `<div class="alert alert-success">✅ <strong>CMO advantage:</strong> Your existing CMO relationship makes rapid scale-up through their network faster and lower risk.</div>`;
+  if (hasHighRegRisk)     constraintHTML += `<div class="alert alert-danger">🚨 <strong>Regulatory constraint:</strong> High regulatory risk score means any manufacturing changes may require 510(k) resubmission before implementation.</div>`;
+
+  const optionsHTML = def.options.map(opt => `
+    <button class="option-btn" data-def="${defId}" data-key="${opt.key}">
+      <span class="option-letter">${opt.key}</span>
+      <div>
+        <span class="option-title">${opt.label}</span>
+        <span class="option-detail">${opt.detail}</span>
+        <div class="option-tags mt-8">${opt.tags.map(([l,c])=>`<span class="tag tag-${c}">${l}</span>`).join('')}</div>
+      </div>
+    </button>`).join('');
+
+  render(`
+    <div class="section-header">Phase 5 — Scale-Up Decision</div>
+    <div class="section-sub">Month 30–36 · Investors have secured $3M in additional funding. Commercial traction is strong. Your earlier choices now constrain or expand your options.</div>
+
+    <div class="alert alert-info">
+      <strong>The ask:</strong> Scale from your current volume of ${(state.launchVolume/1000).toFixed(0)}K units/year to <strong>2,000,000 units/year</strong> over the next 24 months. You have $3M in new funding to deploy.
+    </div>
+
+    ${constraintHTML}
+
+    <div class="card">
+      <div class="card-title">${def.title}</div>
+      <div class="card-sub">${def.context}</div>
+      <div class="options-grid">${optionsHTML}</div>
+      <div id="exp-${defId}" class="explanation"></div>
+    </div>
+
+    <div id="p5-cta" class="hidden"></div>`);
+
+  document.querySelectorAll(`[data-def="${defId}"]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.key;
+      const opt = def.options.find(o=>o.key===key);
+      state.decisions[defId] = key;
+      state.cash -= opt.capex;
+      state.cash += 3_000_000; // new funding
+      state.month = 36;
+      updateDashboard();
+
+      document.querySelectorAll(`[data-def="${defId}"]`).forEach(b => {
+        b.disabled = true;
+        if (b.dataset.key === key) b.classList.add('selected');
+      });
+      const expEl = document.getElementById(`exp-${defId}`);
+      expEl.innerHTML = `<strong>Why it matters:</strong> ${opt.explanation}`;
+      expEl.classList.add('visible');
+
+      const ctaEl = document.getElementById('p5-cta');
+      ctaEl.classList.remove('hidden');
+      ctaEl.innerHTML = `
+        <div class="card">
+          <div class="card-title">🚀 Scale-Up Plan Filed with Board</div>
+          <div class="card-sub">Your 24-month growth plan has been accepted. Now let's see how the full simulation shakes out.</div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-results">See Final Results & Debrief →</button>
+          </div>
+        </div>`;
+      document.getElementById('btn-results').onclick = showResults;
+      ctaEl.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+}
+
+/* ─── Final Results ─── */
+function showResults() {
+  state.phase = 6;
+  updateDashboard();
+
+  const cogs   = state.unitCOGS || calcUnitCOGS(state.launchVolume);
+  const gm     = typeof state.gmPct === 'number' ? state.gmPct : calcGM(cogs);
+  const vol    = state.launchVolume || 150_000;
+  const annRev = vol * ASP;
+  const annCOGS= vol * cogs;
+  const annGross= annRev - annCOGS;
+  const annOpex = annRev * 0.22;
+  const opIncome= annGross - annOpex;
+
+  // Scoring
+  const resScore  = Math.min(100, (state.supplyResilience||0) + (state.decisions.supplierStrategy==='B'?30:0) + 30);
+  const launchOK   = state.launchMonth <= 30;
+  const gmOK       = gm >= 58;
+  const opIncOK    = opIncome > 0;
+  const regOK      = state.regRisk <= 3;
+  const resOK      = resScore >= 65;
+  const cashOK     = state.cash > 500_000;
+
+  let score = 0;
+  if (launchOK) score++; if (gmOK) score++; if (opIncOK) score++;
+  if (regOK) score++;   if (resOK) score++;  if (cashOK) score++;
+
+  let verdict, verdictClass, verdictDesc;
+  if (score >= 5)          { verdict='Profitable Commercialization'; verdictClass='verdict-win'; verdictDesc='Outstanding. NovaTech is on a path to category leadership. Investors are celebrating.'; }
+  else if (score >= 3)     { verdict='Unprofitable Launch'; verdictClass='verdict-lose'; verdictDesc='You made it to market but margins are under pressure. Restructuring required before Series B.'; }
+  else if (state.cash > 0) { verdict='Failed to Launch'; verdictClass='verdict-lose'; verdictDesc='You ran out of time or margin. The company survives on remaining cash but needs a pivot.'; }
+  else                     { verdict='Acquired'; verdictClass='verdict-acq'; verdictDesc='Cash ran out, but the product has real value. A strategic acquirer steps in. Not the exit you planned.'; }
+
+  const passIcon = v => v ? '<span class="score-pass">✓ Pass</span>' : '<span class="score-fail">✗ Miss</span>';
+
+  render(`
+    <div class="section-header">Final Results — NovaTech Medical</div>
+    <div class="section-sub">Here is how your 36-month simulation played out. Every row reflects a decision you made.</div>
+
+    <div class="verdict-banner ${verdictClass}">
+      <div class="verdict-title">${verdict}</div>
+      <div class="verdict-desc">${verdictDesc}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Scorecard</div>
+      <table class="score-table">
+        <thead><tr><th>Metric</th><th>Your Result</th><th>Target</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Launch Timing</td><td>Month ${state.launchMonth || state.month}</td><td>≤ Month 30</td><td>${passIcon(launchOK)}</td></tr>
+          <tr><td>Gross Margin</td><td>${typeof gm==='number'?gm.toFixed(1):gm}%</td><td>≥ 58%</td><td>${passIcon(gmOK)}</td></tr>
+          <tr><td>Operating Income (Yr 1 est.)</td><td>${formatMoney(opIncome)}</td><td>Positive</td><td>${passIcon(opIncOK)}</td></tr>
+          <tr><td>Regulatory Risk</td><td>${state.regRisk <= 3 ? 'Low' : state.regRisk <= 6 ? 'Medium' : 'High'} (${state.regRisk}/10)</td><td>Low (≤3)</td><td>${passIcon(regOK)}</td></tr>
+          <tr><td>Supply Chain Resilience</td><td>${resScore}/100</td><td>≥ 65</td><td>${passIcon(resOK)}</td></tr>
+          <tr><td>Cash Remaining</td><td>${formatMoney(state.cash)}</td><td>> $500K</td><td>${passIcon(cashOK)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 What-If Comparison</div>
+      <div class="card-sub">How does your path compare to the two benchmark strategies?</div>
+      <div class="debrief-row">
+        <div class="debrief-col actual">
+          <div class="debrief-col-title">Your Path</div>
+          <div class="debrief-item"><strong>Biosensor:</strong> ${state.decisions.biosensor==='A'?'Custom ASIC':'Off-the-shelf'}</div>
+          <div class="debrief-item"><strong>Pathway:</strong> ${state.decisions.pathway==='A'?'510(k)':'De Novo'}</div>
+          <div class="debrief-item"><strong>Assembly:</strong> ${state.decisions.assembly==='A'?'Manual':state.decisions.assembly==='B'?'Semi-auto':'Fully auto'}</div>
+          <div class="debrief-item"><strong>Make/Buy:</strong> ${state.decisions.makeOrBuy==='A'?'Internal':state.decisions.makeOrBuy==='B'?'CMO':'Hybrid'}</div>
+          <div class="debrief-item"><strong>Supplier:</strong> ${state.decisions.supplierStrategy==='B'?'Dual-source':'Single-source'}</div>
+          <div class="debrief-item"><strong>GM:</strong> ${typeof gm==='number'?gm.toFixed(1):gm}%</div>
+          <div class="debrief-item"><strong>Launch Month:</strong> ${state.launchMonth || state.month}</div>
+        </div>
+        <div class="debrief-col">
+          <div class="debrief-col-title">Optimal: Low Cost</div>
+          <div class="debrief-item"><strong>Biosensor:</strong> Off-the-shelf ($8)</div>
+          <div class="debrief-item"><strong>Pathway:</strong> 510(k)</div>
+          <div class="debrief-item"><strong>Assembly:</strong> Semi-automated</div>
+          <div class="debrief-item"><strong>Make/Buy:</strong> CMO (lower CapEx)</div>
+          <div class="debrief-item"><strong>Supplier:</strong> Dual-source</div>
+          <div class="debrief-item"><strong>GM (150K units):</strong> ~62%</div>
+          <div class="debrief-item"><strong>Launch Month:</strong> ~22</div>
+        </div>
+        <div class="debrief-col">
+          <div class="debrief-col-title">Optimal: Fast to Market</div>
+          <div class="debrief-item"><strong>Biosensor:</strong> Off-the-shelf ($8)</div>
+          <div class="debrief-item"><strong>Pathway:</strong> 510(k)</div>
+          <div class="debrief-item"><strong>Assembly:</strong> Manual (no validation delay)</div>
+          <div class="debrief-item"><strong>Make/Buy:</strong> CMO (3-month setup)</div>
+          <div class="debrief-item"><strong>Supplier:</strong> Dual-source</div>
+          <div class="debrief-item"><strong>GM (50K units):</strong> ~48%</div>
+          <div class="debrief-item"><strong>Launch Month:</strong> ~18</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔍 Key Decision Review</div>
+      <div class="card-sub">What drove your outcome — and what would have changed it.</div>
+      ${buildDecisionReview()}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Year 1 P&L Summary</div>
+      <div class="metric-grid">
+        <div class="metric-box"><div class="metric-label">Revenue</div><div class="metric-value">${formatMoney(annRev)}</div></div>
+        <div class="metric-box"><div class="metric-label">COGS</div><div class="metric-value">${formatMoney(annCOGS)}</div></div>
+        <div class="metric-box"><div class="metric-label">Gross Profit</div><div class="metric-value metric-${annGross>0?'good':'bad'}">${formatMoney(annGross)}</div></div>
+        <div class="metric-box"><div class="metric-label">GM%</div><div class="metric-value metric-${gm>=58?'good':gm>=45?'warn':'bad'}">${typeof gm==='number'?gm.toFixed(1):gm}%</div></div>
+        <div class="metric-box"><div class="metric-label">OpEx (est. 22%)</div><div class="metric-value">${formatMoney(annOpex)}</div></div>
+        <div class="metric-box"><div class="metric-label">Operating Income</div><div class="metric-value metric-${opIncome>0?'good':'bad'}">${formatMoney(opIncome)}</div></div>
+      </div>
+      <div class="chart-wrap-tall"><canvas id="chart-final-pl"></canvas></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" id="btn-print">🖨️ Print Results</button>
+      <button class="btn btn-primary" id="btn-restart">↺ Play Again</button>
+    </div>`);
+
+  // Render final P&L chart
+  const ctx = document.getElementById('chart-final-pl').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Annual Revenue','COGS','Gross Profit','OpEx','Operating Income'],
+      datasets: [{
+        data: [annRev, annCOGS, annGross, annOpex, opIncome],
+        backgroundColor: ['#0d9488','#dc2626','#16a34a','#d97706', opIncome>=0?'#16a34a':'#dc2626'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{display:false}, title:{display:true,text:'Year 1 P&L (Annual)'}},
+      scales: { y: { grid:{color:'#f1f5f9'}, ticks:{callback:v=>formatMoney(v)} } }
+    }
+  });
+
+  document.getElementById('btn-print').onclick = () => window.print();
+  document.getElementById('btn-restart').onclick = () => {
+    // Reset state
+    Object.keys(state).forEach(k => {
+      if (k==='phase') state[k]=0;
+      else if (k==='month') state[k]=1;
+      else if (k==='cash') state[k]=INITIAL_CASH;
+      else if (k==='regRisk') state[k]=0;
+      else if (k==='decisions') state[k]={};
+      else if (k==='unitCOGS'||k==='gmPct'||k==='launchMonth'||k==='yearOneOpIncome') state[k]=null;
+      else if (k==='launchVolume') state[k]=null;
+      else if (k==='supplyResilience') state[k]=0;
+      else if (k==='p4Events') state[k]=[];
+      else if (k==='p4Turn') state[k]=0;
+      else if (k==='p4Revenue') state[k]=0;
+    });
+    showSplash();
+  };
+}
+
+function buildDecisionReview() {
+  const d = state.decisions;
+  const rows = [
+    {
+      label: 'Biosensor choice',
+      choice: d.biosensor==='A'?'Custom ASIC ($14/unit, 1 supplier)':'Off-the-shelf ($8/unit, 5 suppliers)',
+      impact: d.biosensor==='A'?'Added $6/unit material cost and created single-source supply risk. In Phase 4, any supplier event was harder to absorb.':'Saved $6/unit and gave you multi-source flexibility. Strongest cost/risk tradeoff in Phase 1.',
+      good: d.biosensor==='B'
+    },
+    {
+      label: 'Regulatory pathway',
+      choice: d.pathway==='A'?'510(k) — correct for this device':'De Novo — unnecessary for this device class',
+      impact: d.pathway==='A'?'Correct choice. 510(k) is the right tool for a Class II CGM with existing predicates.':'Added $300K cost and 6+ months for no strategic benefit. De Novo is for genuinely novel devices.',
+      good: d.pathway==='A'
+    },
+    {
+      label: 'Design lock timing',
+      choice: d.designLock==='A'?'Locked immediately (Month 5)':'Optimized first (+3 months, $80K)',
+      impact: d.designLock==='B'?'Correct. The 3-month DFM review reduces post-clearance change risk, which typically costs 5–10× more to fix after FDA clearance.':'Locking immediately saves 3 months but increases post-clearance change risk significantly.',
+      good: d.designLock==='B'
+    },
+    {
+      label: 'Assembly model',
+      choice: d.assembly==='A'?'Fully manual (0.45 hrs/unit)':d.assembly==='B'?'Semi-automated (0.20 hrs/unit)':'Fully automated (0.08 hrs/unit)',
+      impact: d.assembly==='B'?'Optimal for this stage. Halved labor hours vs. manual at a manageable CapEx.':d.assembly==='A'?'High labor cost per unit limits your margin at scale.':'Lowest per-unit cost but $1.2M CapEx and 8-month validation delay — only justified at >500K units/yr.',
+      good: d.assembly==='B'
+    },
+    {
+      label: 'Supplier strategy',
+      choice: d.supplierStrategy==='B'?'Dual-source ($80K, +$0.80/unit)':'Single-source (no extra cost)',
+      impact: d.supplierStrategy==='B'?'Best practice. The $80K qualification investment paid back the first time a supplier issue occurred. In Phase 4, you absorbed the event at zero cost.':'Single-sourcing saved $80K upfront but exposed you to full supply disruption risk. In Phase 4, a supplier event forced a costly response.',
+      good: d.supplierStrategy==='B'
+    },
+    {
+      label: 'QMS approach',
+      choice: d.qms==='B'?'Robust QMS ($280K, $0.80/unit QC)':'Minimal QMS ($120K, $1.20/unit QC)',
+      impact: d.qms==='B'?'Correct long-term. Automated in-line testing typically reduces field complaint rates 40–60%, saving $300–800 per avoided complaint handling event.':'Lower upfront cost, but higher complaint rate and QC cost per unit at scale. May create regulatory audit risk.',
+      good: d.qms==='B'
+    }
+  ];
+
+  return rows.map(r => `
+    <div style="border-left:3px solid ${r.good?'var(--green)':'var(--amber)'};padding:10px 14px;margin-bottom:10px;border-radius:0 6px 6px 0;background:${r.good?'var(--green-bg)':'var(--amber-bg)'}">
+      <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${r.good?'var(--green)':'var(--amber)'};margin-bottom:4px">${r.label}</div>
+      <div style="font-size:.82rem;font-weight:600;color:var(--slate);margin-bottom:3px">${r.choice}</div>
+      <div style="font-size:.78rem;color:var(--slate-700);line-height:1.5">${r.impact}</div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   BOOT
+   ════════════════════════════════════════════════════ */
+showSplash();
+</script>
+</body>
+</html>

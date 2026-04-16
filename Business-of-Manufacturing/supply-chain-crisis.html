@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App 3: Supply Chain Crisis — The Business of Manufacturing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --teal-light: #ccfbf1;
+    --teal-faint: #f0fdfa;
+    --slate: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --white: #ffffff;
+    --amber: #d97706;
+    --red: #dc2626;
+    --green: #16a34a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ---- HEADER ---- */
+  .top-header {
+    background: var(--slate);
+    color: var(--white);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-svg-wrap {
+    background: var(--teal);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .header-suite {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate-300);
+  }
+  .header-app-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .app-badge {
+    background: var(--teal);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---- TOP NAV ---- */
+  .top-nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--slate-300);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-500);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav-tab:hover { color: var(--teal); }
+  .nav-tab.active {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+    font-weight: 600;
+  }
+  .nav-tab-num {
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--slate-100);
+    color: var(--slate-500);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .nav-tab.active .nav-tab-num {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+  }
+
+  /* ---- LAYOUT ---- */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 112px);
+  }
+
+  /* ---- DASHBOARD SIDEBAR ---- */
+  .dashboard-sidebar {
+    background: var(--white);
+    border-right: 1px solid var(--slate-300);
+    padding: 20px 16px;
+    position: sticky;
+    top: 112px;
+    height: calc(100vh - 112px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sidebar-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate-500);
+    margin-bottom: 8px;
+  }
+  .metric-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .metric-value {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .metric-target {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin-top: 3px;
+  }
+  .metric-green { color: var(--green); }
+  .metric-amber { color: var(--amber); }
+  .metric-red { color: var(--red); }
+
+  .round-indicator {
+    background: var(--teal-faint);
+    border: 1px solid var(--teal-light);
+    border-radius: 8px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .round-label { font-size: 11px; color: var(--teal-dark); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .round-value { font-size: 20px; font-weight: 800; color: var(--teal-dark); }
+
+  .investments-sidebar {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .inv-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--slate-500);
+  }
+  .inv-badge {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+  .inv-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--slate-300);
+    flex-shrink: 0;
+  }
+  .inv-dot.active { background: var(--teal); }
+
+  /* ---- MAIN CONTENT ---- */
+  .main-content {
+    padding: 28px 32px;
+    max-width: 860px;
+  }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 6px;
+  }
+  .card-subtitle {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin-bottom: 18px;
+  }
+
+  /* ---- WELCOME SCREEN ---- */
+  .welcome-hero {
+    background: linear-gradient(135deg, var(--slate) 0%, var(--slate-700) 100%);
+    border-radius: 12px;
+    padding: 36px;
+    margin-bottom: 24px;
+    color: var(--white);
+  }
+  .welcome-hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  .welcome-hero p { font-size: 15px; color: var(--slate-300); margin-bottom: 4px; }
+  .welcome-hero .subtitle { font-size: 18px; font-weight: 600; color: var(--teal-light); margin-bottom: 16px; }
+  .company-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .company-stat {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .company-stat-label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .company-stat-value { font-size: 16px; font-weight: 700; color: var(--white); margin-top: 2px; }
+
+  /* ---- INVESTMENT PHASE ---- */
+  .budget-bar {
+    background: var(--slate-100);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .budget-remaining {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--teal);
+  }
+  .budget-bar-track {
+    flex: 1;
+    margin: 0 20px;
+    background: var(--slate-200, #e2e8f0);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .budget-bar-fill {
+    height: 100%;
+    background: var(--teal);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .inv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .inv-card {
+    background: var(--white);
+    border: 2px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .inv-card:hover:not(.disabled) { border-color: var(--teal); background: var(--teal-faint); }
+  .inv-card.selected { border-color: var(--teal); background: var(--teal-faint); }
+  .inv-card.disabled { opacity: 0.5; cursor: not-allowed; }
+  .inv-card-name { font-size: 13px; font-weight: 700; color: var(--slate); margin-bottom: 4px; }
+  .inv-card-cost { font-size: 13px; font-weight: 700; color: var(--teal-dark); margin-bottom: 6px; }
+  .inv-card-desc { font-size: 12px; color: var(--slate-500); line-height: 1.4; }
+  .inv-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--slate-300);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .inv-card.selected .inv-check {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--white);
+  }
+  .inv-card-warn { font-size: 11px; color: var(--amber); margin-top: 4px; font-weight: 600; }
+
+  /* ---- EVENT CARD ---- */
+  .event-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .event-type-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .event-type-supply { background: #fee2e2; color: var(--red); }
+  .event-type-demand { background: #fef3c7; color: var(--amber); }
+  .event-type-logistics { background: var(--teal-light); color: var(--teal-dark); }
+  .event-type-quality { background: #ede9fe; color: #7c3aed; }
+  .event-title { font-size: 20px; font-weight: 800; color: var(--slate); margin-bottom: 8px; }
+  .event-desc { font-size: 14px; color: var(--slate-700); line-height: 1.6; margin-bottom: 20px; }
+
+  .investment-alert {
+    background: var(--teal-faint);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--teal-dark);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  /* ---- OPTIONS ---- */
+  .options-grid { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--white);
+    border: 2px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled):not(.locked) { border-color: var(--teal); background: var(--teal-faint); }
+  .option-btn:disabled, .option-btn.locked { cursor: not-allowed; }
+  .option-btn.selected { border-color: var(--teal); background: var(--teal-faint); }
+  .option-btn.selected .option-letter { background: var(--teal); color: var(--white); border-color: var(--teal); }
+  .option-btn.unselected-locked { opacity: 0.45; }
+  .option-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--slate-300);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .option-content { flex: 1; }
+  .option-text { font-size: 14px; color: var(--slate); font-weight: 500; margin-bottom: 6px; line-height: 1.4; }
+  .option-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .option-tag {
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--slate-100);
+    color: var(--slate-500);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+
+  /* ---- EXPLANATION PANEL ---- */
+  .explanation-panel {
+    background: var(--teal-faint);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 18px 20px;
+    margin-top: 20px;
+  }
+  .explanation-panel h4 { font-size: 13px; font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .explanation-panel p { font-size: 14px; color: var(--slate-700); line-height: 1.6; }
+  .impact-report {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .impact-item {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .impact-label { font-size: 11px; color: var(--slate-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .impact-delta { font-size: 15px; font-weight: 800; }
+  .impact-now { font-size: 11px; color: var(--slate-500); margin-top: 2px; }
+  .delta-pos { color: var(--green); }
+  .delta-neg { color: var(--red); }
+  .delta-neu { color: var(--slate-500); }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--teal);
+    color: var(--white);
+  }
+  .btn-primary:hover { background: var(--teal-dark); }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--slate);
+    border: 2px solid var(--slate-300);
+  }
+  .btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-large { padding: 14px 32px; font-size: 16px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ---- END OF ROUND ---- */
+  .round-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .summary-metric {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .summary-metric-label { font-size: 12px; color: var(--slate-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .summary-metric-value { font-size: 26px; font-weight: 800; }
+  .summary-metric-status { font-size: 12px; font-weight: 600; margin-top: 4px; }
+  .status-pass { color: var(--green); }
+  .status-warn { color: var(--amber); }
+  .status-fail { color: var(--red); }
+
+  .cost-absorbed-box {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cost-absorbed-label { font-size: 13px; color: #92400e; font-weight: 600; }
+  .cost-absorbed-value { font-size: 22px; font-weight: 800; color: #92400e; }
+
+  /* ---- FINAL DEBRIEF ---- */
+  .debrief-verdict {
+    text-align: center;
+    padding: 32px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .verdict-win { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid var(--green); }
+  .verdict-mid { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid var(--amber); }
+  .verdict-fail { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 2px solid var(--red); }
+  .verdict-icon { font-size: 48px; margin-bottom: 12px; }
+  .verdict-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .verdict-desc { font-size: 15px; color: var(--slate-700); max-width: 500px; margin: 0 auto; }
+
+  .final-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .final-metric {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .final-metric-label { font-size: 11px; color: var(--slate-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .final-metric-value { font-size: 22px; font-weight: 800; }
+  .final-metric-target { font-size: 11px; color: var(--slate-500); margin-top: 3px; }
+
+  .insight-box {
+    background: linear-gradient(135deg, var(--teal-faint), #e0f2fe);
+    border: 1px solid var(--teal-light);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .insight-box h4 { font-size: 14px; font-weight: 700; color: var(--teal-dark); margin-bottom: 8px; }
+  .insight-box p { font-size: 14px; color: var(--slate-700); line-height: 1.6; }
+
+  .chart-container {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .chart-container h3 { font-size: 15px; font-weight: 700; color: var(--slate); margin-bottom: 16px; }
+  .chart-canvas-wrap { height: 280px; position: relative; }
+
+  .debrief-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
+
+  /* ---- PROGRESS DOTS ---- */
+  .turn-progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .turn-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--slate-300);
+    transition: background 0.2s;
+  }
+  .turn-dot.done { background: var(--teal); }
+  .turn-dot.current { background: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }
+  .turn-dot-sep { width: 16px; height: 2px; background: var(--slate-300); }
+
+  /* ---- MISC ---- */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--slate-300);
+    margin: 20px 0;
+  }
+  .text-center { text-align: center; }
+  .flex-row { display: flex; gap: 12px; align-items: center; }
+  .mt-12 { margin-top: 12px; }
+  .mt-20 { margin-top: 20px; }
+
+  /* ---- PHASE HEADER ---- */
+  .phase-banner {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--white);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .phase-banner-icon {
+    width: 40px; height: 40px; border-radius: 8px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .phase-banner-title { font-size: 16px; font-weight: 700; }
+  .phase-banner-sub { font-size: 13px; color: var(--teal-light); margin-top: 2px; }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .comp-card {
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--slate-300);
+  }
+  .comp-card.yours { background: var(--teal-faint); border-color: var(--teal-light); }
+  .comp-card.benchmark { background: var(--slate-50); }
+  .comp-card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--slate-500); margin-bottom: 10px; }
+  .comp-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--slate-200, #e2e8f0); font-size: 13px; }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-row-label { color: var(--slate-500); }
+  .comp-row-value { font-weight: 700; color: var(--slate); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeIn 0.3s ease; }
+
+  @media (max-width: 768px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .dashboard-sidebar { position: static; height: auto; }
+    .inv-grid { grid-template-columns: 1fr; }
+    .final-grid { grid-template-columns: repeat(2, 1fr); }
+    .main-content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="top-header" role="banner">
+  <div class="logo-area">
+    <div class="logo-svg-wrap">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-label="OrthAlign logo" role="img">
+        <polyline points="2,12 5,12 7,6 9,18 11,10 13,14 15,12 22,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="header-titles">
+      <span class="header-suite">The Business of Manufacturing · BE 695</span>
+      <span class="header-app-name">Supply Chain Crisis</span>
+    </div>
+  </div>
+  <span class="app-badge">App 3</span>
+</header>
+
+<!-- TOP NAV -->
+<nav class="top-nav" role="navigation" aria-label="App navigation">
+  <a href="dfm-workshop.html" class="nav-tab">
+    <span class="nav-tab-num">1</span> DFM Workshop
+  </a>
+  <a href="scale-up-solver.html" class="nav-tab">
+    <span class="nav-tab-num">2</span> Scale-Up Solver
+  </a>
+  <a href="supply-chain-crisis.html" class="nav-tab active" aria-current="page">
+    <span class="nav-tab-num">3</span> Supply Chain Crisis
+  </a>
+  <a href="meddevice-ceo.html" class="nav-tab">
+    <span class="nav-tab-num">4</span> MedDevice CEO
+  </a>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- DASHBOARD SIDEBAR -->
+  <aside class="dashboard-sidebar" aria-label="Performance dashboard">
+    <div>
+      <div class="sidebar-section-title">Live Metrics</div>
+
+      <div class="metric-card">
+        <div class="metric-label">Service Level</div>
+        <div class="metric-value metric-green" id="dash-sl">100%</div>
+        <div class="metric-target">Target: ≥ 95%</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Gross Margin</div>
+        <div class="metric-value metric-green" id="dash-gm">40.0%</div>
+        <div class="metric-target">Target: ≥ 38%</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Cash Position</div>
+        <div class="metric-value metric-green" id="dash-cash">$2,000K</div>
+        <div class="metric-target">Target: &gt; $500K</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Resilience Score</div>
+        <div class="metric-value metric-amber" id="dash-res">30 / 100</div>
+        <div class="metric-target">Based on investments + decisions</div>
+      </div>
+    </div>
+
+    <div class="round-indicator">
+      <div class="round-label">Progress</div>
+      <div class="round-value" id="dash-round">—</div>
+      <div style="font-size:12px; color: var(--teal-dark); margin-top:3px;" id="dash-turn-label">—</div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-title">Active Investments</div>
+      <div class="investments-sidebar" id="investments-sidebar">
+        <div style="font-size:12px; color:var(--slate-500);">No investments yet.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="main-content" role="main" aria-live="polite">
+    <!-- Screens rendered by JS here -->
+  </main>
+
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const STATE = {
+  phase: 'welcome', // welcome | invest | play | round-end | debrief
+  round: 1,
+  turn: 1,
+
+  // Metrics
+  service_level: 100,
+  gm_pct: 40.0,
+  cash: 2000000,
+  resilience: 30,
+
+  // Investments (cumulative across rounds)
+  investments: {
+    dual_titanium: false,
+    dual_handles: false,
+    safety_stock: false,
+    alt_cmo: false,
+    air_freight: false,
+    logistics_analyst: false,
+  },
+
+  // Per-round investment spend
+  invest_budget_remaining: 500000,
+  current_round_investments: {}, // selections for this round's investment phase
+
+  // Event tracking
+  all_events: [],       // shuffled pool
+  round_events: [],     // events for current round (array of 5)
+  used_event_ids: [],   // events already used
+
+  // Financials tracking
+  total_invest_cost: 0,
+  total_disruption_cost: 0,
+  round_disruption_cost: 0,
+
+  // Air freight COGS impact (permanent for round)
+  air_freight_cogs: 0,
+
+  // For debrief chart
+  history: [], // {round, invest_cost, disruption_cost}
+};
+
+// ============================================================
+// INVESTMENT OPTIONS
+// ============================================================
+const INVESTMENTS = [
+  {
+    id: 'dual_titanium',
+    name: 'Dual-Source Titanium Screws',
+    cost: 80000,
+    desc: 'Reduces supplier failure event impact by 70%.',
+    warn: null,
+  },
+  {
+    id: 'dual_handles',
+    name: 'Dual-Source Instrument Handles',
+    cost: 120000,
+    desc: 'Reduces handle supply disruption impact by 70%.',
+    warn: null,
+  },
+  {
+    id: 'safety_stock',
+    name: 'Build 8-Week Safety Stock',
+    cost: 200000,
+    desc: 'Absorbs demand spikes and short disruptions. Cash position reduced by $200K.',
+    warn: 'Reduces cash by $200K immediately.',
+  },
+  {
+    id: 'alt_cmo',
+    name: 'Qualify Alternate CMO',
+    cost: 150000,
+    desc: 'Enables surge capacity, reduces CMO disruption impact.',
+    warn: null,
+  },
+  {
+    id: 'air_freight',
+    name: 'Switch to Air Freight Contract',
+    cost: 0,
+    desc: '+$4.20/unit added to COGS permanently this round. Protects against freight disruptions.',
+    warn: '+$4.20/unit to COGS (≈ −1.5% GM at current volume).',
+  },
+  {
+    id: 'logistics_analyst',
+    name: 'Hire Logistics Analyst',
+    cost: 95000,
+    desc: 'Improves demand forecast, reduces demand-spike event severity by 20%.',
+    warn: null,
+  },
+];
+
+// ============================================================
+// EVENT POOL
+// ============================================================
+const ALL_EVENTS = [
+  {
+    id: 'S1',
+    type: 'supply',
+    title: 'Titanium Screw Shortage',
+    desc: 'Your titanium screw supplier announces a 12-week lead time extension due to a raw material shortage upstream. Current inventory will run out in approximately 3 weeks.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Accept the backorder and communicate delays to customers.',
+        tags: ['Free', 'High Service Impact'],
+        apply: (s) => ({ sl: -30, gm: 0, cash: 0, res: 0, disruption_cost: 0,
+          explanation: 'Accepting the backorder avoids upfront cost but severely damages service level for 3 months, risking long-term customer relationships and potential lost accounts.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Emergency airfreight from alternate supplier — $18/unit one-time surcharge.',
+        tags: ['Expensive', 'Maintains Service'],
+        apply: (s) => {
+          const units = 80000 / 12 * 3;
+          const cost = Math.round(units * 18);
+          return { sl: 0, gm: 0, cash: -cost, res: 5, disruption_cost: cost,
+            explanation: `Emergency airfreight maintains service level at the cost of approximately $${Math.round(cost/1000)}K in freight surcharges. This preserves customer relationships but is not sustainable long-term.` };
+        },
+      },
+      {
+        letter: 'C',
+        text: 'Negotiate priority allocation — $50K payment for 60% supply coverage.',
+        tags: ['Moderate Cost', 'Partial Protection'],
+        apply: (s) => ({ sl: -12, gm: 0, cash: -50000, res: 3, disruption_cost: 50000,
+          explanation: 'Priority allocation reduces but does not eliminate the service level hit. A 12% service level drop is significant but manageable, while the $50K cost is reasonable compared to losing customers.' }),
+      },
+    ],
+    auto_invest_check: (s) => s.investments.dual_titanium,
+    auto_invest_msg: '✅ Dual-Source Titanium active — impact reduced 70%. Supplier disruption is absorbed with minimal cost.',
+    auto_invest_apply: (s) => ({ sl: 0, gm: 0, cash: -15000, res: 8, disruption_cost: 15000,
+      explanation: 'Your dual-source titanium investment pays off. The alternate supplier seamlessly fills the gap. Only administrative costs apply — this is exactly why dual-sourcing matters.' }),
+  },
+  {
+    id: 'S2',
+    type: 'supply',
+    title: 'CMO Audit Failure',
+    desc: 'Your contract manufacturer (CMO) in Southeast Asia has failed an FDA audit. Manufacturing is suspended for a minimum of 60 days pending corrective action. All product in queue is on hold.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Transfer production to backup CMO — $120K transfer cost, 45-day ramp-up.',
+        tags: ['High Cost', 'Partial Recovery'],
+        apply: (s) => {
+          const cost = s.investments.alt_cmo ? 60000 : 120000;
+          const sl_hit = s.investments.alt_cmo ? -8 : -15;
+          return { sl: sl_hit, gm: 0, cash: -cost, res: 5, disruption_cost: cost,
+            explanation: `Transferring to backup CMO is costly but limits the service disruption. ${s.investments.alt_cmo ? 'Your pre-qualified alternate CMO cuts transfer cost and timeline in half — a strong return on your investment.' : 'Without a pre-qualified alternate, ramp-up takes 45 days and costs $120K.'}` };
+        },
+      },
+      {
+        letter: 'B',
+        text: 'Fly engineering team to CMO for on-site remediation — $40K, 30-day recovery.',
+        tags: ['Moderate Cost', 'Faster'],
+        apply: (s) => {
+          const cost = s.investments.alt_cmo ? 20000 : 40000;
+          const sl_hit = s.investments.alt_cmo ? -5 : -10;
+          return { sl: sl_hit, gm: 0, cash: -cost, res: 7, disruption_cost: cost,
+            explanation: `On-site remediation is the fastest and most cost-effective path. ${s.investments.alt_cmo ? 'Your alternate CMO qualification accelerates the process.' : 'Engineering team arrives within 48 hours and works directly with the CMO to address FDA findings.'} 30-day recovery minimizes the service disruption window.` };
+        },
+      },
+      {
+        letter: 'C',
+        text: 'Draw down safety stock inventory — no immediate cost, but buffer depleted.',
+        tags: ['Free', 'Depletes Safety Stock'],
+        apply: (s) => {
+          if (s.investments.safety_stock) {
+            return { sl: 0, gm: 0, cash: 0, res: -5, disruption_cost: 0,
+              explanation: 'Safety stock successfully absorbs the 60-day CMO suspension with zero service impact. However, your buffer is now depleted — any additional disruption this round will hit service level directly.' };
+          }
+          return { sl: -22, gm: 0, cash: 0, res: -3, disruption_cost: 0,
+            explanation: 'Without safety stock, drawing down inventory only covers a fraction of the 60-day suspension. Service level drops significantly as customers experience stockouts. Building safety stock before crises is critical.' };
+        },
+      },
+    ],
+    auto_invest_check: () => false,
+  },
+  {
+    id: 'S3',
+    type: 'supply',
+    title: 'Key Component Supplier Bankruptcy',
+    desc: 'A critical component supplier has filed for bankruptcy protection. Their assets are being liquidated. No qualified replacement exists. This component is on your approved supplier list and would require a formal qualification process to change.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Emergency qualification of new supplier — $80K, 90-day process.',
+        tags: ['Expensive', 'Permanent Fix'],
+        apply: (s) => ({ sl: -20, gm: 0, cash: -80000, res: 8, disruption_cost: 80000,
+          explanation: 'Emergency supplier qualification is the right long-term move. The 90-day process creates a service gap, but you emerge with a qualified, stable supplier. The $80K investment prevents future vulnerability to this single point of failure.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Redesign around a substitute component — $200K, 6-month delay, possible regulatory notification.',
+        tags: ['Very Expensive', 'Long Delay'],
+        apply: (s) => ({ sl: -35, gm: -2, cash: -200000, res: 5, disruption_cost: 200000,
+          explanation: 'Redesigning around the component is the most disruptive path. The 6-month timeline and potential 510(k) notification create massive operational challenges. However, it may strengthen the product long-term if the component was a weak point.' }),
+      },
+      {
+        letter: 'C',
+        text: 'Acquire remaining inventory at 2× market cost — $160K for 4 months of supply.',
+        tags: ['Expensive Stopgap'],
+        apply: (s) => ({ sl: 0, gm: -1, cash: -160000, res: 2, disruption_cost: 160000,
+          explanation: 'Buying remaining inventory buys time but not a solution. You have 4 months to qualify a new supplier before stockouts occur. This is a costly stopgap — use the time wisely to fast-track supplier qualification.' }),
+      },
+    ],
+    auto_invest_check: () => false,
+  },
+  {
+    id: 'D1',
+    type: 'demand',
+    title: 'Hospital System Signs Exclusive',
+    desc: 'A major regional hospital system (8 hospitals, 200+ OR suites) has approached OrthAlign to sign an exclusive supply agreement. This would double your current demand overnight, representing $3.5M in additional annual revenue.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Decline the agreement — maintain current service levels, miss revenue opportunity.',
+        tags: ['Safe', 'Miss Revenue'],
+        apply: (s) => ({ sl: 0, gm: 0, cash: 0, res: 0, disruption_cost: 0,
+          explanation: 'Declining is the conservative choice. Maintaining service level is important, but passing on $3.5M annually is a significant missed opportunity — especially if a competitor captures this account instead.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Accept with capacity build-out — $300K investment, 4-month ramp, then +$3.5M revenue.',
+        tags: ['Big Investment', 'Big Upside'],
+        apply: (s) => {
+          const sl_hit = s.investments.logistics_analyst ? -8 : -10;
+          return { sl: sl_hit, gm: 0, cash: -300000, res: 10, disruption_cost: 300000,
+            explanation: `Accepting with capacity investment is the high-upside play. The 4-month ramp creates temporary service pressure, but the $3.5M revenue payback makes the $300K investment attractive. ${s.investments.logistics_analyst ? 'Your logistics analyst reduces the ramp impact by 20%.' : ''}` };
+        },
+      },
+      {
+        letter: 'C',
+        text: 'Accept with delayed commitment — manage service risk, protect margins.',
+        tags: ['Low Cost', 'Relationship Risk'],
+        apply: (s) => {
+          const sl_hit = s.investments.logistics_analyst ? -16 : -20;
+          return { sl: sl_hit, gm: 0, cash: 0, res: -3, disruption_cost: 0,
+            explanation: `Committing without capacity often leads to service failures that damage the relationship. A ${Math.abs(sl_hit)}% service level drop during the ramp risks losing the account before it matures. ${s.investments.logistics_analyst ? 'Your logistics analyst helps reduce the forecasting uncertainty.' : ''}` };
+        },
+      },
+    ],
+    auto_invest_check: () => false,
+  },
+  {
+    id: 'L1',
+    type: 'logistics',
+    title: 'Ocean Freight Rate Spike',
+    desc: 'Ocean freight rates have spiked 3× due to a global container shortage caused by port congestion in Asia. This affects 40% of your inbound component sourcing. Current rates are projected to remain elevated for at least one quarter.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Absorb the freight increase into COGS for the quarter.',
+        tags: ['Free', 'Margin Hit'],
+        apply: (s) => ({ sl: 0, gm: -3, cash: 0, res: 0, disruption_cost: 0,
+          explanation: 'Absorbing the cost protects customer relationships and volume, but a 3% GM hit on a product with 40% starting margin is meaningful. This approach is defensible for one quarter but unsustainable if rates remain elevated.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Switch all inbound freight to airfreight — maintains timeline, higher cost.',
+        tags: ['Expensive', 'Maintains Timeline'],
+        apply: (s) => ({ sl: 0, gm: -8, cash: 0, res: 2, disruption_cost: 0,
+          explanation: 'Full airfreight switch eliminates delivery delays but the 8% GM hit is severe. At $2,200 ASP with 80,000 units, that\'s roughly $1.4M in additional annual freight cost if sustained. This is viable as an emergency measure only.' }),
+      },
+      {
+        letter: 'C',
+        text: 'Renegotiate freight contract — $25K legal cost, partial GM protection.',
+        tags: ['Moderate', 'Best Margin Protection'],
+        apply: (s) => ({ sl: 0, gm: -1.5, cash: -25000, res: 4, disruption_cost: 25000,
+          explanation: 'Contract renegotiation with a partial modal shift achieves the best balance — only 1.5% GM impact vs. 3–8% for the other options, at a modest $25K legal cost. Building more flexible freight terms protects you in future disruptions.' }),
+      },
+    ],
+    auto_invest_check: (s) => s.investments.air_freight,
+    auto_invest_msg: '✅ Air Freight Contract active — automatically protected against ocean freight spikes. No margin impact.',
+    auto_invest_apply: (s) => ({ sl: 0, gm: 0, cash: 0, res: 5, disruption_cost: 0,
+      explanation: 'Your air freight contract investment completely shields you from this disruption. While other companies absorb 3–8% margin hits, your proactive contract ensures zero impact. This is a textbook example of resilience investing.' }),
+  },
+  {
+    id: 'L2',
+    type: 'logistics',
+    title: 'Distribution Center Damaged',
+    desc: 'A severe weather event has caused significant structural damage to your primary distribution center. The facility is closed indefinitely — estimated minimum 3-week closure. 60% of your finished goods inventory is locked inside.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Reroute shipments through alternate DC — +$2.20/unit, 2-day additional delay.',
+        tags: ['Moderate Cost', 'Partial Service Hit'],
+        apply: (s) => ({ sl: -5, gm: -0.8, cash: 0, res: 3, disruption_cost: 0,
+          explanation: 'Rerouting through an alternate DC is the practical middle path. A 5% service level dip and minor margin impact are manageable. The 2-day delay is something most hospital customers can accommodate with advance notice.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Direct-ship from factory floor — +$4.50/unit, full service maintained.',
+        tags: ['High Cost', 'Full Service'],
+        apply: (s) => ({ sl: 0, gm: -2, cash: 0, res: 4, disruption_cost: 0,
+          explanation: 'Direct-from-factory shipping is expensive but maintains 100% service level commitment to hospital customers. The 2% GM hit is significant but defensible when relationship continuity is at stake, especially with major accounts.' }),
+      },
+      {
+        letter: 'C',
+        text: 'Delay all shipments 3 weeks until DC reopens.',
+        tags: ['Free', 'Major Service Hit'],
+        apply: (s) => {
+          const sl_hit = s.investments.safety_stock ? -15 : -40;
+          return { sl: sl_hit, gm: 0, cash: 0, res: -5, disruption_cost: 0,
+            explanation: `Waiting for the DC to reopen is the cheapest option but creates severe service failures. ${s.investments.safety_stock ? 'Your safety stock at secondary locations reduces the impact to −15% — still serious but manageable.' : 'A 40% service level drop over 3 weeks will trigger customer escalations and potential contract penalties.'}` };
+        },
+      },
+    ],
+    auto_invest_check: () => false,
+  },
+  {
+    id: 'Q1',
+    type: 'quality',
+    title: 'MDR Spike Detected',
+    desc: 'Your QA team flags a sharp increase in Medical Device Reports: 12 MDRs in 30 days for instrument failures in the OR, compared to your baseline of 1–2 per month. An FDA analyst has called requesting an explanation and preliminary CAPA plan within 15 business days.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Launch voluntary CAPA program with proactive customer notification — $180K.',
+        tags: ['Expensive', 'Protects Brand'],
+        apply: (s) => ({ sl: 0, gm: 0, cash: -180000, res: 8, disruption_cost: 180000,
+          explanation: 'Voluntary CAPA with proactive notification is the gold standard regulatory response. The $180K cost is significant but maintains FDA confidence, preserves hospital relationships, and demonstrates the quality culture that Class II device companies must exhibit.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Investigate internally first — delay external response to gather more data.',
+        tags: ['Risky', 'Low Upfront Cost'],
+        apply: (s) => {
+          // 50% chance of mandatory recall
+          const recall = Math.random() < 0.5;
+          if (recall) {
+            return { sl: -50, gm: -5, cash: -500000, res: -10, disruption_cost: 500000,
+              explanation: '⚠️ Delayed response triggered a mandatory recall. FDA issued a Warning Letter after your 15-day response window lapsed without adequate documentation. The mandatory recall cost $500K and created a 50% service disruption as product was pulled from the field. The reputational damage will take years to recover.' };
+          }
+          return { sl: 0, gm: 0, cash: -30000, res: -5, disruption_cost: 30000,
+            explanation: 'This time, the quiet investigation was sufficient — MDRs were traced to a single lot issue now corrected. However, this approach carries significant regulatory risk. FDA expects proactive communication for MDR spikes of this magnitude. You were fortunate.' };
+        },
+      },
+      {
+        letter: 'C',
+        text: 'Immediate voluntary recall — $500K, patient safety prioritized above all.',
+        tags: ['Very Expensive', 'Strongest Protection'],
+        apply: (s) => ({ sl: -5, gm: -5, cash: -500000, res: 15, disruption_cost: 500000,
+          explanation: 'Voluntary recall is the most expensive option but demonstrates the highest commitment to patient safety and regulatory compliance. Resilience score improves significantly as this action builds long-term credibility with FDA and hospital customers. Johnson & Johnson\'s Tylenol recall is the benchmark case study here.' }),
+      },
+    ],
+    auto_invest_check: () => false,
+  },
+  {
+    id: 'Q2',
+    type: 'quality',
+    title: '25% Tariff Increase on Components',
+    desc: 'The federal government has announced a 25% tariff on components imported from Country X, which represents 35% of your bill of materials. The tariff takes effect in 60 days. Your primary competitors face the same exposure.',
+    options: [
+      {
+        letter: 'A',
+        text: 'Absorb the tariff into COGS — protect customer relationships.',
+        tags: ['Free', 'Margin Hit'],
+        apply: (s) => ({ sl: 0, gm: -7, cash: 0, res: 0, disruption_cost: 0,
+          explanation: 'Absorbing the tariff maintains volume and relationships but a 7% GM hit at your current margin structure is severe. If sustained, this could make the product line unviable. Tariff absorption is a short-term bridge, not a strategy.' }),
+      },
+      {
+        letter: 'B',
+        text: 'Pass tariff cost to customers — maintain margins but risk volume loss.',
+        tags: ['Free', 'Volume Risk'],
+        apply: (s) => ({ sl: -15, gm: 0, cash: 0, res: -3, disruption_cost: 0,
+          explanation: 'Passing costs through protects margins but a 15% service level decline reflects accounts lost to competitors who absorb the cost or have better supplier diversification. Pricing transparency in hospital procurement means customers immediately notice and react.' }),
+      },
+      {
+        letter: 'C',
+        text: 'Qualify domestic supplier — $100K, 6-month timeline, modest long-term GM impact.',
+        tags: ['Investment', 'Best Long-term'],
+        apply: (s) => ({ sl: -5, gm: -3, cash: -100000, res: 12, disruption_cost: 100000,
+          explanation: 'Qualifying a domestic supplier is the highest-resilience path. The $100K and 6-month ramp create short-term pain, but eliminating Country X tariff exposure permanently improves your strategic position. This also reduces geopolitical risk, which resonates with hospital procurement increasingly focused on supply chain security.' }),
+      },
+    ],
+    auto_invest_check: () => false,
+  },
+];
+
+// ============================================================
+// ROUND ASSIGNMENT
+// ============================================================
+function buildRoundEvents() {
+  // Shuffle all 8 events
+  const shuffled = [...ALL_EVENTS].sort(() => Math.random() - 0.5);
+  // Round 1: first 5
+  // Round 2: next 3 + 2 repeats (most impactful)
+  // Round 3: last 2 + 3 from most impactful
+
+  const round1 = shuffled.slice(0, 5);
+  const leftover = shuffled.slice(5); // 3 events
+
+  // For repeat events, pick from supply/quality (most impactful)
+  const highImpact = ALL_EVENTS.filter(e => e.type === 'supply' || e.type === 'quality');
+  const repeats = highImpact.sort(() => Math.random() - 0.5);
+
+  const round2 = [
+    ...leftover,
+    repeats[0],
+    repeats[1],
+  ];
+
+  const round3 = [
+    repeats[2],
+    repeats[3] || repeats[0],
+    shuffled[0],
+    shuffled[1],
+    shuffled[2],
+  ].slice(0, 5);
+
+  return { round1, round2, round3 };
+}
+
+const ROUND_EVENTS = buildRoundEvents();
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt_cash(val) {
+  const abs = Math.abs(val);
+  const sign = val < 0 ? '-' : '';
+  if (abs >= 1000000) return sign + '$' + (abs/1000000).toFixed(2) + 'M';
+  if (abs >= 1000) return sign + '$' + Math.round(abs/1000) + 'K';
+  return sign + '$' + Math.round(abs);
+}
+function fmt_sl(val) { return Math.max(0, Math.round(val)) + '%'; }
+function fmt_gm(val) { return val.toFixed(1) + '%'; }
+function fmt_res(val) { return Math.min(100, Math.max(0, Math.round(val))) + ' / 100'; }
+
+function sl_color(v) { return v >= 95 ? 'metric-green' : v >= 85 ? 'metric-amber' : 'metric-red'; }
+function gm_color(v) { return v >= 38 ? 'metric-green' : v >= 33 ? 'metric-amber' : 'metric-red'; }
+function cash_color(v) { return v > 500000 ? 'metric-green' : v >= 0 ? 'metric-amber' : 'metric-red'; }
+
+function updateDashboard() {
+  const sl = STATE.service_level;
+  const gm = STATE.gm_pct;
+  const cash = STATE.cash;
+  const res = STATE.resilience;
+
+  const slEl = document.getElementById('dash-sl');
+  if (slEl) {
+    slEl.textContent = fmt_sl(sl);
+    slEl.className = 'metric-value ' + sl_color(sl);
+  }
+  const gmEl = document.getElementById('dash-gm');
+  if (gmEl) {
+    gmEl.textContent = fmt_gm(gm);
+    gmEl.className = 'metric-value ' + gm_color(gm);
+  }
+  const cashEl = document.getElementById('dash-cash');
+  if (cashEl) {
+    cashEl.textContent = fmt_cash(cash);
+    cashEl.className = 'metric-value ' + cash_color(cash);
+  }
+  const resEl = document.getElementById('dash-res');
+  if (resEl) {
+    resEl.textContent = fmt_res(res);
+    const rc = res >= 60 ? 'metric-green' : res >= 35 ? 'metric-amber' : 'metric-red';
+    resEl.className = 'metric-value ' + rc;
+  }
+  const roundEl = document.getElementById('dash-round');
+  if (roundEl) {
+    if (STATE.phase === 'welcome') {
+      roundEl.textContent = 'Not Started';
+    } else if (STATE.phase === 'debrief') {
+      roundEl.textContent = 'Complete';
+    } else {
+      roundEl.textContent = `Round ${STATE.round} / 3`;
+    }
+  }
+  const turnEl = document.getElementById('dash-turn-label');
+  if (turnEl) {
+    if (STATE.phase === 'play') {
+      turnEl.textContent = `Turn ${STATE.turn} / 5`;
+    } else if (STATE.phase === 'invest') {
+      turnEl.textContent = `Investment Phase`;
+    } else if (STATE.phase === 'round-end') {
+      turnEl.textContent = `Round ${STATE.round} Complete`;
+    } else {
+      turnEl.textContent = '';
+    }
+  }
+  updateInvestmentsSidebar();
+}
+
+function updateInvestmentsSidebar() {
+  const el = document.getElementById('investments-sidebar');
+  if (!el) return;
+  const names = {
+    dual_titanium: 'Dual-Source Titanium',
+    dual_handles: 'Dual-Source Handles',
+    safety_stock: '8-Week Safety Stock',
+    alt_cmo: 'Alternate CMO',
+    air_freight: 'Air Freight Contract',
+    logistics_analyst: 'Logistics Analyst',
+  };
+  const active = Object.entries(STATE.investments).filter(([k,v]) => v);
+  if (active.length === 0) {
+    el.innerHTML = '<div style="font-size:12px; color:var(--slate-500);">No investments yet.</div>';
+    return;
+  }
+  el.innerHTML = active.map(([k]) => `
+    <div class="inv-item">
+      <div class="inv-dot active"></div>
+      <span style="flex:1">${names[k]}</span>
+      <span class="inv-badge">Active</span>
+    </div>
+  `).join('');
+}
+
+function render(html) {
+  const el = document.getElementById('main-content');
+  el.innerHTML = html;
+  el.classList.remove('animate-in');
+  void el.offsetWidth;
+  el.classList.add('animate-in');
+  updateDashboard();
+}
+
+function getCurrentRoundEvents() {
+  if (STATE.round === 1) return ROUND_EVENTS.round1;
+  if (STATE.round === 2) return ROUND_EVENTS.round2;
+  return ROUND_EVENTS.round3;
+}
+
+// ============================================================
+// SCREENS
+// ============================================================
+
+// --- WELCOME ---
+function showWelcome() {
+  STATE.phase = 'welcome';
+  updateDashboard();
+  render(`
+    <div class="welcome-hero animate-in">
+      <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--teal-light); margin-bottom:8px;">OrthAlign Surgical · Class II Medical Device</div>
+      <h1>Supply Chain Crisis</h1>
+      <div class="subtitle">Something Just Broke. What Do You Do?</div>
+      <p style="color:var(--slate-300); max-width:520px; line-height:1.7;">You are the VP of Supply Chain at OrthAlign Surgical. Over the next three rounds, you'll face 15 real-world supply chain disruptions. Every decision affects service level, gross margin, and cash position.</p>
+      <div class="company-info">
+        <div class="company-stat">
+          <div class="company-stat-label">Product</div>
+          <div class="company-stat-value">Class II Orthopedic Instrument Set</div>
+        </div>
+        <div class="company-stat">
+          <div class="company-stat-label">ASP</div>
+          <div class="company-stat-value">$2,200 / unit</div>
+        </div>
+        <div class="company-stat">
+          <div class="company-stat-label">Starting GM</div>
+          <div class="company-stat-value">40%</div>
+        </div>
+        <div class="company-stat">
+          <div class="company-stat-label">Annual Volume</div>
+          <div class="company-stat-value">80,000 units / year</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How to Play</div>
+      <div class="card-subtitle">3 rounds · 5 disruption events each · 15 total decisions</div>
+      <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:8px;">
+        <div style="background:var(--slate-50); border:1px solid var(--slate-300); border-radius:8px; padding:14px;">
+          <div style="font-size:20px; font-weight:800; color:var(--teal); margin-bottom:6px;">1</div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Invest in Resilience</div>
+          <div style="font-size:12px; color:var(--slate-500); line-height:1.5;">Allocate a $500K budget before each round to reduce disruption impact.</div>
+        </div>
+        <div style="background:var(--slate-50); border:1px solid var(--slate-300); border-radius:8px; padding:14px;">
+          <div style="font-size:20px; font-weight:800; color:var(--teal); margin-bottom:6px;">2</div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Respond to Crises</div>
+          <div style="font-size:12px; color:var(--slate-500); line-height:1.5;">Choose A, B, or C. Each choice has tradeoffs across service, margin, and cash.</div>
+        </div>
+        <div style="background:var(--slate-50); border:1px solid var(--slate-300); border-radius:8px; padding:14px;">
+          <div style="font-size:20px; font-weight:800; color:var(--teal); margin-bottom:6px;">3</div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Survive All 3 Rounds</div>
+          <div style="font-size:12px; color:var(--slate-500); line-height:1.5;">Win by keeping Service Level ≥ 92%, GM ≥ 35%, and Cash &gt; $0.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:8px;">
+      <button class="btn btn-primary btn-large" onclick="startRound(1)">
+        Begin Round 1 →
+      </button>
+    </div>
+  `);
+}
+
+// --- INVESTMENT PHASE ---
+function showInvestmentPhase() {
+  STATE.phase = 'invest';
+  STATE.invest_budget_remaining = 500000;
+  STATE.current_round_investments = {};
+  // Air freight: apply GM hit if selected
+  STATE.air_freight_cogs_this_round = 0;
+  updateDashboard();
+
+  const investedIds = Object.entries(STATE.investments).filter(([k,v]) => v).map(([k]) => k);
+
+  renderInvestmentPhase();
+}
+
+function renderInvestmentPhase() {
+  const budgetPct = (STATE.invest_budget_remaining / 500000) * 100;
+
+  const cards = INVESTMENTS.map(inv => {
+    const alreadyPerm = STATE.investments[inv.id]; // from previous round
+    const selectedThisRound = STATE.current_round_investments[inv.id];
+    const tooExpensive = inv.cost > STATE.invest_budget_remaining && !selectedThisRound;
+    const isDisabled = (tooExpensive && !selectedThisRound) || alreadyPerm;
+    const isSelected = selectedThisRound || alreadyPerm;
+    const costLabel = inv.cost === 0 ? 'No upfront cost' : '$' + (inv.cost/1000) + 'K';
+
+    let extraNote = '';
+    if (alreadyPerm) extraNote = '<div style="font-size:11px; color:var(--teal-dark); font-weight:600; margin-top:6px;">✅ Already active from previous round</div>';
+    if (inv.warn) extraNote += `<div class="inv-card-warn">⚠ ${inv.warn}</div>`;
+
+    return `
+      <div class="inv-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+           onclick="${isDisabled ? '' : `toggleInvestment('${inv.id}')`}"
+           role="button"
+           tabindex="${isDisabled ? -1 : 0}"
+           aria-pressed="${isSelected}"
+           onkeydown="if(event.key==='Enter'||event.key===' '){${isDisabled ? '' : `toggleInvestment('${inv.id}')`}}">
+        <div class="inv-check">
+          ${isSelected ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+        </div>
+        <div class="inv-card-name">${inv.name}</div>
+        <div class="inv-card-cost">${costLabel}</div>
+        <div class="inv-card-desc">${inv.desc}</div>
+        ${extraNote}
+      </div>
+    `;
+  }).join('');
+
+  render(`
+    <div class="phase-banner">
+      <div class="phase-banner-icon">💰</div>
+      <div>
+        <div class="phase-banner-title">Round ${STATE.round} Pre-Round Investment Phase</div>
+        <div class="phase-banner-sub">Allocate up to $500K before disruptions begin. Investments reduce event impact.</div>
+      </div>
+    </div>
+
+    <div class="budget-bar">
+      <div>
+        <div style="font-size:12px; font-weight:600; color:var(--slate-500); margin-bottom:2px;">BUDGET REMAINING</div>
+        <div class="budget-remaining" id="budget-display">$${(STATE.invest_budget_remaining/1000).toFixed(0)}K</div>
+      </div>
+      <div class="budget-bar-track">
+        <div class="budget-bar-fill" id="budget-bar-fill" style="width:${budgetPct}%"></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px; font-weight:600; color:var(--slate-500); margin-bottom:2px;">TOTAL BUDGET</div>
+        <div style="font-size:18px; font-weight:700; color:var(--slate);">$500K</div>
+      </div>
+    </div>
+
+    <div class="inv-grid" id="inv-grid">
+      ${cards}
+    </div>
+
+    <div style="text-align:center;">
+      <button class="btn btn-primary btn-large" onclick="confirmInvestments()">
+        Confirm Investments → Begin Round ${STATE.round}
+      </button>
+      <div style="font-size:12px; color:var(--slate-500); margin-top:8px;">You can skip investments and begin immediately</div>
+    </div>
+  `);
+}
+
+function toggleInvestment(id) {
+  const inv = INVESTMENTS.find(i => i.id === id);
+  if (!inv) return;
+
+  if (STATE.current_round_investments[id]) {
+    // Deselect
+    delete STATE.current_round_investments[id];
+    STATE.invest_budget_remaining += inv.cost;
+  } else {
+    // Select — check budget
+    if (inv.cost > STATE.invest_budget_remaining) return;
+    STATE.current_round_investments[id] = true;
+    STATE.invest_budget_remaining -= inv.cost;
+  }
+  renderInvestmentPhase();
+}
+
+function confirmInvestments() {
+  // Apply investments
+  let roundInvestCost = 0;
+  for (const id of Object.keys(STATE.current_round_investments)) {
+    STATE.investments[id] = true;
+    const inv = INVESTMENTS.find(i => i.id === id);
+    roundInvestCost += inv.cost;
+    // Safety stock: reduce cash
+    if (id === 'safety_stock') {
+      STATE.cash -= 200000;
+    }
+    // Air freight: add GM hit
+    if (id === 'air_freight') {
+      // +$4.20/unit, 80000 units/yr, 1/3 of year per round
+      // GM impact: 4.20/2200 * 100 ≈ 0.19% per unit on ASP basis... let's compute properly
+      // Revenue: 80000 * 2200 = 176M; cost increase = 80000 * 4.20 = 336000; GM% drop = 336000/176000000 * 100 ≈ 0.19%? 
+      // But product GM is 40% so COGS is 60% = 1320/unit. Extra 4.20/1320 of COGS is small but on GM:
+      // Let's use 4.20/2200 = 0.19% reduction in GM
+      STATE.gm_pct = Math.max(0, STATE.gm_pct - 1.5); // using the stated ~1.5% per the spec note
+    }
+    // Resilience score boost
+    STATE.resilience = Math.min(100, STATE.resilience + 8);
+  }
+  STATE.total_invest_cost += roundInvestCost;
+  STATE.round_disruption_cost = 0;
+  STATE.turn = 1;
+  STATE.phase = 'play';
+  updateDashboard();
+  showTurn();
+}
+
+// --- START ROUND ---
+function startRound(r) {
+  STATE.round = r;
+  showInvestmentPhase();
+}
+
+// --- SHOW TURN ---
+function showTurn() {
+  const events = getCurrentRoundEvents();
+  const event = events[STATE.turn - 1];
+  STATE.phase = 'play';
+  updateDashboard();
+
+  const typeLabels = { supply: 'Supply Disruption', demand: 'Demand Disruption', logistics: 'Logistics Disruption', quality: 'Quality / Regulatory' };
+  const typeClasses = { supply: 'event-type-supply', demand: 'event-type-demand', logistics: 'event-type-logistics', quality: 'event-type-quality' };
+
+  // Build turn progress dots
+  const dots = Array.from({length: 5}, (_, i) => {
+    if (i < STATE.turn - 1) return `<div class="turn-dot done" aria-label="Turn ${i+1} complete"></div>`;
+    if (i === STATE.turn - 1) return `<div class="turn-dot current" aria-label="Turn ${i+1} current"></div>`;
+    return `<div class="turn-dot" aria-label="Turn ${i+1} upcoming"></div>`;
+  });
+  const dotsWithSep = dots.flatMap((d, i) => i < 4 ? [d, '<div class="turn-dot-sep"></div>'] : [d]).join('');
+
+  // Check auto-invest
+  const hasAutoInvest = event.auto_invest_check && event.auto_invest_check(STATE);
+  const autoMsg = hasAutoInvest && event.auto_invest_msg ? event.auto_invest_msg : '';
+
+  const optionsHtml = event.options.map(opt => `
+    <button class="option-btn" onclick="selectOption('${event.id}', '${opt.letter}')" aria-label="Option ${opt.letter}: ${opt.text}">
+      <div class="option-letter">${opt.letter}</div>
+      <div class="option-content">
+        <div class="option-text">${opt.text}</div>
+        <div class="option-tags">${opt.tags.map(t => `<span class="option-tag">${t}</span>`).join('')}</div>
+      </div>
+    </button>
+  `).join('');
+
+  render(`
+    <div class="turn-progress" role="progressbar" aria-label="Round ${STATE.round} progress: Turn ${STATE.turn} of 5">
+      <span style="font-size:11px; font-weight:700; color:var(--slate-500); text-transform:uppercase; letter-spacing:0.06em; margin-right:8px;">Round ${STATE.round}</span>
+      ${dotsWithSep}
+      <span style="font-size:11px; color:var(--slate-500); margin-left:8px;">Turn ${STATE.turn} of 5</span>
+    </div>
+
+    <div class="card">
+      <div class="event-header">
+        <span class="event-type-badge ${typeClasses[event.type]}">${typeLabels[event.type]}</span>
+        <span style="font-size:12px; color:var(--slate-500);">Event ${STATE.turn}/5 · Round ${STATE.round}/3</span>
+      </div>
+      <div class="event-title">${event.title}</div>
+      <div class="event-desc">${event.desc}</div>
+
+      ${autoMsg ? `<div class="investment-alert">${autoMsg}</div>` : ''}
+
+      <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px;">Choose Your Response:</div>
+      <div class="options-grid" id="options-grid">
+        ${optionsHtml}
+      </div>
+
+      <div id="explanation-area"></div>
+    </div>
+  `);
+}
+
+function selectOption(eventId, letter) {
+  const event = ALL_EVENTS.find(e => e.id === eventId) || getCurrentRoundEvents().find(e => e.id === eventId);
+  if (!event) return;
+
+  // Lock all options
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(btn => {
+    btn.disabled = true;
+    btn.classList.add('locked');
+  });
+
+  // Find selected option
+  const opt = event.options.find(o => o.letter === letter);
+  if (!opt) return;
+
+  // Mark selected/unselected
+  btns.forEach(btn => {
+    const ltr = btn.querySelector('.option-letter');
+    if (ltr && ltr.textContent === letter) {
+      btn.classList.add('selected');
+    } else {
+      btn.classList.add('unselected-locked');
+    }
+  });
+
+  // Check if auto-invest overrides
+  let result;
+  if (event.auto_invest_check && event.auto_invest_check(STATE) && event.auto_invest_apply) {
+    result = event.auto_invest_apply(STATE);
+  } else {
+    result = opt.apply(STATE);
+  }
+
+  // Apply deltas
+  const prev_sl = STATE.service_level;
+  const prev_gm = STATE.gm_pct;
+  const prev_cash = STATE.cash;
+  const prev_res = STATE.resilience;
+
+  STATE.service_level = Math.max(0, Math.min(100, STATE.service_level + (result.sl || 0)));
+  STATE.gm_pct = Math.max(0, STATE.gm_pct + (result.gm || 0));
+  STATE.cash = STATE.cash + (result.cash || 0);
+  STATE.resilience = Math.max(0, Math.min(100, STATE.resilience + (result.res || 0)));
+  STATE.round_disruption_cost += (result.disruption_cost || 0);
+  STATE.total_disruption_cost += (result.disruption_cost || 0);
+
+  updateDashboard();
+
+  // Build impact report
+  const sl_delta = result.sl || 0;
+  const gm_delta = result.gm || 0;
+  const cash_delta = result.cash || 0;
+
+  const sl_class = sl_delta > 0 ? 'delta-pos' : sl_delta < 0 ? 'delta-neg' : 'delta-neu';
+  const gm_class = gm_delta > 0 ? 'delta-pos' : gm_delta < 0 ? 'delta-neg' : 'delta-neu';
+  const cash_class = cash_delta > 0 ? 'delta-pos' : cash_delta < 0 ? 'delta-neg' : 'delta-neu';
+
+  const sl_str = sl_delta === 0 ? '±0%' : (sl_delta > 0 ? '+' : '') + sl_delta + '%';
+  const gm_str = gm_delta === 0 ? '±0%' : (gm_delta > 0 ? '+' : '') + gm_delta.toFixed(1) + '%';
+  const cash_str = cash_delta === 0 ? '$0' : fmt_cash(cash_delta);
+
+  const expHtml = `
+    <div class="explanation-panel" id="explanation-panel">
+      <h4>Decision Analysis</h4>
+      <p>${result.explanation}</p>
+      <div class="impact-report">
+        <div class="impact-item">
+          <div class="impact-label">Service Level</div>
+          <div class="impact-delta ${sl_class}">${sl_str}</div>
+          <div class="impact-now">Now: ${fmt_sl(STATE.service_level)}</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Gross Margin</div>
+          <div class="impact-delta ${gm_class}">${gm_str}</div>
+          <div class="impact-now">Now: ${fmt_gm(STATE.gm_pct)}</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Cash Position</div>
+          <div class="impact-delta ${cash_class}">${cash_str}</div>
+          <div class="impact-now">Now: ${fmt_cash(STATE.cash)}</div>
+        </div>
+      </div>
+      <div style="margin-top:16px; text-align:right;">
+        ${STATE.turn < 5 ? `<button class="btn btn-primary" onclick="nextTurn()">Next Turn →</button>` : `<button class="btn btn-primary" onclick="showRoundEnd()">See Round ${STATE.round} Summary →</button>`}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('explanation-area').innerHTML = expHtml;
+  document.getElementById('explanation-area').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function nextTurn() {
+  STATE.turn++;
+  showTurn();
+}
+
+// --- ROUND END ---
+function showRoundEnd() {
+  STATE.phase = 'round-end';
+  updateDashboard();
+
+  const sl = STATE.service_level;
+  const gm = STATE.gm_pct;
+  const cash = STATE.cash;
+  const res = STATE.resilience;
+
+  const sl_pass = sl >= 95 ? 'status-pass' : sl >= 85 ? 'status-warn' : 'status-fail';
+  const sl_label = sl >= 95 ? '✅ Target Met' : sl >= 85 ? '⚠ Below Target' : '❌ Critical';
+  const gm_pass = gm >= 38 ? 'status-pass' : gm >= 33 ? 'status-warn' : 'status-fail';
+  const gm_label = gm >= 38 ? '✅ Target Met' : gm >= 33 ? '⚠ Below Target' : '❌ Critical';
+  const cash_pass = cash > 500000 ? 'status-pass' : cash >= 0 ? 'status-warn' : 'status-fail';
+  const cash_label = cash > 500000 ? '✅ Healthy' : cash >= 0 ? '⚠ Low Cash' : '❌ Cash Negative';
+
+  // Store history
+  STATE.history.push({
+    round: STATE.round,
+    invest_cost: STATE.total_invest_cost,
+    disruption_cost: STATE.round_disruption_cost,
+  });
+
+  const isLastRound = STATE.round === 3;
+  const nextAction = isLastRound
+    ? `<button class="btn btn-primary btn-large" onclick="showDebrief()">View Final Results →</button>`
+    : `<button class="btn btn-primary btn-large" onclick="startRound(${STATE.round + 1})">Begin Round ${STATE.round + 1} →</button>`;
+
+  render(`
+    <div class="phase-banner" style="background: linear-gradient(135deg, var(--slate-700), var(--slate));">
+      <div class="phase-banner-icon">📊</div>
+      <div>
+        <div class="phase-banner-title">Round ${STATE.round} Complete</div>
+        <div class="phase-banner-sub">Here's how your decisions performed this round.</div>
+      </div>
+    </div>
+
+    <div class="round-summary-grid">
+      <div class="summary-metric">
+        <div class="summary-metric-label">Service Level</div>
+        <div class="summary-metric-value ${sl_color(sl)}">${fmt_sl(sl)}</div>
+        <div class="summary-metric-status ${sl_pass}">${sl_label}</div>
+        <div style="font-size:11px; color:var(--slate-500); margin-top:2px;">Target ≥ 95%</div>
+      </div>
+      <div class="summary-metric">
+        <div class="summary-metric-label">Gross Margin</div>
+        <div class="summary-metric-value ${gm_color(gm)}">${fmt_gm(gm)}</div>
+        <div class="summary-metric-status ${gm_pass}">${gm_label}</div>
+        <div style="font-size:11px; color:var(--slate-500); margin-top:2px;">Target ≥ 38%</div>
+      </div>
+      <div class="summary-metric">
+        <div class="summary-metric-label">Cash Position</div>
+        <div class="summary-metric-value ${cash_color(cash)}">${fmt_cash(cash)}</div>
+        <div class="summary-metric-status ${cash_pass}">${cash_label}</div>
+        <div style="font-size:11px; color:var(--slate-500); margin-top:2px;">Target &gt; $500K</div>
+      </div>
+      <div class="summary-metric">
+        <div class="summary-metric-label">Resilience Score</div>
+        <div class="summary-metric-value" style="color:var(--teal)">${fmt_res(res)}</div>
+        <div class="summary-metric-status" style="color:var(--teal);">${res >= 60 ? '✅ Strong' : res >= 40 ? '⚠ Building' : '🔴 Low'}</div>
+        <div style="font-size:11px; color:var(--slate-500); margin-top:2px;">Out of 100</div>
+      </div>
+    </div>
+
+    <div class="cost-absorbed-box">
+      <div>
+        <div class="cost-absorbed-label">Disruption Costs This Round</div>
+        <div style="font-size:12px; color:#92400e; margin-top:2px;">Direct cash spent responding to events</div>
+      </div>
+      <div class="cost-absorbed-value">${fmt_cash(STATE.round_disruption_cost)}</div>
+    </div>
+
+    ${STATE.round < 3 ? `
+    <div class="card" style="background:var(--teal-faint); border-color:var(--teal-light);">
+      <div class="card-title" style="color:var(--teal-dark); font-size:16px;">💡 Round ${STATE.round} Lesson</div>
+      <p style="font-size:14px; color:var(--slate-700); line-height:1.7; margin-top:8px;">
+        ${STATE.round === 1 ? 'Supply chain resilience is built before crises occur. In Round 2, you\'ll have another $500K to invest. Consider which investments would have had the biggest impact on this round\'s events.' : 'You\'re entering the final round. Every dollar of resilience investment now compounds against the disruptions ahead. Think about which vulnerabilities remain exposed.'}
+      </p>
+    </div>
+    ` : ''}
+
+    <div class="text-center mt-20">
+      ${nextAction}
+    </div>
+  `);
+}
+
+// --- FINAL DEBRIEF ---
+function showDebrief() {
+  STATE.phase = 'debrief';
+  updateDashboard();
+
+  const sl = STATE.service_level;
+  const gm = STATE.gm_pct;
+  const cash = STATE.cash;
+  const res = STATE.resilience;
+
+  // Determine verdict
+  const win = sl >= 92 && gm >= 35 && cash > 0;
+  const mid = !win && (sl >= 80 || (gm >= 30 && cash > -500000));
+  let verdictClass, verdictIcon, verdictTitle, verdictDesc;
+  if (win) {
+    verdictClass = 'verdict-win';
+    verdictIcon = '🏆';
+    verdictTitle = 'Resilient Supply Chain';
+    verdictDesc = 'OrthAlign maintained strong service levels, healthy margins, and positive cash position through 15 disruptions. Your proactive investments and sound decision-making built a truly resilient supply chain.';
+  } else if (mid) {
+    verdictClass = 'verdict-mid';
+    verdictIcon = '⚠️';
+    verdictTitle = 'Costly Survival';
+    verdictDesc = 'OrthAlign survived but at significant cost. Service level or margins fell below optimal thresholds. Reactive responses to disruptions proved more expensive than proactive resilience investments would have been.';
+  } else {
+    verdictClass = 'verdict-fail';
+    verdictIcon = '❌';
+    verdictTitle = 'Supply Chain Failure';
+    verdictDesc = 'OrthAlign could not maintain minimum performance thresholds through the disruption cycle. Cash position, service level, or margins reached critical levels. This outcome illustrates why supply chain resilience investment is not optional in medical device manufacturing.';
+  }
+
+  // Benchmark (fully resilient: all investments, optimal choices)
+  const benchmark = {
+    sl: 96,
+    gm: 37.5,
+    cash: 850000,
+    res: 95,
+    invest_cost: 1500000,  // $500K × 3 rounds
+    disruption_cost: 350000, // typically 300-400K with full resilience
+  };
+
+  render(`
+    <div class="debrief-verdict ${verdictClass} animate-in">
+      <div class="verdict-icon">${verdictIcon}</div>
+      <div class="verdict-title">${verdictTitle}</div>
+      <div class="verdict-desc">${verdictDesc}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Final Scorecard</div>
+      <div class="final-grid">
+        <div class="final-metric">
+          <div class="final-metric-label">Service Level</div>
+          <div class="final-metric-value ${sl_color(sl)}">${fmt_sl(sl)}</div>
+          <div class="final-metric-target">Target: ≥ 92%</div>
+        </div>
+        <div class="final-metric">
+          <div class="final-metric-label">Gross Margin</div>
+          <div class="final-metric-value ${gm_color(gm)}">${fmt_gm(gm)}</div>
+          <div class="final-metric-target">Target: ≥ 35%</div>
+        </div>
+        <div class="final-metric">
+          <div class="final-metric-label">Cash Position</div>
+          <div class="final-metric-value ${cash_color(cash)}">${fmt_cash(cash)}</div>
+          <div class="final-metric-target">Target: &gt; $0</div>
+        </div>
+        <div class="final-metric">
+          <div class="final-metric-label">Resilience Score</div>
+          <div class="final-metric-value" style="color:var(--teal)">${Math.min(100,Math.round(res))}</div>
+          <div class="final-metric-target">Out of 100</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Cost of Resilience vs. Cost of Disruptions (Cumulative)</h3>
+      <div class="chart-canvas-wrap">
+        <canvas id="debrief-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="comp-card yours">
+        <div class="comp-card-label">Your Performance</div>
+        <div class="comp-row"><span class="comp-row-label">Service Level</span><span class="comp-row-value ${sl_color(sl)}">${fmt_sl(sl)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Gross Margin</span><span class="comp-row-value ${gm_color(gm)}">${fmt_gm(gm)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Cash Position</span><span class="comp-row-value">${fmt_cash(cash)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Resilience Investments</span><span class="comp-row-value">${fmt_cash(STATE.total_invest_cost)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Disruption Response Cost</span><span class="comp-row-value">${fmt_cash(STATE.total_disruption_cost)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Total Cost</span><span class="comp-row-value">${fmt_cash(STATE.total_invest_cost + STATE.total_disruption_cost)}</span></div>
+      </div>
+      <div class="comp-card benchmark">
+        <div class="comp-card-label">Fully Resilient Benchmark</div>
+        <div class="comp-row"><span class="comp-row-label">Service Level</span><span class="comp-row-value metric-green">${fmt_sl(benchmark.sl)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Gross Margin</span><span class="comp-row-value metric-green">${fmt_gm(benchmark.gm)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Cash Position</span><span class="comp-row-value">${fmt_cash(benchmark.cash)}</span></div>
+        <div class="comp-row"><span class="comp-row-label">Resilience Investments</span><span class="comp-row-value">$1,500K</span></div>
+        <div class="comp-row"><span class="comp-row-label">Disruption Response Cost</span><span class="comp-row-value">$350K</span></div>
+        <div class="comp-row"><span class="comp-row-label">Total Cost</span><span class="comp-row-value">$1,850K</span></div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h4>💡 Key Industry Insight</h4>
+      <p>Companies that invested $500K per round in supply chain resilience typically spent only $300–400K responding to disruptions — a total of ~$1.85M over three rounds. Companies that invested nothing typically spent $1.2–1.8M reacting to the same events, often suffering service level collapses that cost additional revenue. <strong>Resilience is not overhead — it is insurance with positive expected value.</strong></p>
+    </div>
+
+    <div class="insight-box" style="background: linear-gradient(135deg, #fff7ed, #fef3c7); border-color: #fed7aa;">
+      <h4>📚 Learning Objectives Achieved</h4>
+      <p>Through this simulation you experienced: (1) the asymmetric cost of proactive vs. reactive supply chain management, (2) how Class II medical device regulatory requirements amplify supply disruption costs, (3) the compounding effect of resilience investments across multiple disruption events, and (4) real tradeoffs between service level, margin, and cash in MedTech supply chains.</p>
+    </div>
+
+    <div class="debrief-actions">
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print Results</button>
+      <button class="btn btn-primary btn-large" onclick="playAgain()">↩ Play Again</button>
+    </div>
+  `);
+
+  // Render chart after DOM is ready
+  setTimeout(() => renderDebriefChart(benchmark), 100);
+}
+
+function renderDebriefChart(benchmark) {
+  const canvas = document.getElementById('debrief-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const labels = ['Your Company', 'Fully Resilient Benchmark'];
+  const investData = [STATE.total_invest_cost / 1000, 1500];
+  const disruptData = [STATE.total_disruption_cost / 1000, 350];
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Resilience Investments ($K)',
+          data: investData,
+          backgroundColor: '#0d9488',
+          borderColor: '#0f766e',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+        {
+          label: 'Disruption Response Cost ($K)',
+          data: disruptData,
+          backgroundColor: '#dc2626',
+          borderColor: '#b91c1c',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { font: { family: 'Inter', size: 12 }, padding: 16 }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => ` ${context.dataset.label}: $${context.parsed.y.toFixed(0)}K`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 13, weight: '600' } }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            font: { family: 'Inter', size: 12 },
+            callback: (v) => '$' + v + 'K'
+          },
+          title: {
+            display: true,
+            text: 'Cost ($K)',
+            font: { family: 'Inter', size: 12 }
+          }
+        }
+      }
+    }
+  });
+}
+
+function playAgain() {
+  // Reset all state
+  STATE.phase = 'welcome';
+  STATE.round = 1;
+  STATE.turn = 1;
+  STATE.service_level = 100;
+  STATE.gm_pct = 40.0;
+  STATE.cash = 2000000;
+  STATE.resilience = 30;
+  STATE.investments = {
+    dual_titanium: false,
+    dual_handles: false,
+    safety_stock: false,
+    alt_cmo: false,
+    air_freight: false,
+    logistics_analyst: false,
+  };
+  STATE.invest_budget_remaining = 500000;
+  STATE.current_round_investments = {};
+  STATE.total_invest_cost = 0;
+  STATE.total_disruption_cost = 0;
+  STATE.round_disruption_cost = 0;
+  STATE.history = [];
+
+  // Rebuild event order
+  const fresh = buildRoundEvents();
+  ROUND_EVENTS.round1 = fresh.round1;
+  ROUND_EVENTS.round2 = fresh.round2;
+  ROUND_EVENTS.round3 = fresh.round3;
+
+  showWelcome();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+showWelcome();
+</script>
+</body>
+</html>

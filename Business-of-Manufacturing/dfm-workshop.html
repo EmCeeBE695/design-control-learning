@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DFM Workshop — The Business of Manufacturing</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --teal-light: #ccfbf1;
+    --teal-faint: #f0fdfa;
+    --slate: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --white: #ffffff;
+    --amber: #d97706;
+    --red: #dc2626;
+    --green: #16a34a;
+    --purple: #7c3aed;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.10), 0 2px 4px -1px rgba(0,0,0,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    background: var(--slate);
+    color: var(--white);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    height: 60px;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .header-logo {
+    flex-shrink: 0;
+  }
+  .header-title-block {
+    flex: 1;
+  }
+  .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .header-subtitle {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+  .header-suite {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: auto;
+  }
+  .app-badge {
+    background: var(--teal);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  /* ── App Nav ── */
+  .app-nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--slate-300);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .app-nav-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    padding-right: 16px;
+    margin-right: 4px;
+    border-right: 1px solid var(--slate-300);
+  }
+  .app-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 14px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-500);
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .app-nav-item:hover { color: var(--teal); }
+  .app-nav-item.active {
+    color: var(--teal-dark);
+    border-bottom-color: var(--teal);
+    font-weight: 600;
+  }
+  .app-nav-item .nav-num {
+    background: var(--slate-100);
+    color: var(--slate-500);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .app-nav-item.active .nav-num {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+  }
+
+  /* ── Main layout ── */
+  .main-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  /* ── Splash ── */
+  .splash {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .splash-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--teal);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(13,148,136,0.35);
+  }
+  .splash h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    color: var(--slate);
+  }
+  .splash-sub {
+    font-size: 17px;
+    color: var(--slate-500);
+    margin-bottom: 24px;
+  }
+  .splash-context {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    text-align: left;
+  }
+  .splash-context h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--slate-500);
+    margin-bottom: 12px;
+  }
+  .device-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .device-stat {
+    flex: 1;
+    min-width: 120px;
+  }
+  .device-stat .ds-label { font-size: 12px; color: var(--slate-500); margin-bottom: 2px; }
+  .device-stat .ds-value { font-size: 18px; font-weight: 700; color: var(--slate); }
+  .btn-primary {
+    background: var(--teal);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 36px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: -0.01em;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(13,148,136,0.3);
+  }
+  .btn-primary:hover {
+    background: var(--teal-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13,148,136,0.4);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--slate-700);
+    border: 1.5px solid var(--slate-300);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: var(--teal-faint);
+  }
+
+  /* ── Phase Stepper ── */
+  .phase-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .stepper-node {
+    display: flex;
+    align-items: center;
+  }
+  .stepper-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--slate-300);
+    background: var(--white);
+    color: var(--slate-500);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+  .stepper-dot.done {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+  }
+  .stepper-dot.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--white);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+  }
+  .stepper-dot.result {
+    width: 36px;
+    height: 36px;
+    font-size: 10px;
+  }
+  .stepper-line {
+    width: 28px;
+    height: 2px;
+    background: var(--slate-300);
+    transition: background 0.25s;
+  }
+  .stepper-line.done { background: var(--green); }
+  .stepper-label {
+    font-size: 9px;
+    text-align: center;
+    color: var(--slate-500);
+    margin-top: 4px;
+    line-height: 1.2;
+  }
+  .stepper-node-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Dashboard ── */
+  .dashboard-bar {
+    background: var(--slate);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 700px) {
+    .dashboard-bar { grid-template-columns: repeat(3, 1fr); }
+  }
+  .dash-metric {
+    text-align: center;
+  }
+  .dash-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  .dash-value {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s;
+  }
+  .dash-value.good { color: #4ade80; }
+  .dash-value.warn { color: #fbbf24; }
+  .dash-value.bad { color: #f87171; }
+  .dash-sub {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 1px;
+  }
+
+  /* ── Decision Cards ── */
+  .node-section {
+    margin-bottom: 32px;
+    scroll-margin-top: 140px;
+  }
+  .node-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .node-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .node-num.locked {
+    background: var(--green);
+  }
+  .node-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--slate);
+    letter-spacing: -0.02em;
+  }
+  .node-device {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin-top: 1px;
+  }
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 680px) {
+    .options-grid { grid-template-columns: 1fr; }
+  }
+  .option-card {
+    background: var(--white);
+    border: 2px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    position: relative;
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+    display: block;
+  }
+  .option-card:hover:not(:disabled) {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+    background: var(--teal-faint);
+  }
+  .option-card:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+  }
+  .option-card:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+  .option-card.selected {
+    border-color: var(--teal);
+    background: var(--teal-faint);
+    opacity: 1;
+  }
+  .option-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: var(--teal);
+    color: var(--white);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 20px;
+    text-align: center;
+  }
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .letter-a { background: #0891b2; }
+  .letter-b { background: #7c3aed; }
+  .letter-c { background: #d97706; }
+  .option-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 6px;
+    padding-right: 20px;
+    line-height: 1.3;
+  }
+  .option-cost {
+    font-size: 13px;
+    color: var(--slate-700);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .option-cost strong {
+    color: var(--slate);
+    font-weight: 700;
+  }
+  .option-desc {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .tag-cost { background: #fef3c7; color: #92400e; }
+  .tag-risk { background: #fee2e2; color: #991b1b; }
+  .tag-speed { background: #dcfce7; color: #166534; }
+  .tag-quality { background: #ede9fe; color: #5b21b6; }
+  .tag-neutral { background: var(--slate-100); color: var(--slate-700); }
+  .tag-warn { background: #fef3c7; color: #92400e; }
+
+  /* ── Explanation Panel ── */
+  .explanation-panel {
+    background: var(--teal-faint);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin-top: 12px;
+    animation: fadeSlideIn 0.3s ease;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .explanation-panel .ep-head {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--teal-dark);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .explanation-panel .ep-text {
+    font-size: 13px;
+    color: var(--slate-700);
+    line-height: 1.6;
+  }
+  .explanation-panel .ep-choice {
+    font-size: 12px;
+    color: var(--teal-dark);
+    font-weight: 600;
+    margin-bottom: 6px;
+    background: var(--teal-light);
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+
+  /* ── Warning event ── */
+  .warning-event {
+    background: #fff7ed;
+    border: 1.5px solid #f97316;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    animation: fadeSlideIn 0.3s ease;
+  }
+  .warning-event .we-icon {
+    font-size: 18px;
+    line-height: 1;
+    margin-top: 1px;
+  }
+  .warning-event .we-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #9a3412;
+    margin-bottom: 3px;
+  }
+  .warning-event .we-text {
+    font-size: 12px;
+    color: #7c2d12;
+    line-height: 1.5;
+  }
+
+  /* ── Results screen ── */
+  .results-section {
+    animation: fadeSlideIn 0.4s ease;
+  }
+  .results-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 32px 20px;
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .verdict-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 800;
+    padding: 10px 28px;
+    border-radius: 40px;
+    margin-bottom: 12px;
+  }
+  .verdict-win { background: #dcfce7; color: #14532d; }
+  .verdict-loss { background: #fee2e2; color: #7f1d1d; }
+  .verdict-partial { background: #fef3c7; color: #78350f; }
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 640px) {
+    .results-grid { grid-template-columns: 1fr; }
+  }
+  .result-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .result-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--slate-500);
+    margin-bottom: 16px;
+  }
+  .kpi-big {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi-big.good { color: var(--green); }
+  .kpi-big.warn { color: var(--amber); }
+  .kpi-big.bad { color: var(--red); }
+  .kpi-context {
+    font-size: 13px;
+    color: var(--slate-500);
+  }
+  .chart-container {
+    position: relative;
+    height: 260px;
+  }
+  .chart-container-tall {
+    position: relative;
+    height: 320px;
+  }
+  .full-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .full-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .comparison-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    padding: 8px 12px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-300);
+  }
+  .comparison-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .comparison-table .you-col { color: var(--slate-700); }
+  .comparison-table .opt-col { color: var(--green); font-weight: 600; }
+  .comparison-table .match { color: var(--green); }
+  .comparison-table .mismatch { color: var(--red); }
+  .fda-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .fda-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    padding: 8px 10px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-300);
+  }
+  .fda-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .fda-table tr:last-child td { border-bottom: none; }
+  .fda-yes { color: var(--red); font-weight: 600; }
+  .fda-maybe { color: var(--amber); font-weight: 600; }
+  .fda-no { color: var(--green); font-weight: 600; }
+  .capex-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .capex-item {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 6px;
+    padding: 10px 14px;
+    flex: 1;
+    min-width: 150px;
+  }
+  .capex-item .ci-label { font-size: 11px; color: var(--slate-500); margin-bottom: 3px; }
+  .capex-item .ci-value { font-size: 18px; font-weight: 700; color: var(--slate); }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+  .gauge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .gauge-svg {
+    overflow: visible;
+  }
+  .score-display {
+    text-align: center;
+    margin-top: 8px;
+  }
+  .progress-bar-wrap {
+    background: var(--slate-100);
+    border-radius: 20px;
+    height: 12px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.6s ease;
+  }
+  .shortfalls {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--slate-700);
+    line-height: 1.7;
+  }
+  .shortfall-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .shortfall-item::before { content: '•'; color: var(--red); font-weight: 700; }
+  @media print {
+    .app-nav, .no-print { display: none; }
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── APP HEADER ── -->
+<header class="app-header" role="banner">
+  <div class="header-logo">
+    <!-- Heartbeat SVG on teal rect -->
+    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" aria-label="Business of Manufacturing logo" xmlns="http://www.w3.org/2000/svg">
+      <rect width="42" height="42" rx="9" fill="#0d9488"/>
+      <polyline points="4,21 10,21 13,13 16,29 19,18 22,24 25,21 38,21"
+        stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+  <div class="header-title-block">
+    <div class="header-title">DFM Workshop</div>
+    <div class="header-subtitle">Design It Right the First Time</div>
+  </div>
+  <div class="header-suite">The Business of Manufacturing · BE 695</div>
+  <div class="app-badge">App 1</div>
+</header>
+
+<!-- ── APP NAV ── -->
+<nav class="app-nav" aria-label="Suite navigation">
+  <span class="app-nav-label">Play any order</span>
+  <a href="dfm-workshop.html" class="app-nav-item active" aria-current="page">
+    <span class="nav-num">1</span> DFM Workshop
+  </a>
+  <a href="scale-up-solver.html" class="app-nav-item">
+    <span class="nav-num">2</span> Scale-Up Solver
+  </a>
+  <a href="supply-chain-crisis.html" class="app-nav-item">
+    <span class="nav-num">3</span> Supply Chain Crisis
+  </a>
+  <a href="meddevice-ceo.html" class="app-nav-item">
+    <span class="nav-num">4</span> MedDevice CEO
+  </a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main-content" id="mainContent">
+
+  <!-- SPLASH -->
+  <div id="splashScreen" class="splash">
+    <div class="splash-icon">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="28" height="28" rx="4" stroke="white" stroke-width="2" fill="none"/>
+        <path d="M10 26 L10 18 L14 22 L18 12 L22 20 L26 16 L26 26" stroke="white" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+    <h1>DFM Workshop</h1>
+    <p class="splash-sub">Design for Manufacturability — 8 critical decisions, real medical device economics</p>
+
+    <div class="splash-context">
+      <h3>Device Scenario</h3>
+      <div class="device-row">
+        <div class="device-stat">
+          <div class="ds-label">Product</div>
+          <div class="ds-value" style="font-size:14px;line-height:1.3;">Single-use Hemostasis Valve</div>
+        </div>
+        <div class="device-stat">
+          <div class="ds-label">Classification</div>
+          <div class="ds-value" style="font-size:14px;">Class II Catheter Accessory</div>
+        </div>
+        <div class="device-stat">
+          <div class="ds-label">ASP</div>
+          <div class="ds-value">$85/unit</div>
+        </div>
+        <div class="device-stat">
+          <div class="ds-label">Target Volume</div>
+          <div class="ds-value">200K/yr</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:13px; color:var(--slate-500); margin-bottom:20px; line-height:1.7;">
+      You're the manufacturing engineer. Make 8 design &amp; process decisions that will lock in your unit economics — and your FDA regulatory burden — for years to come. Watch every choice ripple through your cost model in real time.
+    </p>
+
+    <button class="btn-primary" onclick="startGame()" aria-label="Start DFM Workshop simulation">
+      Start Workshop →
+    </button>
+  </div>
+
+  <!-- GAME -->
+  <div id="gameScreen" style="display:none;">
+    <!-- Phase Stepper -->
+    <div id="phaseStepper" class="phase-stepper" role="navigation" aria-label="Decision progress"></div>
+
+    <!-- Dashboard -->
+    <div class="dashboard-bar" id="dashboardBar" role="region" aria-label="Live cost metrics">
+      <div class="dash-metric">
+        <div class="dash-label">Materials</div>
+        <div class="dash-value" id="dm-materials">—</div>
+        <div class="dash-sub">$/unit</div>
+      </div>
+      <div class="dash-metric">
+        <div class="dash-label">Labor</div>
+        <div class="dash-value" id="dm-labor">—</div>
+        <div class="dash-sub">$/unit</div>
+      </div>
+      <div class="dash-metric">
+        <div class="dash-label">OH Rate</div>
+        <div class="dash-value" id="dm-oh">—</div>
+        <div class="dash-sub">$/hr</div>
+      </div>
+      <div class="dash-metric">
+        <div class="dash-label">Unit COGS</div>
+        <div class="dash-value" id="dm-cogs">—</div>
+        <div class="dash-sub">$/unit</div>
+      </div>
+      <div class="dash-metric">
+        <div class="dash-label">GM%</div>
+        <div class="dash-value" id="dm-gm">—</div>
+        <div class="dash-sub">at $85 ASP</div>
+      </div>
+      <div class="dash-metric">
+        <div class="dash-label">DFM Score</div>
+        <div class="dash-value" id="dm-dfm">50</div>
+        <div class="dash-sub">/ 100</div>
+      </div>
+    </div>
+
+    <!-- Decision Nodes -->
+    <div id="nodesContainer"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsScreen" style="display:none;"></div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════
+const ASP = 85;
+const ANNUAL_VOLUME = 200000;
+const ANNUAL_OH = 800000;
+const DL_RATE = 30;
+const FREIGHT_OUT = 1.80;
+
+let state = {
+  choices: {},       // nodeId -> optionIndex (0,1,2)
+  dfmScore: 50,
+  capex: 0,
+  extraCosts: [],    // one-time events
+  currentNode: 1,
+  gameStarted: false
+};
+
+// Computed metrics from choices
+function computeMetrics() {
+  const c = state.choices;
+  let materials = 0;
+  let stdHrs = 0;
+  let sterilization = 0;
+  let packaging = 0;
+  let qcCost = 0;
+  let cmoCost = 0;
+  let yield_ = 1.0; // fraction
+
+  // Node 1 — Body Material
+  if (c[1] === 0) { materials += 12; }       // PEEK
+  else if (c[1] === 1) { materials += 4; }   // PC
+  else if (c[1] === 2) { materials += 8; stdHrs += 0.30; } // SS + machining
+
+  // Node 2 — Seal
+  if (c[2] === 0) { materials += 0.50; stdHrs += 0.50; }  // CA
+  else if (c[2] === 1) { materials += 1.20; stdHrs += 0.10; } // UV
+  else if (c[2] === 2) { materials += 0.30; stdHrs += 0.05; } // Overmold
+
+  // Node 3 — Component Count
+  if (c[3] === 0) { stdHrs += 0.25; }   // 3-piece
+  else if (c[3] === 1) { stdHrs += 0.45; } // 5-piece
+  else if (c[3] === 2) { stdHrs += 0.15; } // 2-piece
+
+  // Node 4 — Tolerances (yield)
+  if (c[4] === 0) { yield_ = 0.94; }
+  else if (c[4] === 1) { yield_ = 0.98; }
+  else if (c[4] === 2) { yield_ = 0.995; }
+
+  // Node 5 — Sterilization
+  if (c[5] === 0) { sterilization = 2.50; }   // ETO
+  else if (c[5] === 1) { sterilization = 1.80; } // Gamma (+ possible one-time)
+  else if (c[5] === 2) { sterilization = 2.10; } // E-beam
+
+  // Node 6 — Packaging
+  if (c[6] === 0) { packaging = 3.20; }
+  else if (c[6] === 1) { packaging = 0.80; }
+  else if (c[6] === 2) { packaging = 1.50; }
+
+  // Node 7 — Production
+  if (c[7] === 1) { cmoCost = 8.00; }   // CMO
+  else if (c[7] === 2) { cmoCost = 4.00; } // Hybrid
+
+  // Node 8 — QC
+  if (c[8] === 0) { qcCost = 2.10; }
+  else if (c[8] === 1) { qcCost = 0.40; }
+  else if (c[8] === 2) { qcCost = 0.25; }
+
+  // Derived
+  const ohRate = stdHrs > 0 ? ANNUAL_OH / (ANNUAL_VOLUME * stdHrs) : 0;
+  const lohRate = DL_RATE + ohRate;
+  const laborCost = lohRate * stdHrs;
+
+  // Scrap adder: on mat + labor portion
+  let scrapAdder = 0;
+  if (yield_ < 1.0 && Object.keys(c).length >= 4) {
+    scrapAdder = (materials + laborCost) * (1 / yield_ - 1);
+  }
+
+  const unitCOGS = materials + laborCost + sterilization + packaging + FREIGHT_OUT + qcCost + cmoCost + scrapAdder;
+  const gm = unitCOGS > 0 ? ((ASP - unitCOGS) / ASP) * 100 : null;
+
+  return {
+    materials,
+    stdHrs,
+    ohRate,
+    lohRate,
+    laborCost,
+    sterilization,
+    packaging,
+    qcCost,
+    cmoCost,
+    scrapAdder,
+    yield_,
+    unitCOGS,
+    gm
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// NODE DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const NODES = [
+  {
+    id: 1,
+    title: "Body Material",
+    subtitle: "Choose the primary structural material for the valve body",
+    teaching: "Material choice sets your cost foundation and supply chain resilience. PEEK offers biocompatibility and strength but at a premium. Polycarbonate is cost-effective with broad supplier availability. Stainless adds machining labor but is extremely durable.",
+    options: [
+      {
+        letter: 'A',
+        name: 'Medical-grade PEEK',
+        cost: '$12.00/unit',
+        desc: '3 qualified suppliers. Excellent biocompatibility and stiffness.',
+        tags: [{text:'High Cost', cls:'tag-cost'}, {text:'Limited Suppliers', cls:'tag-risk'}],
+        dfmDelta: -10
+      },
+      {
+        letter: 'B',
+        name: 'Medical-grade Polycarbonate',
+        cost: '$4.00/unit',
+        desc: '40+ suppliers worldwide. Standard injection-molding process.',
+        tags: [{text:'Low Cost', cls:'tag-speed'}, {text:'Broad Supply', cls:'tag-quality'}],
+        dfmDelta: +10
+      },
+      {
+        letter: 'C',
+        name: 'Stainless Steel 316L',
+        cost: '$8.00/unit + 0.30 hrs machining',
+        desc: '15+ suppliers. Highly durable, requires CNC machining operations.',
+        tags: [{text:'Moderate Cost', cls:'tag-neutral'}, {text:'Durable', cls:'tag-quality'}],
+        dfmDelta: 0
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Seal Assembly Method",
+    subtitle: "How will the hemostatic seal be joined to the valve body?",
+    teaching: "Upfront CapEx on overmolding can dramatically reduce unit cost at scale — $80K tooling pays back at ~40K units if UV savings hold. Cyanoacrylate's low material cost is overwhelmed by high labor and the near-impossibility of automation. Cure time drives throughput and OH rate.",
+    options: [
+      {
+        letter: 'A',
+        name: 'Cyanoacrylate Adhesive',
+        cost: '$0.50/unit material · 0.50 hrs/unit labor',
+        desc: 'Manual application, hard to automate. Long cure time limits throughput.',
+        tags: [{text:'Low Material Cost', cls:'tag-speed'}, {text:'High Labor', cls:'tag-cost'}, {text:'Not Automatable', cls:'tag-risk'}],
+        dfmDelta: -15
+      },
+      {
+        letter: 'B',
+        name: 'UV-Cure Adhesive',
+        cost: '$1.20/unit material · 0.10 hrs/unit labor',
+        desc: 'Seconds-long cure cycle. Semi-automated dispensing feasible.',
+        tags: [{text:'Fast Cycle', cls:'tag-speed'}, {text:'Automatable', cls:'tag-quality'}],
+        dfmDelta: +10,
+        capex: 0
+      },
+      {
+        letter: 'C',
+        name: 'Overmolded Seal',
+        cost: '$80K tooling CapEx · $0.30/unit material · 0.05 hrs/unit',
+        desc: 'Injection-overmolded seal. Lowest unit cost, highest automation potential.',
+        tags: [{text:'High CapEx', cls:'tag-cost'}, {text:'Lowest Unit Cost', cls:'tag-speed'}, {text:'Best Automation', cls:'tag-quality'}],
+        dfmDelta: +15,
+        capex: 80000
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Component Count",
+    subtitle: "How many discrete parts make up the assembled valve?",
+    teaching: "Fewer parts equals less assembly time, which lowers labor cost and overhead allocation. Every part adds a join, a tolerance stack, and a failure mode. A 2-piece integrated design requires $120K tooling but eliminates 0.30 hrs of labor per unit.",
+    options: [
+      {
+        letter: 'A',
+        name: '3-Piece Design',
+        cost: '0.25 hrs/unit assembly',
+        desc: 'Standard design approach. Moderate assembly complexity.',
+        tags: [{text:'Moderate Labor', cls:'tag-neutral'}],
+        dfmDelta: 0
+      },
+      {
+        letter: 'B',
+        name: '5-Piece Design',
+        cost: '0.45 hrs/unit assembly',
+        desc: 'Additional components reduce seal failure risk through redundancy.',
+        tags: [{text:'High Labor', cls:'tag-cost'}, {text:'Better Reliability', cls:'tag-quality'}],
+        dfmDelta: -10
+      },
+      {
+        letter: 'C',
+        name: '2-Piece Integrated Molding',
+        cost: '$120K tooling CapEx · 0.15 hrs/unit',
+        desc: 'Integrated body and seal housing in two injection-molded parts.',
+        tags: [{text:'High CapEx', cls:'tag-cost'}, {text:'Lowest Labor', cls:'tag-speed'}],
+        dfmDelta: +15,
+        capex: 120000
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Tolerances on Sealing Surface",
+    subtitle: "What dimensional tolerance class for the critical sealing interface?",
+    teaching: "Yield directly drives cost. At 94% yield you need 1/0.94 = 1.064 units of material and labor input per good unit shipped — a 6.4% scrap adder on your conversion costs. Loose tolerances favor commodity injection molding with commodity supply chains.",
+    options: [
+      {
+        letter: 'A',
+        name: '±0.001\" Tight Tolerance',
+        cost: 'Precision machining · 94% yield · 2 suppliers',
+        desc: 'Aerospace-grade tolerances. Significant scrap cost at scale.',
+        tags: [{text:'Low Yield', cls:'tag-risk'}, {text:'Limited Supply', cls:'tag-cost'}, {text:'High Precision', cls:'tag-quality'}],
+        dfmDelta: -15
+      },
+      {
+        letter: 'B',
+        name: '±0.005\" Moderate Tolerance',
+        cost: 'Standard machining · 98% yield · 15+ suppliers',
+        desc: 'Achievable with standard CNC. Good process capability headroom.',
+        tags: [{text:'Good Yield', cls:'tag-speed'}, {text:'Broad Supply', cls:'tag-quality'}],
+        dfmDelta: +5
+      },
+      {
+        letter: 'C',
+        name: '±0.010\" Loose Tolerance',
+        cost: 'Injection molded · 99.5% yield · commodity supply',
+        desc: 'Enables commodity injection molding. Near-zero scrap loss.',
+        tags: [{text:'Best Yield', cls:'tag-speed'}, {text:'Commodity Supply', cls:'tag-quality'}],
+        dfmDelta: +10
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Sterilization Method",
+    subtitle: "Terminal sterilization process for the finished device",
+    teaching: "Sterilization method interacts with material selection — this is a systems engineering decision. ETO is universal but slow (14-day cycle). Gamma is fast but can degrade certain polymers. E-beam is fastest but requires additional validation. Regulatory submissions must specify the validated method.",
+    options: [
+      {
+        letter: 'A',
+        name: 'Ethylene Oxide (ETO)',
+        cost: '$2.50/unit · 14-day lead time',
+        desc: 'Compatible with virtually all materials. Long aeration cycle needed.',
+        tags: [{text:'Universal Compatibility', cls:'tag-quality'}, {text:'Slow Turnaround', cls:'tag-risk'}],
+        dfmDelta: 0
+      },
+      {
+        letter: 'B',
+        name: 'Gamma Irradiation',
+        cost: '$1.80/unit · 3-day turnaround',
+        desc: 'Fast and reliable. Potential polymer degradation risk.',
+        tags: [{text:'Fast', cls:'tag-speed'}, {text:'Material Compatibility Risk', cls:'tag-risk'}],
+        dfmDelta: 0,
+        triggerWarning: true
+      },
+      {
+        letter: 'C',
+        name: 'E-Beam Irradiation',
+        cost: '$2.10/unit · Fastest turnaround · Requires validation',
+        desc: 'Highest dose uniformity. Smaller penetration depth — confirm geometry.',
+        tags: [{text:'Fastest', cls:'tag-speed'}, {text:'Validation Required', cls:'tag-neutral'}],
+        dfmDelta: +5
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "Packaging Format",
+    subtitle: "Sterile barrier system and primary packaging for the device",
+    teaching: "Packaging is a fully validated system per ISO 11607 — it's part of the sterile barrier and therefore part of COGS and regulatory burden. Any packaging change post-clearance triggers a new validation study. Chevron pouches are the most cost-effective option for lower-profile devices.",
+    options: [
+      {
+        letter: 'A',
+        name: 'Custom Thermoformed Tray + Pouch',
+        cost: '$3.20/unit',
+        desc: 'Premium presentation with rigid tray. Requires custom tooling.',
+        tags: [{text:'Premium Protection', cls:'tag-quality'}, {text:'High Cost', cls:'tag-cost'}],
+        dfmDelta: -5
+      },
+      {
+        letter: 'B',
+        name: 'Chevron Pouch',
+        cost: '$0.80/unit',
+        desc: 'Standard peel pouch. Widely validated, minimal tooling, low cost.',
+        tags: [{text:'Low Cost', cls:'tag-speed'}, {text:'Standard', cls:'tag-neutral'}],
+        dfmDelta: +10
+      },
+      {
+        letter: 'C',
+        name: 'Rigid Blister Pack',
+        cost: '$1.50/unit',
+        desc: 'Good shelf presence. Moderate tooling cost, good HCP familiarity.',
+        tags: [{text:'Moderate Cost', cls:'tag-neutral'}, {text:'Retail Presence', cls:'tag-quality'}],
+        dfmDelta: 0
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "Production Model",
+    subtitle: "Where and how will the device be manufactured?",
+    teaching: "Internal manufacturing means lower unit cost at scale but requires $500K capital and full quality system build-out. A CMO can launch in 6 months with zero CapEx but costs $8/unit more and reduces process control. Hybrid splits the difference — useful during volume ramp.",
+    options: [
+      {
+        letter: 'A',
+        name: 'Internal Manufacturing Line',
+        cost: '$500K CapEx · Full control · 200K units/yr capacity',
+        desc: 'Build internal line. Best unit economics at full volume, full IP control.',
+        tags: [{text:'High CapEx', cls:'tag-cost'}, {text:'Full Control', cls:'tag-quality'}, {text:'Best Unit Economics', cls:'tag-speed'}],
+        dfmDelta: +10,
+        capex: 500000
+      },
+      {
+        letter: 'B',
+        name: 'Contract Manufacturer (CMO)',
+        cost: 'No CapEx · +$8.00/unit CMO fee · Flexible volume',
+        desc: 'Outsource all production. Fast start, less capital at risk.',
+        tags: [{text:'No CapEx', cls:'tag-speed'}, {text:'Higher Unit Cost', cls:'tag-cost'}, {text:'Fast Start', cls:'tag-quality'}],
+        dfmDelta: 0
+      },
+      {
+        letter: 'C',
+        name: 'Hybrid (Internal + CMO)',
+        cost: '$250K CapEx · +$4.00/unit for CMO portion',
+        desc: 'Internal core processes, CMO handles volume overflow. Balanced risk.',
+        tags: [{text:'Moderate CapEx', cls:'tag-neutral'}, {text:'Balanced', cls:'tag-quality'}],
+        dfmDelta: +5,
+        capex: 250000
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: "Quality Control Approach",
+    subtitle: "Inspection and acceptance testing strategy for finished devices",
+    teaching: "Quality is a cost — but so are escapes. 100% inspection is resource-intensive but eliminates shipped defects. AQL sampling is cheaper but carries statistical escape risk. Automated vision systems have high CapEx but dramatically reduce per-unit inspection cost and human variability at scale.",
+    options: [
+      {
+        letter: 'A',
+        name: '100% Manual Inspection',
+        cost: '+$2.10/unit QC cost',
+        desc: 'Every unit inspected by trained operators. Zero statistical escape.',
+        tags: [{text:'Highest QC Cost', cls:'tag-cost'}, {text:'Zero Escape', cls:'tag-quality'}],
+        dfmDelta: 0
+      },
+      {
+        letter: 'B',
+        name: 'AQL Statistical Sampling',
+        cost: '+$0.40/unit QC cost',
+        desc: 'Lot-based acceptance per ANSI/ASQ Z1.4. Cost-effective at volume.',
+        tags: [{text:'Low Cost', cls:'tag-speed'}, {text:'Some Escape Risk', cls:'tag-risk'}],
+        dfmDelta: +5
+      },
+      {
+        letter: 'C',
+        name: 'Automated Vision System',
+        cost: '$180K CapEx · +$0.25/unit QC cost',
+        desc: '100% automated inspection. Consistent, fast, scalable, no fatigue.',
+        tags: [{text:'High CapEx', cls:'tag-cost'}, {text:'Best Quality', cls:'tag-quality'}, {text:'Lowest Ongoing Cost', cls:'tag-speed'}],
+        dfmDelta: +15,
+        capex: 180000
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════
+// PHASE STEPPER
+// ═══════════════════════════════════════════════════════════
+function renderStepper() {
+  const el = document.getElementById('phaseStepper');
+  el.innerHTML = '';
+
+  const totalNodes = 8;
+  for (let i = 1; i <= totalNodes; i++) {
+    const isDone = state.choices[i] !== undefined;
+    const isActive = i === state.currentNode;
+
+    // Node wrap (dot + label)
+    const wrap = document.createElement('div');
+    wrap.className = 'stepper-node-wrap';
+
+    const dot = document.createElement('div');
+    dot.className = 'stepper-dot' + (isDone ? ' done' : isActive ? ' active' : '');
+    dot.textContent = isDone ? '✓' : i;
+    dot.setAttribute('aria-label', `Node ${i}${isDone ? ' (completed)' : isActive ? ' (current)' : ''}`);
+    wrap.appendChild(dot);
+
+    const label = document.createElement('div');
+    label.className = 'stepper-label';
+    label.textContent = ['Material','Seal','Count','Tolerances','Sterile','Package','Production','QC'][i-1];
+    wrap.appendChild(label);
+
+    const nodeDiv = document.createElement('div');
+    nodeDiv.className = 'stepper-node';
+    nodeDiv.appendChild(wrap);
+
+    el.appendChild(nodeDiv);
+
+    // Connector line
+    if (i < totalNodes) {
+      const lineWrap = document.createElement('div');
+      lineWrap.className = 'stepper-node';
+      const line = document.createElement('div');
+      line.className = 'stepper-line' + (isDone ? ' done' : '');
+      lineWrap.appendChild(line);
+      el.appendChild(lineWrap);
+    }
+  }
+
+  // Results node
+  const resultsDot = document.createElement('div');
+  resultsDot.className = 'stepper-node-wrap';
+  const line = document.createElement('div');
+  line.className = 'stepper-node';
+  const l = document.createElement('div');
+  l.className = 'stepper-line' + (state.choices[8] !== undefined ? ' done' : '');
+  line.appendChild(l);
+  el.appendChild(line);
+
+  const rDot = document.createElement('div');
+  rDot.className = 'stepper-dot result' + (state.choices[8] !== undefined ? ' done' : '');
+  rDot.textContent = state.choices[8] !== undefined ? '★' : 'R';
+  rDot.setAttribute('aria-label', 'Results');
+  resultsDot.appendChild(rDot);
+  const rLabel = document.createElement('div');
+  rLabel.className = 'stepper-label';
+  rLabel.textContent = 'Results';
+  resultsDot.appendChild(rLabel);
+  el.appendChild(resultsDot);
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD UPDATE
+// ═══════════════════════════════════════════════════════════
+function updateDashboard() {
+  const m = computeMetrics();
+
+  const setVal = (id, val, good, warn) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    el.classList.remove('good','warn','bad');
+    if (good === true) el.classList.add('good');
+    else if (warn === true) el.classList.add('warn');
+    else if (good === false && warn === false) el.classList.add('bad');
+  };
+
+  const hasChoices = Object.keys(state.choices).length > 0;
+
+  if (hasChoices) {
+    setVal('dm-materials', `$${m.materials.toFixed(2)}`);
+    setVal('dm-labor', m.stdHrs > 0 ? `$${m.laborCost.toFixed(2)}` : '$—');
+    setVal('dm-oh', m.stdHrs > 0 ? `$${m.ohRate.toFixed(0)}` : '—');
+    if (m.unitCOGS > 0) {
+      const cogsGood = m.unitCOGS < 45;
+      const cogsWarn = m.unitCOGS >= 45 && m.unitCOGS < 55;
+      setVal('dm-cogs', `$${m.unitCOGS.toFixed(2)}`, cogsGood, cogsWarn);
+    } else {
+      setVal('dm-cogs', '—');
+    }
+    if (m.gm !== null) {
+      const gmGood = m.gm >= 55;
+      const gmWarn = m.gm >= 45 && m.gm < 55;
+      setVal('dm-gm', `${m.gm.toFixed(1)}%`, gmGood, gmWarn);
+    } else {
+      setVal('dm-gm', '—');
+    }
+  }
+
+  const dfmEl = document.getElementById('dm-dfm');
+  if (dfmEl) {
+    dfmEl.textContent = state.dfmScore;
+    dfmEl.classList.remove('good','warn','bad');
+    if (state.dfmScore >= 70) dfmEl.classList.add('good');
+    else if (state.dfmScore >= 50) dfmEl.classList.add('warn');
+    else dfmEl.classList.add('bad');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// NODE RENDERING
+// ═══════════════════════════════════════════════════════════
+function renderNodes() {
+  const container = document.getElementById('nodesContainer');
+  container.innerHTML = '';
+
+  NODES.forEach(node => {
+    const section = document.createElement('div');
+    section.className = 'node-section';
+    section.id = `node-${node.id}`;
+
+    const isLocked = state.choices[node.id] !== undefined;
+    const isActive = node.id === state.currentNode;
+    const isFuture = node.id > state.currentNode;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'node-header';
+    header.innerHTML = `
+      <div class="node-num ${isLocked ? 'locked' : ''}" aria-hidden="true">${isLocked ? '✓' : node.id}</div>
+      <div>
+        <div class="node-title">${node.id}. ${node.title}</div>
+        <div class="node-device">${node.subtitle}</div>
+      </div>
+    `;
+    section.appendChild(header);
+
+    // Options grid
+    const grid = document.createElement('div');
+    grid.className = 'options-grid';
+
+    node.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-card';
+      if (isLocked && state.choices[node.id] === idx) btn.classList.add('selected');
+      if (isLocked || isFuture) btn.disabled = true;
+
+      const letterClass = ['letter-a','letter-b','letter-c'][idx];
+      const tagsHTML = opt.tags.map(t => `<span class="tag ${t.cls}">${t.text}</span>`).join('');
+
+      btn.innerHTML = `
+        <div class="option-letter ${letterClass}" aria-hidden="true">${opt.letter}</div>
+        <div class="option-name">${opt.name}</div>
+        <div class="option-cost">${opt.cost}</div>
+        <div class="option-desc">${opt.desc}</div>
+        <div class="tags">${tagsHTML}</div>
+      `;
+
+      btn.setAttribute('aria-label', `Option ${opt.letter}: ${opt.name}`);
+      if (!isLocked && !isFuture) {
+        btn.addEventListener('click', () => makeChoice(node.id, idx));
+      }
+
+      grid.appendChild(btn);
+    });
+
+    section.appendChild(grid);
+
+    // Explanation panel if chosen
+    if (isLocked) {
+      const chosenIdx = state.choices[node.id];
+      const chosen = node.options[chosenIdx];
+      const ep = document.createElement('div');
+      ep.className = 'explanation-panel';
+      ep.innerHTML = `
+        <div class="ep-head">📊 Why It Matters</div>
+        <div class="ep-choice">You chose: ${chosen.name}</div>
+        <div class="ep-text">${node.teaching}</div>
+      `;
+      section.appendChild(ep);
+
+      // Warning event for node 5 gamma + polycarbonate
+      if (node.id === 5 && chosenIdx === 1 && state.choices[1] === 1) {
+        const warn = document.createElement('div');
+        warn.className = 'warning-event';
+        warn.innerHTML = `
+          <div class="we-icon">⚠️</div>
+          <div>
+            <div class="we-title">Material Compatibility Event Triggered</div>
+            <div class="we-text">Polycarbonate may yellow and embrittle under gamma radiation. Material compatibility testing required. <strong>$15,000 one-time cost added</strong> to CapEx tracker. This is the kind of systems-level interaction DFM is designed to catch early.</div>
+          </div>
+        `;
+        section.appendChild(warn);
+      }
+    }
+
+    container.appendChild(section);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHOICE LOGIC
+// ═══════════════════════════════════════════════════════════
+function makeChoice(nodeId, optIdx) {
+  const node = NODES.find(n => n.id === nodeId);
+  const opt = node.options[optIdx];
+
+  state.choices[nodeId] = optIdx;
+
+  // DFM score
+  state.dfmScore = Math.min(100, Math.max(0, state.dfmScore + (opt.dfmDelta || 0)));
+
+  // CapEx
+  if (opt.capex) state.capex += opt.capex;
+
+  // Warning: gamma + polycarbonate
+  if (nodeId === 5 && optIdx === 1 && state.choices[1] === 1) {
+    state.capex += 15000;
+  }
+
+  // Advance current node
+  if (nodeId === state.currentNode && state.currentNode < 8) {
+    state.currentNode = nodeId + 1;
+  } else if (nodeId === 8) {
+    state.currentNode = 9; // results
+  }
+
+  renderNodes();
+  renderStepper();
+  updateDashboard();
+
+  // Scroll to next node or results
+  setTimeout(() => {
+    if (state.currentNode <= 8) {
+      const nextEl = document.getElementById(`node-${state.currentNode}`);
+      if (nextEl) nextEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      showResults();
+    }
+  }, 200);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GAME START
+// ═══════════════════════════════════════════════════════════
+function startGame() {
+  state = {
+    choices: {},
+    dfmScore: 50,
+    capex: 0,
+    currentNode: 1,
+    gameStarted: true
+  };
+
+  document.getElementById('splashScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('resultsScreen').style.display = 'none';
+
+  renderStepper();
+  renderNodes();
+  updateDashboard();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESULTS SCREEN
+// ═══════════════════════════════════════════════════════════
+function showResults() {
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultsScreen').style.display = 'block';
+
+  const m = computeMetrics();
+  const gm = m.gm || 0;
+  const dfm = state.dfmScore;
+
+  const isWin = gm >= 55 && dfm >= 70;
+  const isPartial = (gm >= 45 && gm < 55) || (dfm >= 50 && dfm < 70);
+
+  let verdictClass = isWin ? 'verdict-win' : (isPartial ? 'verdict-partial' : 'verdict-loss');
+  let verdictText = isWin ? '🏆 Winning Design' : (isPartial ? '⚠️ Room to Improve' : '❌ Cost Structure Fails');
+  let verdictSub = '';
+  if (isWin) verdictSub = 'GM ≥ 55% and DFM Score ≥ 70 — you designed for profitability and manufacturability.';
+  else {
+    const issues = [];
+    if (gm < 55) issues.push(`GM% of ${gm.toFixed(1)}% is below the 55% target`);
+    if (dfm < 70) issues.push(`DFM Score of ${dfm} is below the 70 threshold`);
+    verdictSub = 'Shortfalls: ' + issues.join('; ') + '.';
+  }
+
+  const gmClass = gm >= 55 ? 'good' : gm >= 45 ? 'warn' : 'bad';
+  const dfmClass = dfm >= 70 ? 'good' : dfm >= 50 ? 'warn' : 'bad';
+
+  // COGS breakdown values
+  const cogsBreakdown = [
+    { label: 'Materials', value: m.materials },
+    { label: 'Labor (DL)', value: m.laborCost > 0 ? (DL_RATE * m.stdHrs) : 0 },
+    { label: 'Overhead', value: m.laborCost > 0 ? (m.ohRate * m.stdHrs) : 0 },
+    { label: 'Scrap Adder', value: m.scrapAdder },
+    { label: 'Sterilization', value: m.sterilization },
+    { label: 'Packaging', value: m.packaging },
+    { label: 'Freight Out', value: FREIGHT_OUT },
+    { label: 'QC Cost', value: m.qcCost },
+    { label: 'CMO Fee', value: m.cmoCost }
+  ].filter(d => d.value > 0);
+
+  // Optimal design
+  const OPTIMAL = {
+    materials: 4.00,         // polycarbonate
+    sealMat: 1.20,           // UV-cure
+    sealHrs: 0.10,
+    compHrs: 0.15,           // 2-piece ($120K)
+    yield_: 0.995,           // loose
+    sterilization: 2.10,     // e-beam
+    packaging: 0.80,         // chevron
+    cmoCost: 0,              // internal
+    qcCost: 0.25             // automated vision ($180K)
+  };
+  const optStdHrs = OPTIMAL.sealHrs + OPTIMAL.compHrs;
+  const optOhRate = ANNUAL_OH / (ANNUAL_VOLUME * optStdHrs);
+  const optLohRate = DL_RATE + optOhRate;
+  const optLabor = optLohRate * optStdHrs;
+  const optMatTotal = OPTIMAL.materials + OPTIMAL.sealMat;
+  const optScrap = (optMatTotal + optLabor) * (1 / OPTIMAL.yield_ - 1);
+  const optCOGS = optMatTotal + optLabor + optScrap + OPTIMAL.sterilization + OPTIMAL.packaging + FREIGHT_OUT + OPTIMAL.qcCost;
+  const optGM = ((ASP - optCOGS) / ASP) * 100;
+
+  // FDA callout rows
+  const CHOICES = state.choices;
+  function getChoiceName(nodeId, idx) {
+    return NODES.find(n=>n.id===nodeId).options[idx].name;
+  }
+  const fdaRows = [
+    {
+      decision: 'Body Material',
+      chosen: getChoiceName(1, CHOICES[1]),
+      resubmit: 'Yes',
+      resubmitClass: 'fda-yes',
+      detail: '510(k) re-submission required. Estimated $200K–$500K, 6–18 month delay.'
+    },
+    {
+      decision: 'Seal Assembly Method',
+      chosen: getChoiceName(2, CHOICES[2]),
+      resubmit: 'Likely Yes',
+      resubmitClass: 'fda-maybe',
+      detail: 'Change to adhesive type or bonding method likely requires 510(k) supplement or new submission.'
+    },
+    {
+      decision: 'Component Count',
+      chosen: getChoiceName(3, CHOICES[3]),
+      resubmit: 'Maybe',
+      resubmitClass: 'fda-maybe',
+      detail: 'Design change that affects device function/safety may trigger substantial equivalence review.'
+    },
+    {
+      decision: 'Tolerances',
+      chosen: getChoiceName(4, CHOICES[4]),
+      resubmit: 'Yes',
+      resubmitClass: 'fda-yes',
+      detail: 'Sealing surface tolerances are critical to function — change requires 510(k) review per design change guidance.'
+    },
+    {
+      decision: 'Sterilization Method',
+      chosen: getChoiceName(5, CHOICES[5]),
+      resubmit: 'Possibly Yes',
+      resubmitClass: 'fda-maybe',
+      detail: 'Sterility assurance is a predicate claim. Changing modality requires validation and possible Special 510(k).'
+    },
+    {
+      decision: 'Packaging Format',
+      chosen: getChoiceName(6, CHOICES[6]),
+      resubmit: 'No',
+      resubmitClass: 'fda-no',
+      detail: 'Minor packaging changes typically handled via design change file with engineering justification only.'
+    },
+    {
+      decision: 'Production Model',
+      chosen: getChoiceName(7, CHOICES[7]),
+      resubmit: 'No',
+      resubmitClass: 'fda-no',
+      detail: 'Manufacturer site changes require FDA notification (510(k) supplement) but rarely full re-submission unless design changes.'
+    },
+    {
+      decision: 'QC Approach',
+      chosen: getChoiceName(8, CHOICES[8]),
+      resubmit: 'No',
+      resubmitClass: 'fda-no',
+      detail: 'QC protocol changes are typically internal procedural changes; document in DHF and quality system.'
+    }
+  ];
+
+  // CapEx breakdown
+  const capexItems = [];
+  if (CHOICES[2] === 2) capexItems.push({ label: 'Overmold Tooling (Seal)', value: 80000 });
+  if (CHOICES[3] === 2) capexItems.push({ label: '2-Piece Mold Tooling', value: 120000 });
+  if (CHOICES[7] === 0) capexItems.push({ label: 'Internal Mfg Line', value: 500000 });
+  if (CHOICES[7] === 2) capexItems.push({ label: 'Hybrid Line (partial)', value: 250000 });
+  if (CHOICES[8] === 2) capexItems.push({ label: 'Automated Vision System', value: 180000 });
+  if (CHOICES[5] === 1 && CHOICES[1] === 1) capexItems.push({ label: 'Gamma/PC Compat. Testing', value: 15000 });
+
+  // Comparison table rows
+  const compRows = [
+    {
+      decision: 'Body Material',
+      nodeId: 1,
+      yourChoice: getChoiceName(1, CHOICES[1]),
+      optimalChoice: 'Medical-grade Polycarbonate',
+      match: CHOICES[1] === 1
+    },
+    {
+      decision: 'Seal Method',
+      nodeId: 2,
+      yourChoice: getChoiceName(2, CHOICES[2]),
+      optimalChoice: 'UV-Cure Adhesive',
+      match: CHOICES[2] === 1
+    },
+    {
+      decision: 'Component Count',
+      nodeId: 3,
+      yourChoice: getChoiceName(3, CHOICES[3]),
+      optimalChoice: '2-Piece Integrated Molding',
+      match: CHOICES[3] === 2
+    },
+    {
+      decision: 'Tolerances',
+      nodeId: 4,
+      yourChoice: getChoiceName(4, CHOICES[4]),
+      optimalChoice: '±0.010" Loose Tolerance',
+      match: CHOICES[4] === 2
+    },
+    {
+      decision: 'Sterilization',
+      nodeId: 5,
+      yourChoice: getChoiceName(5, CHOICES[5]),
+      optimalChoice: 'E-Beam Irradiation',
+      match: CHOICES[5] === 2
+    },
+    {
+      decision: 'Packaging',
+      nodeId: 6,
+      yourChoice: getChoiceName(6, CHOICES[6]),
+      optimalChoice: 'Chevron Pouch',
+      match: CHOICES[6] === 1
+    },
+    {
+      decision: 'Production',
+      nodeId: 7,
+      yourChoice: getChoiceName(7, CHOICES[7]),
+      optimalChoice: 'Internal Manufacturing Line',
+      match: CHOICES[7] === 0
+    },
+    {
+      decision: 'QC',
+      nodeId: 8,
+      yourChoice: getChoiceName(8, CHOICES[8]),
+      optimalChoice: 'Automated Vision System',
+      match: CHOICES[8] === 2
+    }
+  ];
+
+  const resultsEl = document.getElementById('resultsScreen');
+  resultsEl.className = 'results-section';
+  resultsEl.innerHTML = `
+    <div class="results-header">
+      <div class="verdict-badge ${verdictClass}">${verdictText}</div>
+      <p style="color:var(--slate-700); font-size:14px; margin-top:6px; max-width:560px; margin-left:auto; margin-right:auto;">${verdictSub}</p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="results-grid">
+      <div class="result-card">
+        <h3>Gross Margin</h3>
+        <div class="kpi-big ${gmClass}">${gm.toFixed(1)}%</div>
+        <div class="kpi-context">Target: ≥55% | Benchmark: 60%</div>
+        <div class="progress-bar-wrap" style="margin-top:12px;">
+          <div class="progress-bar-fill" style="width:${Math.min(100,gm)}%; background:${gm>=55?'var(--green)':gm>=45?'var(--amber)':'var(--red)'}"></div>
+        </div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:6px;">Unit COGS: $${m.unitCOGS.toFixed(2)} · ASP: $${ASP}</div>
+      </div>
+
+      <div class="result-card">
+        <h3>DFM Score</h3>
+        <div class="kpi-big ${dfmClass}">${dfm}/100</div>
+        <div class="kpi-context">Target: ≥70 | Excellent: ≥85</div>
+        <div class="progress-bar-wrap" style="margin-top:12px;">
+          <div class="progress-bar-fill" style="width:${dfm}%; background:${dfm>=70?'var(--green)':dfm>=50?'var(--amber)':'var(--red)'}"></div>
+        </div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:6px;">Starts at 50 · Adjusted per each decision</div>
+      </div>
+    </div>
+
+    <!-- COGS Waterfall Chart -->
+    <div class="full-card">
+      <h3>COGS Waterfall — Unit Cost Breakdown</h3>
+      <div class="chart-container-tall">
+        <canvas id="cogsChart"></canvas>
+      </div>
+      <div style="font-size:12px;color:var(--slate-500);margin-top:8px;text-align:center;">
+        Total Unit COGS: <strong>$${m.unitCOGS.toFixed(2)}</strong> · GM: <strong>${gm.toFixed(1)}%</strong> at $85 ASP
+      </div>
+    </div>
+
+    <!-- GM vs Benchmark Chart -->
+    <div class="results-grid">
+      <div class="result-card">
+        <h3>GM% vs Benchmarks</h3>
+        <div class="chart-container">
+          <canvas id="gmChart"></canvas>
+        </div>
+      </div>
+      <div class="result-card">
+        <h3>DFM Score vs Targets</h3>
+        <div class="chart-container">
+          <canvas id="dfmChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="full-card">
+      <h3>Your Choices vs. Optimal DFM Design</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Decision</th>
+            <th>Your Choice</th>
+            <th>Optimal (DFM)</th>
+            <th>Match?</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${compRows.map(r => `
+            <tr>
+              <td><strong>${r.decision}</strong></td>
+              <td class="you-col">${r.yourChoice}</td>
+              <td class="opt-col">${r.optimalChoice}</td>
+              <td class="${r.match ? 'match' : 'mismatch'}">${r.match ? '✓ Yes' : '✗ No'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:12px;font-size:12px;color:var(--slate-500);">
+        Optimal GM: <strong>${optGM.toFixed(1)}%</strong> · Optimal DFM Score: <strong>100</strong> (all best choices) · Optimal CapEx: <strong>$${(120000+180000).toLocaleString()}</strong> (tooling + vision only)
+      </div>
+    </div>
+
+    <!-- FDA Post-Clearance Table -->
+    <div class="full-card">
+      <h3>What Would Change After FDA 510(k) Clearance?</h3>
+      <p style="font-size:13px;color:var(--slate-500);margin-bottom:14px;">Post-market design changes to Class II devices may require a new 510(k) submission or Special 510(k). Estimated cost: <strong>$200K–$500K</strong> and <strong>6–18 months</strong> delay per change. Lock in your best design before clearance.</p>
+      <table class="fda-table">
+        <thead>
+          <tr>
+            <th>Decision</th>
+            <th>Your Choice</th>
+            <th>510(k) Re-submission?</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${fdaRows.map(r => `
+            <tr>
+              <td><strong>${r.decision}</strong></td>
+              <td>${r.chosen}</td>
+              <td class="${r.resubmitClass}">${r.resubmit}</td>
+              <td>${r.detail}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CapEx Summary -->
+    <div class="full-card">
+      <h3>Total Capital Expenditure Summary</h3>
+      <div class="capex-summary">
+        ${capexItems.length > 0
+          ? capexItems.map(c => `
+              <div class="capex-item">
+                <div class="ci-label">${c.label}</div>
+                <div class="ci-value">$${c.value.toLocaleString()}</div>
+              </div>
+            `).join('')
+          : '<div style="color:var(--slate-500);font-size:13px;">No capital expenditures in your design (CMO-only model).</div>'
+        }
+        <div class="capex-item" style="border-color:var(--teal);background:var(--teal-faint);">
+          <div class="ci-label" style="color:var(--teal-dark);">Total CapEx</div>
+          <div class="ci-value" style="color:var(--teal-dark);">$${state.capex.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row no-print">
+      <button class="btn-primary" onclick="window.print()" aria-label="Print results">🖨 Print Results</button>
+      <button class="btn-secondary" onclick="playAgain()" aria-label="Play again">↺ Play Again</button>
+    </div>
+  `;
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Render Charts
+  setTimeout(() => {
+    renderCOGSChart(cogsBreakdown, m.unitCOGS);
+    renderGMChart(gm);
+    renderDFMChart(dfm);
+  }, 100);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════════
+function renderCOGSChart(breakdown, totalCOGS) {
+  const ctx = document.getElementById('cogsChart');
+  if (!ctx) return;
+
+  const colors = [
+    '#0891b2','#7c3aed','#d97706','#dc2626','#16a34a','#0d9488','#64748b','#f59e0b','#4f46e5'
+  ];
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: breakdown.map(d => d.label),
+      datasets: [{
+        data: breakdown.map(d => d.value),
+        backgroundColor: breakdown.map((_, i) => colors[i % colors.length]),
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` $${ctx.parsed.x.toFixed(2)}/unit (${((ctx.parsed.x/totalCOGS)*100).toFixed(1)}% of COGS)`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            callback: v => `$${v.toFixed(0)}`,
+            font: { family: 'Inter', size: 11 }
+          },
+          title: { display: true, text: '$/unit', font: { family: 'Inter', size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 12 }, color: '#334155' }
+        }
+      }
+    }
+  });
+}
+
+function renderGMChart(gm) {
+  const ctx = document.getElementById('gmChart');
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Your GM%', 'Target (55%)', 'Benchmark (60%)', 'Optimal Design'],
+      datasets: [{
+        data: [gm, 55, 60, null],
+        backgroundColor: [
+          gm >= 55 ? '#16a34a' : gm >= 45 ? '#d97706' : '#dc2626',
+          '#cbd5e1',
+          '#94a3b8',
+          '#0d9488'
+        ],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y ? ctx.parsed.y.toFixed(1) : '—'}%` } }
+      },
+      scales: {
+        y: {
+          min: 0, max: 80,
+          ticks: { callback: v => `${v}%`, font: { family: 'Inter', size: 11 } },
+          grid: { color: '#f1f5f9' }
+        },
+        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderDFMChart(dfm) {
+  const ctx = document.getElementById('dfmChart');
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Your Score', 'Threshold (70)', 'Excellent (85)', 'Perfect (100)'],
+      datasets: [{
+        data: [dfm, 70, 85, 100],
+        backgroundColor: [
+          dfm >= 70 ? '#16a34a' : dfm >= 50 ? '#d97706' : '#dc2626',
+          '#cbd5e1',
+          '#94a3b8',
+          '#0d9488'
+        ],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}/100` } }
+      },
+      scales: {
+        y: {
+          min: 0, max: 110,
+          ticks: { font: { family: 'Inter', size: 11 } },
+          grid: { color: '#f1f5f9' }
+        },
+        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PLAY AGAIN
+// ═══════════════════════════════════════════════════════════
+function playAgain() {
+  state = {
+    choices: {},
+    dfmScore: 50,
+    capex: 0,
+    currentNode: 1,
+    gameStarted: false
+  };
+
+  document.getElementById('splashScreen').style.display = 'block';
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultsScreen').style.display = 'none';
+  document.getElementById('resultsScreen').innerHTML = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Init dashboard labels visible from start
+document.addEventListener('DOMContentLoaded', () => {
+  // Show initial DFM score of 50
+  updateDashboard();
+});
+</script>
+</body>
+</html>

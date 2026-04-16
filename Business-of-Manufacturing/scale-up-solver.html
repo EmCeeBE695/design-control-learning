@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Scale-Up Solver | The Business of Manufacturing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ===== DESIGN TOKENS ===== */
+  :root {
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --teal-light: #ccfbf1;
+    --teal-faint: #f0fdfa;
+    --slate: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --white: #ffffff;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+    --radius: 8px;
+  }
+
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--slate);
+    background: var(--slate-50);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  .site-header {
+    background: var(--slate);
+    color: var(--white);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .logo-mark {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .logo-svg {
+    display: block;
+  }
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+  .logo-text .suite-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--slate-300);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .logo-text .app-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .app-badge {
+    margin-left: 4px;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 99px;
+    letter-spacing: 0.04em;
+  }
+  .header-spacer { flex: 1; }
+  .header-meta {
+    font-size: 12px;
+    color: var(--slate-300);
+    text-align: right;
+  }
+  .header-meta strong { color: var(--white); display: block; }
+
+  /* ===== TOP NAV ===== */
+  .top-nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--slate-300);
+    padding: 0 24px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .top-nav a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-500);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .top-nav a:hover { color: var(--teal); }
+  .top-nav a.active {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+    font-weight: 600;
+  }
+  .top-nav a .nav-num {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--slate-100);
+    color: var(--slate-500);
+    padding: 1px 6px;
+    border-radius: 99px;
+  }
+  .top-nav a.active .nav-num {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ===== SPLASH ===== */
+  .splash-wrap {
+    max-width: 780px;
+    margin: 48px auto;
+    padding: 0 24px;
+  }
+  .splash-hero {
+    background: var(--slate);
+    border-radius: 12px;
+    padding: 40px 48px;
+    color: var(--white);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .splash-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: var(--teal);
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  .splash-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 20%;
+    width: 160px; height: 160px;
+    background: var(--teal);
+    border-radius: 50%;
+    opacity: 0.06;
+  }
+  .splash-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(13,148,136,0.2);
+    border: 1px solid rgba(13,148,136,0.4);
+    color: #5eead4;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .splash-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .splash-hero .subtitle {
+    font-size: 17px;
+    color: #94a3b8;
+    margin-bottom: 28px;
+  }
+  .scenario-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+  .scenario-box h3 {
+    font-size: 11px;
+    font-weight: 700;
+    color: #5eead4;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .scenario-box p {
+    font-size: 14px;
+    color: #cbd5e1;
+    line-height: 1.65;
+  }
+  .scenario-box p strong { color: var(--white); }
+
+  .splash-params {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+  }
+  .splash-params h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .splash-params h2::before {
+    content: '';
+    display: block;
+    width: 4px; height: 18px;
+    background: var(--teal);
+    border-radius: 2px;
+  }
+  .params-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 24px;
+  }
+  .param-item { }
+  .param-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 3px;
+  }
+  .param-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--slate);
+  }
+  .param-value.highlight { color: var(--teal); }
+  .param-value.warn { color: var(--amber); }
+  .param-sub {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin-top: 1px;
+  }
+  .cogs-breakdown {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--slate-100);
+  }
+  .cogs-breakdown h3 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+  .cogs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .cogs-table td {
+    padding: 4px 8px;
+    color: var(--slate-700);
+  }
+  .cogs-table td:last-child { text-align: right; font-weight: 600; }
+  .cogs-table .total-row td {
+    border-top: 1px solid var(--slate-300);
+    font-weight: 700;
+    color: var(--slate);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+  .cogs-table .gm-row td { color: var(--green); font-weight: 700; }
+
+  .begin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px 32px;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+  }
+  .begin-btn:hover { background: var(--teal-dark); transform: translateY(-1px); }
+  .begin-btn:active { transform: translateY(0); }
+
+  /* ===== MAIN APP ===== */
+  .app-layout {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ===== DASHBOARD SIDEBAR ===== */
+  .dashboard-sidebar {
+    position: sticky;
+    top: 112px;
+  }
+  .dash-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .dash-card-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dash-card-title::before {
+    content: '';
+    display: block;
+    width: 3px; height: 14px;
+    background: var(--teal);
+    border-radius: 2px;
+  }
+  .kpi-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .kpi-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+  }
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-700);
+  }
+  .kpi-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate);
+  }
+  .kpi-item.budget .kpi-value { color: var(--green); }
+  .kpi-item.budget.warn .kpi-value { color: var(--amber); }
+  .kpi-item.budget.over .kpi-value { color: var(--red); }
+  .kpi-item.timeline.ok .kpi-value { color: var(--slate); }
+  .kpi-item.timeline.warn .kpi-value { color: var(--amber); }
+  .kpi-item.timeline.over .kpi-value { color: var(--red); }
+
+  .capacity-meter {
+    margin-top: 8px;
+  }
+  .meter-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--slate-500);
+    margin-bottom: 4px;
+  }
+  .meter-bar-bg {
+    width: 100%;
+    height: 12px;
+    background: var(--slate-100);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+  }
+  .meter-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--teal);
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
+  }
+  .meter-target-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--amber);
+  }
+  .meter-cap-val {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--teal);
+    transition: color 0.2s;
+  }
+  .meter-cap-val.at-target { color: var(--green); }
+  .meter-cap-val.over-budget { color: var(--red); }
+
+  .reg-risk-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--green-light);
+    color: var(--green);
+    transition: background 0.2s, color 0.2s;
+  }
+  .reg-risk-display.amber {
+    background: var(--amber-light);
+    color: var(--amber);
+  }
+  .reg-risk-display.red {
+    background: var(--red-light);
+    color: var(--red);
+  }
+  .reg-risk-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .margin-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .margin-box {
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+  }
+  .margin-box .mb-label { font-size: 10px; color: var(--slate-500); font-weight: 600; text-transform: uppercase; }
+  .margin-box .mb-val { font-size: 17px; font-weight: 800; margin-top: 2px; }
+  .margin-box.before .mb-val { color: var(--slate-700); }
+  .margin-box.after .mb-val { color: var(--teal); transition: color 0.2s; }
+  .margin-box.after.improved .mb-val { color: var(--green); }
+  .margin-box.after.worse .mb-val { color: var(--red); }
+
+  /* ===== MAIN CONTENT ===== */
+  .main-content { min-width: 0; }
+  .section-header {
+    margin-bottom: 20px;
+  }
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .section-header p {
+    font-size: 13px;
+    color: var(--slate-500);
+  }
+
+  /* ===== SOLUTION OPTIONS ===== */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .option-card {
+    background: var(--white);
+    border: 2px solid var(--slate-300);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    position: relative;
+    user-select: none;
+    outline: none;
+  }
+  .option-card:hover {
+    border-color: var(--teal);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .option-card:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+  }
+  .option-card.selected {
+    border-color: var(--teal);
+    background: var(--teal-faint);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+  }
+  .option-card.selected .check-badge { display: flex; }
+  .check-badge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 12px;
+  }
+  .option-card.reg-warn { border-color: var(--red); }
+  .option-card.reg-warn .opt-reg-badge { background: var(--red-light); color: var(--red); }
+
+  .opt-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 10px;
+    padding-right: 28px;
+    line-height: 1.3;
+  }
+  .opt-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .opt-pill {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 99px;
+    letter-spacing: 0.03em;
+  }
+  .opt-pill.capex { background: #ede9fe; color: #7c3aed; }
+  .opt-pill.capacity { background: var(--teal-light); color: var(--teal-dark); }
+  .opt-pill.time { background: var(--slate-100); color: var(--slate-700); }
+  .opt-pill.op-good { background: var(--green-light); color: var(--green); }
+  .opt-pill.op-bad { background: var(--red-light); color: var(--red); }
+  .opt-reg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: var(--amber-light);
+    color: var(--amber);
+  }
+  .opt-reg-badge.safe { background: var(--green-light); color: var(--green); }
+  .opt-reg-badge.danger { background: var(--red-light); color: var(--red); }
+
+  .opt-desc {
+    font-size: 12px;
+    color: var(--slate-500);
+    line-height: 1.5;
+  }
+
+  /* ===== CHART SECTION ===== */
+  .chart-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .chart-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .chart-card p {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin-bottom: 16px;
+  }
+  .chart-container {
+    position: relative;
+    height: 220px;
+  }
+
+  /* ===== EVALUATE BUTTON ===== */
+  .eval-section {
+    text-align: center;
+    padding: 20px 0 8px;
+  }
+  .eval-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 40px;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+  }
+  .eval-btn:hover { background: var(--teal-dark); transform: translateY(-1px); }
+  .eval-note {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin-top: 8px;
+  }
+
+  /* ===== OUTPUT SCREEN ===== */
+  .output-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .output-header {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .output-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .output-header p { font-size: 14px; color: var(--slate-500); }
+  .output-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+  .win-banner {
+    padding: 20px 28px;
+    border-radius: var(--radius);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .win-banner.success { background: var(--green-light); color: var(--green); border: 1px solid #86efac; }
+  .win-banner.partial { background: var(--amber-light); color: var(--amber); border: 1px solid #fcd34d; }
+  .win-banner.fail { background: var(--red-light); color: var(--red); border: 1px solid #fca5a5; }
+  .win-icon { font-size: 28px; }
+  .win-text { }
+  .win-text .win-title { font-size: 18px; margin-bottom: 2px; }
+  .win-text .win-sub { font-size: 14px; font-weight: 400; opacity: 0.8; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .result-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+  }
+  .result-card .rc-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .result-card .rc-val {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .result-card .rc-sub { font-size: 12px; color: var(--slate-500); }
+  .result-card .rc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .badge-pass { background: var(--green-light); color: var(--green); }
+  .badge-warn { background: var(--amber-light); color: var(--amber); }
+  .badge-fail { background: var(--red-light); color: var(--red); }
+
+  .result-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .result-chart-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 24px;
+  }
+  .result-chart-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .result-chart-card p { font-size: 12px; color: var(--slate-500); margin-bottom: 14px; }
+  .result-chart-card .chart-container { height: 200px; }
+
+  .benchmarks-section {
+    margin-bottom: 24px;
+  }
+  .benchmarks-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .benchmarks-section .bm-note {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin-bottom: 16px;
+  }
+  .benchmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .benchmark-card {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 18px 20px;
+    border-top: 3px solid var(--teal);
+  }
+  .benchmark-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 10px;
+  }
+  .bm-items { display: flex; flex-direction: column; gap: 6px; }
+  .bm-item { display: flex; justify-content: space-between; font-size: 12px; }
+  .bm-item .bm-k { color: var(--slate-500); }
+  .bm-item .bm-v { font-weight: 600; color: var(--slate-700); }
+  .bm-options {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--slate-100);
+    font-size: 11px;
+    color: var(--slate-500);
+    line-height: 1.5;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.65);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--white);
+    border-radius: 12px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .modal-header {
+    background: var(--red);
+    color: var(--white);
+    padding: 20px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-body {
+    padding: 24px;
+  }
+  .modal-body p {
+    font-size: 14px;
+    color: var(--slate-700);
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+  .modal-impacts {
+    background: var(--red-light);
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .modal-impacts .mi-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .modal-impacts ul {
+    list-style: none;
+    font-size: 13px;
+    color: #991b1b;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .modal-impacts ul li::before { content: '• '; font-weight: 700; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .btn-cancel {
+    padding: 10px 20px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: var(--slate-300); }
+  .btn-confirm {
+    padding: 10px 20px;
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-confirm:hover { background: #b91c1c; }
+
+  /* ===== UTILITY BUTTONS ===== */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    border: 1px solid var(--slate-300);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .btn-secondary:hover { background: var(--slate-300); }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: var(--teal);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--teal-dark); }
+
+  /* ===== PRINT ===== */
+  @media print {
+    .site-header, .top-nav, .no-print { display: none !important; }
+    .screen { display: block !important; }
+    #screen-main { display: none !important; }
+    #screen-splash { display: none !important; }
+    body { background: white; }
+    .win-banner, .result-card, .result-chart-card, .benchmark-card {
+      break-inside: avoid;
+    }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    .app-layout { grid-template-columns: 1fr; }
+    .dashboard-sidebar { position: static; }
+    .options-grid { grid-template-columns: 1fr; }
+    .results-grid { grid-template-columns: 1fr 1fr; }
+    .result-charts-row { grid-template-columns: 1fr; }
+    .benchmarks-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .splash-hero { padding: 28px 24px; }
+    .params-grid { grid-template-columns: 1fr 1fr; }
+    .results-grid { grid-template-columns: 1fr; }
+    .output-header { flex-direction: column; }
+    .splash-hero h1 { font-size: 24px; }
+  }
+
+  /* ===== HELPER CLASSES ===== */
+  .hidden { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  /* Selected options summary strip */
+  .selected-strip {
+    background: var(--teal-faint);
+    border: 1px solid var(--teal-light);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--teal-dark);
+    font-weight: 500;
+    display: none;
+  }
+  .selected-strip.visible { display: block; }
+  .selected-strip strong { font-weight: 700; }
+
+  /* COGS line items in dashboard */
+  .cogs-detail {
+    margin-top: 10px;
+    background: var(--slate-50);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .cogs-detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--slate-500);
+    padding: 2px 0;
+  }
+  .cogs-detail-row.total {
+    border-top: 1px solid var(--slate-300);
+    margin-top: 4px;
+    padding-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate);
+  }
+  .cogs-detail-row.gm {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header" role="banner">
+  <div class="logo-mark">
+    <!-- SVG Logo: heartbeat line on teal rect -->
+    <svg class="logo-svg" width="38" height="38" viewBox="0 0 38 38" fill="none" aria-label="The Business of Manufacturing logo" xmlns="http://www.w3.org/2000/svg">
+      <rect width="38" height="38" rx="7" fill="#0d9488"/>
+      <polyline points="4,19 10,19 13,10 16,28 20,13 23,24 26,19 34,19" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="logo-text">
+      <span class="suite-name">The Business of Manufacturing</span>
+      <span class="app-name">Scale-Up Solver</span>
+    </div>
+  </div>
+  <span class="app-badge">App 2</span>
+  <div class="header-spacer"></div>
+  <div class="header-meta">
+    <strong>BE 695</strong>
+    Boston University BME
+  </div>
+</header>
+
+<!-- ===== TOP NAV ===== -->
+<nav class="top-nav" role="navigation" aria-label="App navigation">
+  <a href="dfm-workshop.html" aria-label="App 1: DFM Workshop">
+    <span class="nav-num">1</span> DFM Workshop
+  </a>
+  <a href="scale-up-solver.html" class="active" aria-current="page" aria-label="App 2: Scale-Up Solver (current)">
+    <span class="nav-num">2</span> Scale-Up Solver
+  </a>
+  <a href="supply-chain-crisis.html" aria-label="App 3: Supply Chain Crisis">
+    <span class="nav-num">3</span> Supply Chain Crisis
+  </a>
+  <a href="meddevice-ceo.html" aria-label="App 4: MedDevice CEO">
+    <span class="nav-num">4</span> MedDevice CEO
+  </a>
+</nav>
+
+<!-- ===== SCREEN: SPLASH ===== -->
+<div id="screen-splash" class="screen active" role="main">
+  <div class="splash-wrap">
+    <!-- Hero -->
+    <div class="splash-hero">
+      <div class="splash-tag">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+        Scale-Up Challenge
+      </div>
+      <h1>You've Got 5× the Demand<br>and the Same Factory</h1>
+      <p class="subtitle">App 2 of 4 — ClearPath Medical | HemoSeal Aortic Valve</p>
+      <div class="scenario-box">
+        <h3>Scenario Brief</h3>
+        <p>
+          ClearPath Medical has just received <strong>510(k) clearance</strong> for the HemoSeal bioprosthetic aortic valve.
+          Demand has surged to <strong>1,000,000 units/year</strong>. Your current factory is built for 200,000 units/year.
+          You have a <strong>$2,000,000 capital budget</strong> and <strong>12 months</strong> to close the gap before
+          competitors enter the market. Every month of delay costs market share — and every regulatory misstep
+          costs far more.
+        </p>
+      </div>
+    </div>
+
+    <!-- Starting Parameters -->
+    <div class="splash-params">
+      <h2>Starting Factory Parameters</h2>
+      <div class="params-grid">
+        <div class="param-item">
+          <div class="param-label">Standard Hrs/Unit</div>
+          <div class="param-value">0.25 hrs</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Workers / Line</div>
+          <div class="param-value">25</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Production Lines</div>
+          <div class="param-value">1</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Shifts / Day</div>
+          <div class="param-value">1</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Days/Wk × Wks/Yr</div>
+          <div class="param-value">5 × 50</div>
+          <div class="param-sub">= 250 production days</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Hrs / Shift</div>
+          <div class="param-value">8 hrs</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Current Capacity</div>
+          <div class="param-value highlight">200,000</div>
+          <div class="param-sub">units/year</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Target Demand</div>
+          <div class="param-value warn">1,000,000</div>
+          <div class="param-sub">units/year (5× gap)</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">CapEx Budget</div>
+          <div class="param-value">$2,000,000</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Factory OH (fixed)</div>
+          <div class="param-value">$1,200,000/yr</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">DL Rate</div>
+          <div class="param-value">$27.00/hr</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">ASP</div>
+          <div class="param-value">$85.00/unit</div>
+        </div>
+      </div>
+
+      <!-- COGS Breakdown -->
+      <div class="cogs-breakdown">
+        <h3>Current COGS Breakdown (at 200K units)</h3>
+        <table class="cogs-table" aria-label="Current cost of goods sold breakdown">
+          <tbody>
+            <tr><td>Materials</td><td>$18.00 / unit</td></tr>
+            <tr><td>Direct Labor (27 × 0.25 hrs)</td><td>$6.75 / unit</td></tr>
+            <tr><td>Overhead (OH rate $24/hr × 0.25 hrs)</td><td>$6.00 / unit</td></tr>
+            <tr><td>Sterile packaging</td><td>$3.50 / unit</td></tr>
+            <tr><td>Quality / Inspection</td><td>$2.20 / unit</td></tr>
+            <tr><td>Shipping materials</td><td>$1.80 / unit</td></tr>
+            <tr class="total-row"><td>Total COGS</td><td>$38.25 / unit</td></tr>
+            <tr class="gm-row"><td>Gross Margin (ASP $85.00)</td><td>55.0%</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px; font-size:12px; color:var(--slate-500);">
+          OH Rate = $1,200,000 ÷ (200,000 × 0.25 std hrs) = <strong>$24.00/hr</strong> &nbsp;|&nbsp;
+          OH per unit = $24.00 × 0.25 = <strong>$6.00</strong>
+        </div>
+      </div>
+    </div>
+
+    <button class="begin-btn" onclick="showMain()" aria-label="Begin the Scale-Up Solver simulation">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Begin Simulation
+    </button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: MAIN APP ===== -->
+<div id="screen-main" class="screen" role="main">
+  <div class="app-layout">
+
+    <!-- SIDEBAR DASHBOARD -->
+    <aside class="dashboard-sidebar" aria-label="Live dashboard">
+
+      <div class="dash-card">
+        <div class="dash-card-title">Budget Tracker</div>
+        <div class="kpi-row">
+          <div class="kpi-item budget" id="kpi-budget">
+            <div class="kpi-label">Budget Remaining</div>
+            <div class="kpi-value" id="val-budget">$2,000,000</div>
+          </div>
+          <div class="kpi-item" id="kpi-capex">
+            <div class="kpi-label">CapEx Committed</div>
+            <div class="kpi-value" id="val-capex">$0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Capacity</div>
+        <div class="capacity-meter">
+          <div class="meter-labels">
+            <span>0</span><span>500K</span><span>1M (target)</span>
+          </div>
+          <div class="meter-bar-bg" role="progressbar" aria-valuenow="200000" aria-valuemin="0" aria-valuemax="1000000" aria-label="Capacity progress">
+            <div class="meter-bar-fill" id="capacity-bar" style="width:20%"></div>
+            <div class="meter-target-line" style="left:100%"></div>
+          </div>
+          <div class="meter-cap-val" id="capacity-val">200,000 units/yr</div>
+        </div>
+        <div style="margin-top:12px;">
+          <div class="kpi-item timeline ok" id="kpi-timeline">
+            <div class="kpi-label">Months to Implement</div>
+            <div class="kpi-value" id="val-timeline">0 mo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Gross Margin</div>
+        <div class="margin-compare">
+          <div class="margin-box before">
+            <div class="mb-label">Before</div>
+            <div class="mb-val">55.0%</div>
+          </div>
+          <div class="margin-box after" id="gm-after-box">
+            <div class="mb-label">After</div>
+            <div class="mb-val" id="gm-after-val">55.0%</div>
+          </div>
+        </div>
+        <div class="cogs-detail" style="margin-top:12px;">
+          <div class="cogs-detail-row"><span>OH Rate</span><span id="detail-oh-rate">$24.00/hr</span></div>
+          <div class="cogs-detail-row"><span>OH/unit</span><span id="detail-oh-unit">$6.00</span></div>
+          <div class="cogs-detail-row"><span>DL/unit</span><span id="detail-dl">$6.75</span></div>
+          <div class="cogs-detail-row"><span>Materials</span><span>$18.00</span></div>
+          <div class="cogs-detail-row"><span>Other</span><span>$7.50</span></div>
+          <div class="cogs-detail-row total"><span>Total COGS</span><span id="detail-cogs">$38.25</span></div>
+          <div class="cogs-detail-row gm"><span>GM%</span><span id="detail-gm">55.0%</span></div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Regulatory Risk</div>
+        <div class="reg-risk-display" id="reg-risk-display" role="status" aria-live="polite">
+          <div class="reg-risk-dot"></div>
+          <span id="reg-risk-text">No regulatory events</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+      <div class="section-header">
+        <h2>Scale-Up Solution Menu</h2>
+        <p>Select options to build your production plan. The dashboard updates in real time. You can select multiple options.</p>
+      </div>
+
+      <div class="selected-strip" id="selected-strip" aria-live="polite">
+        <strong id="selected-count">0 options selected</strong> — <span id="selected-names"></span>
+      </div>
+
+      <!-- OPTIONS GRID -->
+      <div class="options-grid" role="group" aria-label="Scale-up options">
+
+        <!-- Option 1: Add 2nd Shift -->
+        <div class="option-card" id="opt-0" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="0" onclick="toggleOption(0)" onkeydown="handleOptKey(event,0)"
+             aria-label="Add 2nd Shift: $0 CapEx, adds 200,000 units/yr, 1 month">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Add 2nd Shift</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$0 CapEx</span>
+            <span class="opt-pill capacity">+200K units/yr</span>
+            <span class="opt-pill time">1 month</span>
+            <span class="opt-pill op-bad">+$180K/yr labor</span>
+          </div>
+          <div class="opt-reg-badge safe">✓ No regulatory impact — no design change</div>
+          <div class="opt-desc" style="margin-top:8px;">Add a second 8-hour shift with 25 additional workers. Fastest capacity expansion with minimal capital outlay. Operational in weeks.</div>
+        </div>
+
+        <!-- Option 2: Add 3rd Shift -->
+        <div class="option-card" id="opt-1" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="1" onclick="toggleOption(1)" onkeydown="handleOptKey(event,1)"
+             aria-label="Add 3rd Shift: $0 CapEx, adds 200,000 units/yr, 2 months">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Add 3rd Shift</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$0 CapEx</span>
+            <span class="opt-pill capacity">+200K units/yr</span>
+            <span class="opt-pill time">2 months</span>
+            <span class="opt-pill op-bad">+$360K/yr labor</span>
+          </div>
+          <div class="opt-reg-badge safe">✓ No regulatory impact — no design change</div>
+          <div class="opt-desc" style="margin-top:8px;">Requires 2nd shift to be established first. Adds overnight production capability. Significant labor cost but zero capital.</div>
+        </div>
+
+        <!-- Option 3: Add 2nd Line -->
+        <div class="option-card" id="opt-2" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="2" onclick="toggleOption(2)" onkeydown="handleOptKey(event,2)"
+             aria-label="Add 2nd Production Line: $400K CapEx, adds 200,000 units/yr, 4 months, IQ/OQ/PQ required">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Add 2nd Production Line</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$400K CapEx</span>
+            <span class="opt-pill capacity">+200K units/yr</span>
+            <span class="opt-pill time">4 months</span>
+            <span class="opt-pill op-bad">+25 DL workers</span>
+          </div>
+          <div class="opt-reg-badge" style="background:var(--slate-100);color:var(--slate-700);">📋 IQ/OQ/PQ validation required</div>
+          <div class="opt-desc" style="margin-top:8px;">Install an identical second production line. Requires installation qualification, operational qualification, and performance qualification testing.</div>
+        </div>
+
+        <!-- Option 4: Add 3rd Line -->
+        <div class="option-card" id="opt-3" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="3" onclick="toggleOption(3)" onkeydown="handleOptKey(event,3)"
+             aria-label="Add 3rd Production Line: $400K CapEx, adds 200,000 units/yr, 4 months, IQ/OQ/PQ required">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Add 3rd Production Line</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$400K CapEx</span>
+            <span class="opt-pill capacity">+200K units/yr</span>
+            <span class="opt-pill time">4 months</span>
+            <span class="opt-pill op-bad">+25 DL workers</span>
+          </div>
+          <div class="opt-reg-badge" style="background:var(--slate-100);color:var(--slate-700);">📋 IQ/OQ/PQ validation required</div>
+          <div class="opt-desc" style="margin-top:8px;">A third dedicated line further multiplies throughput. Requires independent validation. Highest capital but maintains design integrity.</div>
+        </div>
+
+        <!-- Option 5: Automate Adhesive -->
+        <div class="option-card" id="opt-4" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="4" onclick="toggleOption(4)" onkeydown="handleOptKey(event,4)"
+             aria-label="Automate Adhesive Dispensing: $600K CapEx, saves $3.50/unit, adds 150,000 units/yr, 6 months, OQ/PQ re-validation">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Automate Adhesive Dispensing</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$600K CapEx</span>
+            <span class="opt-pill capacity">+150K units/yr</span>
+            <span class="opt-pill time">6 months</span>
+            <span class="opt-pill op-good">−$3.50/unit saved</span>
+          </div>
+          <div class="opt-reg-badge">⚠ OQ/PQ re-validation (regulatory event)</div>
+          <div class="opt-desc" style="margin-top:8px;">Robotic dispensing system replaces manual adhesive application. Reduces std hrs per unit (0.25→0.15). Lower cost per unit at volume, but requires process re-validation.</div>
+        </div>
+
+        <!-- Option 6: UV-Cure Adhesive -->
+        <div class="option-card reg-warn" id="opt-5" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="5" onclick="toggleOption(5)" onkeydown="handleOptKey(event,5)"
+             aria-label="Switch to UV-Cure Adhesive: $150K CapEx, saves $2.80/unit, adds 200,000 units/yr, 8-18 months, possible 510(k) re-submission required">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Switch to UV-Cure Adhesive</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$150K CapEx</span>
+            <span class="opt-pill capacity">+200K units/yr</span>
+            <span class="opt-pill time">8–18 months</span>
+            <span class="opt-pill op-good">−$2.80/unit saved</span>
+          </div>
+          <div class="opt-reg-badge danger">🔴 Possible 510(k) re-submission</div>
+          <div class="opt-desc" style="margin-top:8px;">Faster cure time increases throughput significantly. However, changing the bonding chemistry is a device design change that may trigger 510(k) re-review.</div>
+        </div>
+
+        <!-- Option 7: CMO -->
+        <div class="option-card" id="opt-6" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="6" onclick="toggleOption(6)" onkeydown="handleOptKey(event,6)"
+             aria-label="Outsource Sub-Assembly to CMO: $50K setup, adds $6.00/unit cost, adds 400,000 units/yr, 3 months, supplier qualification">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Outsource Sub-Assembly to CMO</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$50K setup</span>
+            <span class="opt-pill capacity">+400K units/yr</span>
+            <span class="opt-pill time">3 months</span>
+            <span class="opt-pill op-bad">+$6.00/unit CMO cost</span>
+          </div>
+          <div class="opt-reg-badge" style="background:var(--slate-100);color:var(--slate-700);">📋 Supplier qualification (21 CFR 820)</div>
+          <div class="opt-desc" style="margin-top:8px;">Contract manufacturer handles sub-assembly. Flexible capacity that scales with demand. Adds per-unit cost but requires supplier audit and qualification per 21 CFR 820.</div>
+        </div>
+
+        <!-- Option 8: Redesign for Automation -->
+        <div class="option-card reg-warn" id="opt-7" tabindex="0" role="checkbox" aria-checked="false"
+             data-id="7" onclick="toggleOption(7)" onkeydown="handleOptKey(event,7)"
+             aria-label="Redesign for Automation: $1.2M CapEx, saves $8.00/unit, adds 800,000 units/yr, 18-24 months, new 510(k) required">
+          <div class="check-badge" aria-hidden="true">✓</div>
+          <div class="opt-name">Redesign for Automation</div>
+          <div class="opt-pills">
+            <span class="opt-pill capex">$1,200K CapEx</span>
+            <span class="opt-pill capacity">+800K units/yr</span>
+            <span class="opt-pill time">18–24 months</span>
+            <span class="opt-pill op-good">−$8.00/unit at 1M vol</span>
+          </div>
+          <div class="opt-reg-badge danger">🔴 New 510(k) required</div>
+          <div class="opt-desc" style="margin-top:8px;">Full DFM redesign for high-speed automation. Transforms unit economics at scale but demands a complete resubmission — cannot be completed within the 12-month window.</div>
+        </div>
+
+      </div><!-- /options-grid -->
+
+      <!-- LIVE CHART -->
+      <div class="chart-card">
+        <h3>Live Capacity Analysis</h3>
+        <p>Compares your planned capacity against the 1M unit demand target. Updates as you toggle options.</p>
+        <div class="chart-container">
+          <canvas id="capacityChart" aria-label="Capacity comparison chart"></canvas>
+        </div>
+      </div>
+
+      <!-- EVALUATE -->
+      <div class="eval-section no-print">
+        <button class="eval-btn" onclick="showOutput()" aria-label="Evaluate your scale-up plan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          Evaluate My Plan
+        </button>
+        <div class="eval-note">Review your capacity, budget, timeline, and regulatory risk scores</div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-layout -->
+</div>
+
+<!-- ===== SCREEN: OUTPUT ===== -->
+<div id="screen-output" class="screen" role="main">
+  <div class="output-wrap">
+    <div class="output-header">
+      <div>
+        <h2>Plan Evaluation Results</h2>
+        <p>ClearPath Medical | HemoSeal Valve Scale-Up Assessment</p>
+      </div>
+      <div class="output-actions no-print">
+        <button class="btn-secondary" onclick="window.print()" aria-label="Print results">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Results
+        </button>
+        <button class="btn-primary" onclick="tryAgain()" aria-label="Try again with different options">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3 13a9 9 0 109-9 9 9 0 01-6.3 2.6L3 8"/></svg>
+          Try Again
+        </button>
+      </div>
+    </div>
+
+    <!-- WIN CONDITION BANNER -->
+    <div class="win-banner" id="win-banner" role="alert" aria-live="polite">
+      <div class="win-icon" id="win-icon"></div>
+      <div class="win-text">
+        <div class="win-title" id="win-title"></div>
+        <div class="win-sub" id="win-sub"></div>
+      </div>
+    </div>
+
+    <!-- SCORECARD -->
+    <div class="results-grid">
+      <div class="result-card">
+        <div class="rc-label">Annual Capacity Achieved</div>
+        <div class="rc-val" id="out-capacity" style="color:var(--teal)">—</div>
+        <div class="rc-sub">vs. 1,000,000 target</div>
+        <div class="rc-badge" id="out-cap-badge">—</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">Budget Used</div>
+        <div class="rc-val" id="out-budget">—</div>
+        <div class="rc-sub">of $2,000,000 available</div>
+        <div class="rc-badge" id="out-budget-badge">—</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">Months to Implement</div>
+        <div class="rc-val" id="out-timeline">—</div>
+        <div class="rc-sub">12-month window</div>
+        <div class="rc-badge" id="out-timeline-badge">—</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">OH Rate (After Scale)</div>
+        <div class="rc-val" id="out-oh" style="color:var(--green)">—</div>
+        <div class="rc-sub">vs. $24.00/hr before</div>
+        <div class="rc-badge" id="out-oh-badge">—</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">New Gross Margin</div>
+        <div class="rc-val" id="out-gm">—</div>
+        <div class="rc-sub">vs. 55.0% before</div>
+        <div class="rc-badge" id="out-gm-badge">—</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">Regulatory Risk Score</div>
+        <div class="rc-val" id="out-reg">—</div>
+        <div class="rc-sub">0 = safe, 2+ = high risk</div>
+        <div class="rc-badge" id="out-reg-badge">—</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="result-charts-row">
+      <div class="result-chart-card">
+        <h3>Gross Margin — Before vs After</h3>
+        <p>Impact of scale-up options on unit economics</p>
+        <div class="chart-container">
+          <canvas id="gmChart" aria-label="Gross margin comparison chart"></canvas>
+        </div>
+      </div>
+      <div class="result-chart-card">
+        <h3>Overhead Rate — Economies of Scale</h3>
+        <p>Fixed OH ($1.2M) spread over more units drives margin improvement</p>
+        <div class="chart-container">
+          <canvas id="ohChart" aria-label="Overhead rate comparison chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELECTED OPTIONS SUMMARY -->
+    <div class="result-chart-card" style="margin-bottom:24px;" id="your-plan-card">
+      <h3>Your Selected Plan</h3>
+      <p>Options included in your scale-up strategy</p>
+      <div id="your-plan-list" style="font-size:13px; color:var(--slate-700);"></div>
+    </div>
+
+    <!-- BENCHMARKS -->
+    <div class="benchmarks-section">
+      <h3>Benchmark Reference Paths</h3>
+      <p class="bm-note">Three proven approaches to reaching 1M units/year — compare your plan against these benchmarks.</p>
+      <div class="benchmarks-grid">
+
+        <div class="benchmark-card">
+          <h4>⚡ Fastest Path to 1M</h4>
+          <div class="bm-items">
+            <div class="bm-item"><span class="bm-k">Capacity</span><span class="bm-v">1,200,000 units/yr ✓</span></div>
+            <div class="bm-item"><span class="bm-k">Timeline</span><span class="bm-v">4 months ✓</span></div>
+            <div class="bm-item"><span class="bm-k">CapEx Used</span><span class="bm-v">$850,000 ✓</span></div>
+            <div class="bm-item"><span class="bm-k">Reg Risk</span><span class="bm-v" style="color:var(--green)">0 — Safe ✓</span></div>
+          </div>
+          <div class="bm-options">Options: 2nd Shift + 3rd Shift + 2nd Line + 3rd Line + CMO</div>
+        </div>
+
+        <div class="benchmark-card">
+          <h4>💰 Cheapest Path to 1M</h4>
+          <div class="bm-items">
+            <div class="bm-item"><span class="bm-k">Capacity</span><span class="bm-v">950,000 units/yr ≈</span></div>
+            <div class="bm-item"><span class="bm-k">Timeline</span><span class="bm-v">6 months ✓</span></div>
+            <div class="bm-item"><span class="bm-k">CapEx Used</span><span class="bm-v">$1,000,000 ✓</span></div>
+            <div class="bm-item"><span class="bm-k">Reg Risk</span><span class="bm-v" style="color:var(--green)">0 — Safe ✓</span></div>
+          </div>
+          <div class="bm-options">Options: 2nd Shift + 3rd Shift + Automate Adhesive + 2nd Line</div>
+        </div>
+
+        <div class="benchmark-card">
+          <h4>🛡️ Safest Regulatory Path</h4>
+          <div class="bm-items">
+            <div class="bm-item"><span class="bm-k">Capacity</span><span class="bm-v">1,000,000 units/yr ✓</span></div>
+            <div class="bm-item"><span class="bm-k">Timeline</span><span class="bm-v">4 months ✓</span></div>
+            <div class="bm-item"><span class="bm-k">CapEx Used</span><span class="bm-v">$800,000 ✓</span></div>
+            <div class="bm-item"><span class="bm-k">Reg Risk</span><span class="bm-v" style="color:var(--green)">0 — Safe ✓</span></div>
+          </div>
+          <div class="bm-options">Options: 2nd Shift + 3rd Shift + 2nd Line + 3rd Line (shifts + lines only, no design changes)</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="output-actions no-print" style="justify-content:center; display:flex; gap:12px; padding-bottom:40px;">
+      <button class="btn-secondary" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Results
+      </button>
+      <button class="btn-primary" onclick="tryAgain()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3 13a9 9 0 109-9 9 9 0 01-6.3 2.6L3 8"/></svg>
+        Try Again
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== REGULATORY WARNING MODAL ===== -->
+<div class="modal-overlay" id="reg-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div class="modal-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span id="modal-title">⚠ Regulatory Event</span>
+    </div>
+    <div class="modal-body">
+      <p id="modal-body-text"></p>
+      <div class="modal-impacts">
+        <div class="mi-title">Key Regulatory Risks</div>
+        <ul id="modal-impacts-list"></ul>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modal-cancel" onclick="cancelRegModal()">Cancel — Don't Add</button>
+        <button class="btn-confirm" id="modal-confirm" onclick="confirmRegModal()">I Understand — Proceed</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+// ===============================================================
+// DATA
+// ===============================================================
+const BASE_CAPACITY = 200_000;
+const TARGET = 1_000_000;
+const BUDGET = 2_000_000;
+const FACTORY_OH = 1_200_000;
+const DL_RATE = 27;
+const MATERIALS = 18;
+const ASP = 85;
+const BASE_STD_HRS = 0.25;
+const BASE_GM = 55.0; // %
+const OTHER_COSTS = 3.50 + 2.20 + 1.80; // $7.50
+
+const OPTIONS = [
+  {
+    id: 0,
+    name: "Add 2nd Shift",
+    capex: 0,
+    capacityAdd: 200_000,
+    months: 1,
+    regRisk: 0,
+    opCostPerUnit: 0,       // no direct per-unit addition to COGS from options that add shifts
+    annualOpCost: 180_000,  // extra labor per year
+    laborSavings: 0,
+    cmoCost: 0,
+    regModal: null,
+  },
+  {
+    id: 1,
+    name: "Add 3rd Shift",
+    capex: 0,
+    capacityAdd: 200_000,
+    months: 2,
+    regRisk: 0,
+    opCostPerUnit: 0,
+    annualOpCost: 360_000,
+    laborSavings: 0,
+    cmoCost: 0,
+    regModal: null,
+  },
+  {
+    id: 2,
+    name: "Add 2nd Production Line",
+    capex: 400_000,
+    capacityAdd: 200_000,
+    months: 4,
+    regRisk: 0,  // IQ/OQ/PQ = equipment validation, not a device design change
+    opCostPerUnit: 0,
+    annualOpCost: 0,
+    laborSavings: 0,
+    cmoCost: 0,
+    regModal: null,
+  },
+  {
+    id: 3,
+    name: "Add 3rd Production Line",
+    capex: 400_000,
+    capacityAdd: 200_000,
+    months: 4,
+    regRisk: 0,  // IQ/OQ/PQ = equipment validation, not a device design change
+    opCostPerUnit: 0,
+    annualOpCost: 0,
+    laborSavings: 0,
+    cmoCost: 0,
+    regModal: null,
+  },
+  {
+    id: 4,
+    name: "Automate Adhesive Dispensing",
+    capex: 600_000,
+    capacityAdd: 150_000,
+    months: 6,
+    regRisk: 1,  // Process change requires OQ/PQ re-validation
+    opCostPerUnit: 0,
+    annualOpCost: 0,
+    laborSavings: 3.50,
+    cmoCost: 0,
+    regModal: null,
+  },
+  {
+    id: 5,
+    name: "Switch to UV-Cure Adhesive",
+    capex: 150_000,
+    capacityAdd: 200_000,
+    months: 18, // worst-case (8-18, use 18 for timeline calc)
+    regRisk: 2,
+    opCostPerUnit: 0,
+    annualOpCost: 0,
+    laborSavings: 2.80,
+    cmoCost: 0,
+    regModal: {
+      body: "Changing from the currently approved adhesive system to UV-cure chemistry constitutes a change to the approved device design. Under FDA 21 CFR 807.87 and the de novo/510(k) substantial equivalence standard, this material/process change may require a new 510(k) submission.",
+      impacts: [
+        "Estimated FDA review time: 6–12 months after submission",
+        "During FDA review, you cannot legally manufacture or sell the modified device",
+        "Biocompatibility (ISO 10993) testing must be repeated for new adhesive chemistry",
+        "Device history files and design controls must be updated throughout",
+        "Timeline risk: 8–18 months total, likely exceeding your 12-month window"
+      ]
+    }
+  },
+  {
+    id: 6,
+    name: "Outsource Sub-Assembly to CMO",
+    capex: 50_000,
+    capacityAdd: 400_000,
+    months: 3,
+    regRisk: 0,  // Supplier qualification — not a device design change
+    opCostPerUnit: 0,
+    annualOpCost: 0,
+    laborSavings: 0,
+    cmoCost: 6.00,
+    regModal: null,
+  },
+  {
+    id: 7,
+    name: "Redesign for Automation",
+    capex: 1_200_000,
+    capacityAdd: 800_000,
+    months: 24, // 18-24 months worst case
+    regRisk: 2,
+    opCostPerUnit: 0,
+    annualOpCost: 0,
+    laborSavings: 8.00,
+    cmoCost: 0,
+    regModal: {
+      body: "A full product redesign optimized for automation constitutes a significant device modification. Because the form, fit, and function of the HemoSeal valve would change materially, FDA requires a new 510(k) pre-market notification demonstrating substantial equivalence to a predicate device.",
+      impacts: [
+        "New 510(k) submission required — estimated review: 12–18 months",
+        "Complete design revalidation: bench testing, animal studies, clinical data potentially required",
+        "18–24 month total timeline — CANNOT be completed within the 12-month window",
+        "During redesign and review period, current product must continue to be made on the old line",
+        "Factory OH burden increases while new line is built and validated"
+      ]
+    }
+  },
+];
+
+// ===============================================================
+// STATE
+// ===============================================================
+let selected = new Set();
+let pendingModalOptionId = null;
+let capacityChart = null;
+let gmChart = null;
+let ohChart = null;
+
+// ===============================================================
+// CALCULATIONS
+// ===============================================================
+function computeMetrics() {
+  const ids = [...selected];
+
+  // Total CapEx
+  const totalCapex = ids.reduce((s, id) => s + OPTIONS[id].capex, 0);
+  const budgetRemaining = BUDGET - totalCapex;
+
+  // Max timeline
+  const maxMonths = ids.length === 0 ? 0 : Math.max(...ids.map(id => OPTIONS[id].months));
+
+  // Total capacity added
+  const totalCapacityAdded = ids.reduce((s, id) => s + OPTIONS[id].capacityAdd, 0);
+  const newCapacity = BASE_CAPACITY + totalCapacityAdded;
+
+  // Regulatory risk count
+  const regRiskScore = ids.reduce((s, id) => s + OPTIONS[id].regRisk, 0);
+
+  // Labor savings per unit (from automation options)
+  const laborSavings = ids.reduce((s, id) => s + OPTIONS[id].laborSavings, 0);
+
+  // CMO cost per unit (only if CMO selected)
+  const cmoCostPerUnit = selected.has(6) ? OPTIONS[6].cmoCost : 0;
+
+  // New OH rate: $1,200,000 / (new_capacity × 0.25 std hrs)
+  // Note: std hrs remain 0.25 for OH rate calculation (fixed overhead)
+  const newOhRate = FACTORY_OH / (newCapacity * BASE_STD_HRS);
+  const newOhPerUnit = newOhRate * BASE_STD_HRS;
+
+  // New DL per unit (unchanged unless labor savings)
+  const dlPerUnit = DL_RATE * BASE_STD_HRS; // $6.75
+
+  // New COGS: materials + DL + OH + other - labor savings + CMO cost
+  const newCogs = MATERIALS + dlPerUnit + newOhPerUnit + OTHER_COSTS - laborSavings + cmoCostPerUnit;
+  const newGm = ((ASP - newCogs) / ASP) * 100;
+
+  return {
+    totalCapex,
+    budgetRemaining,
+    maxMonths,
+    newCapacity,
+    regRiskScore,
+    laborSavings,
+    cmoCostPerUnit,
+    newOhRate,
+    newOhPerUnit,
+    dlPerUnit,
+    newCogs,
+    newGm,
+  };
+}
+
+// ===============================================================
+// UI UPDATES
+// ===============================================================
+function updateDashboard() {
+  const m = computeMetrics();
+
+  // Budget
+  const budgetEl = document.getElementById('kpi-budget');
+  const budgetValEl = document.getElementById('val-budget');
+  budgetValEl.textContent = formatDollar(m.budgetRemaining);
+  budgetEl.className = 'kpi-item budget';
+  if (m.budgetRemaining < 0) {
+    budgetEl.classList.add('over');
+  } else if (m.budgetRemaining < 500_000) {
+    budgetEl.classList.add('warn');
+  }
+
+  document.getElementById('val-capex').textContent = formatDollar(m.totalCapex);
+
+  // Capacity
+  const pct = Math.min((m.newCapacity / TARGET) * 100, 100);
+  const bar = document.getElementById('capacity-bar');
+  bar.style.width = pct + '%';
+  bar.closest('.meter-bar-bg').setAttribute('aria-valuenow', m.newCapacity);
+  const capVal = document.getElementById('capacity-val');
+  capVal.textContent = formatNum(m.newCapacity) + ' units/yr';
+  capVal.className = 'meter-cap-val';
+  if (m.newCapacity >= TARGET) capVal.classList.add('at-target');
+
+  // Timeline
+  const timeEl = document.getElementById('kpi-timeline');
+  const timeValEl = document.getElementById('val-timeline');
+  timeValEl.textContent = m.maxMonths + ' mo';
+  timeEl.className = 'kpi-item timeline';
+  if (m.maxMonths > 12) timeEl.classList.add('over');
+  else if (m.maxMonths >= 10) timeEl.classList.add('warn');
+  else timeEl.classList.add('ok');
+
+  // GM
+  const gmAfterBox = document.getElementById('gm-after-box');
+  const gmAfterVal = document.getElementById('gm-after-val');
+  gmAfterVal.textContent = m.newGm.toFixed(1) + '%';
+  gmAfterBox.className = 'margin-box after';
+  if (m.newGm > BASE_GM) gmAfterBox.classList.add('improved');
+  else if (m.newGm < BASE_GM - 2) gmAfterBox.classList.add('worse');
+
+  // COGS detail
+  document.getElementById('detail-oh-rate').textContent = '$' + m.newOhRate.toFixed(2) + '/hr';
+  document.getElementById('detail-oh-unit').textContent = '$' + m.newOhPerUnit.toFixed(2);
+  // DL + labor savings (effective labor cost), separate from CMO
+  const effectiveDL = Math.max(0, m.dlPerUnit - m.laborSavings);
+  document.getElementById('detail-dl').textContent = '$' + effectiveDL.toFixed(2) + (m.laborSavings > 0 ? ' (−$' + m.laborSavings.toFixed(2) + ' saved)' : '');
+  // Add CMO note if applicable
+  const cogsEl = document.getElementById('detail-cogs');
+  let cogsDisplay = '$' + m.newCogs.toFixed(2);
+  if (m.cmoCostPerUnit > 0) cogsDisplay += ' (incl. $' + m.cmoCostPerUnit.toFixed(2) + ' CMO)';
+  cogsEl.textContent = cogsDisplay;
+  document.getElementById('detail-gm').textContent = m.newGm.toFixed(1) + '%';
+
+  // Reg risk
+  const regDisplay = document.getElementById('reg-risk-display');
+  const regText = document.getElementById('reg-risk-text');
+  regDisplay.className = 'reg-risk-display';
+  if (m.regRiskScore === 0) {
+    regText.textContent = 'No regulatory events';
+  } else if (m.regRiskScore === 1) {
+    regDisplay.classList.add('amber');
+    regText.textContent = '1 regulatory event — caution';
+  } else {
+    regDisplay.classList.add('red');
+    regText.textContent = m.regRiskScore + ' regulatory events — high risk';
+  }
+
+  // Selected strip
+  const strip = document.getElementById('selected-strip');
+  const cnt = document.getElementById('selected-count');
+  const names = document.getElementById('selected-names');
+  if (selected.size === 0) {
+    strip.classList.remove('visible');
+  } else {
+    strip.classList.add('visible');
+    cnt.textContent = selected.size + ' option' + (selected.size > 1 ? 's' : '') + ' selected';
+    names.textContent = [...selected].map(id => OPTIONS[id].name).join(' + ');
+  }
+
+  // Update chart
+  updateCapacityChart(m.newCapacity);
+}
+
+function updateCapacityChart(newCap) {
+  if (!capacityChart) return;
+  capacityChart.data.datasets[0].data = [BASE_CAPACITY, newCap];
+  capacityChart.update('active');
+}
+
+// ===============================================================
+// OPTION TOGGLE
+// ===============================================================
+function toggleOption(id) {
+  const opt = OPTIONS[id];
+
+  if (selected.has(id)) {
+    // Deselect
+    selected.delete(id);
+    document.getElementById('opt-' + id).classList.remove('selected');
+    document.getElementById('opt-' + id).setAttribute('aria-checked', 'false');
+    updateDashboard();
+    return;
+  }
+
+  // If regulatory warning needed
+  if (opt.regModal) {
+    pendingModalOptionId = id;
+    openRegModal(opt);
+    return;
+  }
+
+  // Normal select
+  doSelect(id);
+}
+
+function doSelect(id) {
+  selected.add(id);
+  document.getElementById('opt-' + id).classList.add('selected');
+  document.getElementById('opt-' + id).setAttribute('aria-checked', 'true');
+  updateDashboard();
+}
+
+function handleOptKey(e, id) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    toggleOption(id);
+  }
+}
+
+// ===============================================================
+// MODAL
+// ===============================================================
+function openRegModal(opt) {
+  document.getElementById('modal-body-text').textContent = opt.regModal.body;
+  const list = document.getElementById('modal-impacts-list');
+  list.innerHTML = opt.regModal.impacts.map(i => `<li>${i}</li>`).join('');
+  document.getElementById('reg-modal').classList.add('open');
+  document.getElementById('modal-cancel').focus();
+}
+
+function cancelRegModal() {
+  document.getElementById('reg-modal').classList.remove('open');
+  if (pendingModalOptionId !== null) {
+    // Ensure it stays deselected
+    selected.delete(pendingModalOptionId);
+    const el = document.getElementById('opt-' + pendingModalOptionId);
+    el.classList.remove('selected');
+    el.setAttribute('aria-checked', 'false');
+    pendingModalOptionId = null;
+  }
+}
+
+function confirmRegModal() {
+  document.getElementById('reg-modal').classList.remove('open');
+  if (pendingModalOptionId !== null) {
+    doSelect(pendingModalOptionId);
+    pendingModalOptionId = null;
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('reg-modal').addEventListener('click', function(e) {
+  if (e.target === this) cancelRegModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') cancelRegModal();
+});
+
+// ===============================================================
+// SCREEN NAVIGATION
+// ===============================================================
+function showMain() {
+  document.getElementById('screen-splash').classList.remove('active');
+  document.getElementById('screen-output').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  window.scrollTo(0, 0);
+  initCapacityChart();
+}
+
+function showOutput() {
+  const m = computeMetrics();
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-output').classList.add('active');
+  window.scrollTo(0, 0);
+  populateOutput(m);
+}
+
+function tryAgain() {
+  document.getElementById('screen-output').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ===============================================================
+// OUTPUT POPULATION
+// ===============================================================
+function populateOutput(m) {
+  // Capacity
+  document.getElementById('out-capacity').textContent = formatNum(m.newCapacity);
+  const capBadge = document.getElementById('out-cap-badge');
+  if (m.newCapacity >= TARGET) {
+    capBadge.textContent = '✓ Target Met';
+    capBadge.className = 'rc-badge badge-pass';
+  } else if (m.newCapacity >= TARGET * 0.8) {
+    capBadge.textContent = '~ Partially Met (' + Math.round(m.newCapacity/TARGET*100) + '%)';
+    capBadge.className = 'rc-badge badge-warn';
+  } else {
+    capBadge.textContent = '✗ Missed (' + Math.round(m.newCapacity/TARGET*100) + '%)';
+    capBadge.className = 'rc-badge badge-fail';
+  }
+
+  // Budget
+  document.getElementById('out-budget').textContent = formatDollar(m.totalCapex);
+  const budgetBadge = document.getElementById('out-budget-badge');
+  if (m.budgetRemaining >= 0) {
+    budgetBadge.textContent = '✓ Within Budget ($' + formatNum(m.budgetRemaining) + ' remaining)';
+    budgetBadge.className = 'rc-badge badge-pass';
+  } else {
+    budgetBadge.textContent = '✗ Over Budget by ' + formatDollar(-m.budgetRemaining);
+    budgetBadge.className = 'rc-badge badge-fail';
+  }
+
+  // Timeline
+  document.getElementById('out-timeline').textContent = m.maxMonths + ' months';
+  const timelineBadge = document.getElementById('out-timeline-badge');
+  if (m.maxMonths <= 12) {
+    timelineBadge.textContent = '✓ Within 12-Month Window';
+    timelineBadge.className = 'rc-badge badge-pass';
+  } else {
+    timelineBadge.textContent = '✗ Exceeds Window by ' + (m.maxMonths - 12) + ' months';
+    timelineBadge.className = 'rc-badge badge-fail';
+  }
+
+  // OH rate
+  document.getElementById('out-oh').textContent = '$' + m.newOhRate.toFixed(2) + '/hr';
+  const ohBadge = document.getElementById('out-oh-badge');
+  if (m.newOhRate < 24) {
+    ohBadge.textContent = '↓ Reduced from $24.00/hr — economies of scale working';
+    ohBadge.className = 'rc-badge badge-pass';
+  } else {
+    ohBadge.textContent = '= No change (no capacity added)';
+    ohBadge.className = 'rc-badge badge-warn';
+  }
+
+  // GM
+  document.getElementById('out-gm').textContent = m.newGm.toFixed(1) + '%';
+  const gmBadge = document.getElementById('out-gm-badge');
+  if (m.newGm >= BASE_GM) {
+    gmBadge.textContent = '↑ Improved from 55.0%';
+    gmBadge.className = 'rc-badge badge-pass';
+  } else {
+    gmBadge.textContent = '↓ Declined from 55.0%';
+    gmBadge.className = 'rc-badge badge-warn';
+  }
+
+  // Reg risk
+  document.getElementById('out-reg').textContent = m.regRiskScore;
+  const regBadge = document.getElementById('out-reg-badge');
+  if (m.regRiskScore === 0) {
+    regBadge.textContent = '✓ Safe — No regulatory events';
+    regBadge.className = 'rc-badge badge-pass';
+  } else if (m.regRiskScore <= 2) {
+    regBadge.textContent = '⚠ Caution — ' + m.regRiskScore + ' event(s)';
+    regBadge.className = 'rc-badge badge-warn';
+  } else {
+    regBadge.textContent = '✗ High Risk — ' + m.regRiskScore + ' events';
+    regBadge.className = 'rc-badge badge-fail';
+  }
+
+  // WIN CONDITION
+  const banner = document.getElementById('win-banner');
+  const icon = document.getElementById('win-icon');
+  const title = document.getElementById('win-title');
+  const sub = document.getElementById('win-sub');
+
+  const capMet = m.newCapacity >= TARGET;
+  const budgetMet = m.budgetRemaining >= 0;
+  const timeMet = m.maxMonths <= 12;
+  const regSafe = m.regRiskScore === 0;
+
+  if (capMet && budgetMet && timeMet && regSafe) {
+    banner.className = 'win-banner success';
+    icon.textContent = '🏆';
+    title.textContent = 'Success! You Scaled ClearPath Medical';
+    sub.textContent = 'All four win conditions met: capacity ≥ 1M units, budget ≤ $2M, timeline ≤ 12 months, and zero regulatory events. HemoSeal ships on time.';
+  } else if (capMet && budgetMet && timeMet) {
+    banner.className = 'win-banner partial';
+    icon.textContent = '⚠';
+    title.textContent = 'Capacity Met — But Regulatory Risks Accepted';
+    sub.textContent = 'You hit the production target within budget and timeline, but ' + m.regRiskScore + ' regulatory event(s) create legal and market exposure. Proceed with caution.';
+  } else {
+    const misses = [];
+    if (!capMet) misses.push('capacity (' + Math.round(m.newCapacity/TARGET*100) + '% of target)');
+    if (!budgetMet) misses.push('budget (over by ' + formatDollar(-m.budgetRemaining) + ')');
+    if (!timeMet) misses.push('timeline (' + m.maxMonths + ' months > 12)');
+    if (!regSafe) misses.push('regulatory safety (' + m.regRiskScore + ' events)');
+
+    banner.className = 'win-banner fail';
+    icon.textContent = '✗';
+    title.textContent = 'Plan Incomplete — Revise Your Strategy';
+    sub.textContent = 'Missed: ' + misses.join(', ') + '. Try Again to find a combination that meets all requirements.';
+  }
+
+  // Selected plan list
+  const planList = document.getElementById('your-plan-list');
+  if (selected.size === 0) {
+    planList.innerHTML = '<p style="color:var(--slate-500); font-style:italic;">No options selected. Try again and choose some options.</p>';
+  } else {
+    planList.innerHTML = '<div style="display:flex; flex-direction:column; gap:8px;">' +
+      [...selected].map(id => {
+        const o = OPTIONS[id];
+        return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--slate-50); border-radius:6px; border:1px solid var(--slate-100);">
+          <span style="font-weight:600;">${o.name}</span>
+          <span style="font-size:12px; color:var(--slate-500);">${o.capex > 0 ? formatDollar(o.capex) + ' CapEx' : 'No CapEx'} · ${o.months} mo${o.months > 12 ? ' ⚠' : ''} · +${formatNum(o.capacityAdd)} units/yr</span>
+        </div>`;
+      }).join('') +
+    '</div>';
+  }
+
+  // Build charts
+  buildGmChart(m.newGm);
+  buildOhChart(m.newOhRate);
+}
+
+// ===============================================================
+// CHARTS
+// ===============================================================
+function initCapacityChart() {
+  const ctx = document.getElementById('capacityChart').getContext('2d');
+  if (capacityChart) capacityChart.destroy();
+  capacityChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Current Capacity', 'Your Plan'],
+      datasets: [{
+        label: 'Units/Year',
+        data: [BASE_CAPACITY, BASE_CAPACITY],
+        backgroundColor: ['#dc2626', '#0d9488'],
+        borderColor: ['#b91c1c', '#0f766e'],
+        borderWidth: 1.5,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => formatNum(ctx.raw) + ' units/yr'
+          }
+        },
+        annotation: {
+          annotations: {
+            target: {
+              type: 'line',
+              yMin: TARGET,
+              yMax: TARGET,
+              borderColor: '#d97706',
+              borderWidth: 2,
+              borderDash: [6, 4],
+              label: {
+                display: true,
+                content: '1M Target',
+                position: 'end',
+                color: '#d97706',
+                font: { size: 11, weight: '600' },
+                backgroundColor: 'rgba(255,255,255,0.85)',
+                padding: 4,
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 1_200_000,
+          ticks: {
+            callback: v => formatNum(v),
+            font: { size: 11 },
+            color: '#64748b',
+          },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { size: 12 }, color: '#334155' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // Try to load annotation plugin
+  // (Chart.js 4.4.0 annotation might not be loaded, handle gracefully)
+}
+
+function buildGmChart(newGm) {
+  const ctx = document.getElementById('gmChart').getContext('2d');
+  if (gmChart) gmChart.destroy();
+  gmChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Before Scale-Up', 'After Scale-Up'],
+      datasets: [{
+        label: 'Gross Margin %',
+        data: [BASE_GM, Math.max(0, newGm)],
+        backgroundColor: ['#64748b', newGm >= BASE_GM ? '#16a34a' : '#dc2626'],
+        borderRadius: 4,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ctx.raw.toFixed(1) + '%' }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 80,
+          ticks: { callback: v => v + '%', font: { size: 11 }, color: '#64748b' },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { size: 12 }, color: '#334155' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function buildOhChart(newOhRate) {
+  const ctx = document.getElementById('ohChart').getContext('2d');
+  if (ohChart) ohChart.destroy();
+  ohChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['OH Rate Before\n(200K units)', 'OH Rate After\n(' + formatNum(BASE_CAPACITY + [...selected].reduce((s,id) => s + OPTIONS[id].capacityAdd, 0)) + ' units)'],
+      datasets: [{
+        label: '$/hr',
+        data: [24, newOhRate],
+        backgroundColor: ['#64748b', newOhRate < 24 ? '#16a34a' : '#d97706'],
+        borderRadius: 4,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => '$' + ctx.raw.toFixed(2) + '/hr' }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 28,
+          ticks: { callback: v => '$' + v, font: { size: 11 }, color: '#64748b' },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { size: 11 }, color: '#334155' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ===============================================================
+// FORMATTERS
+// ===============================================================
+function formatNum(n) {
+  if (n >= 1_000_000) {
+    const v = n / 1_000_000;
+    return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + 'M';
+  }
+  if (n >= 1_000) return Math.round(n / 1_000) + 'K';
+  return Math.round(n).toString();
+}
+
+function formatDollar(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1_000_000) {
+    const v = abs / 1_000_000;
+    return sign + '$' + (v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)) + 'M';
+  }
+  if (abs >= 1_000) return sign + '$' + Math.round(abs / 1_000) + 'K';
+  return sign + '$' + Math.round(abs).toString();
+}
+
+// ===============================================================
+// INIT
+// ===============================================================
+updateDashboard();
+</script>
+
+</body>
+</html>
