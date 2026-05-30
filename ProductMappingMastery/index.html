@@ -5,6 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Mapping Mastery</title>
     <style>
+  :root {
+    --teal:       #0d9488;
+    --teal-dark:  #0f766e;
+    --teal-faint: #f0fdfa;
+    --teal-light: #ccfbf1;
+    --slate:      #0f172a;
+    --slate-700:  #334155;
+    --slate-500:  #64748b;
+    --slate-300:  #cbd5e1;
+    --slate-100:  #f1f5f9;
+    --slate-50:   #f8fafc;
+    --white:      #ffffff;
+    --amber:      #d97706;
+    --red:        #dc2626;
+    --green:      #16a34a;
+    --purple:     #7c3aed;
+  }
+
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #334155; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+  /* ── BOM top-bar ── */
+  .bom-topbar {
+    background: #0f172a; color: #fff;
+    padding: 12px 28px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 9999;
+    font-family: 'Inter', system-ui, sans-serif;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  .bom-topbar .bom-course {
+    font-size: .65rem; text-transform: uppercase;
+    letter-spacing: .1em; color: #cbd5e1; line-height: 1.2;
+  }
+  .bom-topbar .bom-title {
+    font-size: .95rem; font-weight: 800; color: #fff; line-height: 1.2;
+  }
+  .bom-spacer { flex: 1; }
+  .bom-badge {
+    font-size: .65rem; font-weight: 700; padding: 3px 10px;
+    background: #0d9488; color: #fff;
+    border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+  }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +65,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             min-height: 100vh;
             color: #333;
         }
@@ -24,7 +76,7 @@
             top: 0;
             width: 250px;
             height: 100vh;
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             padding: 20px;
             z-index: 1000;
@@ -54,7 +106,7 @@
         }
 
         .sidebar h2 {
-            color: #667eea;
+            color: #0d9488;
             margin-bottom: 20px;
             font-size: 1.3em;
         }
@@ -63,7 +115,7 @@
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             color: white;
             border: none;
             border-radius: 8px;
@@ -113,7 +165,7 @@
 
         .landing h1 {
             font-size: 3em;
-            color: #667eea;
+            color: #0d9488;
             margin-bottom: 20px;
         }
 
@@ -131,7 +183,7 @@
         }
 
         .game-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             color: white;
             padding: 30px;
             border-radius: 15px;
@@ -168,7 +220,7 @@
         }
 
         .game-header h2 {
-            color: #667eea;
+            color: #0d9488;
             font-size: 2.5em;
             margin-bottom: 10px;
         }
@@ -277,7 +329,7 @@
         }
 
         .control-btn.left {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             color: white;
         }
 
@@ -338,7 +390,7 @@
             text-align: center;
             margin-bottom: 30px;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             color: white;
             border-radius: 10px;
         }
@@ -360,8 +412,8 @@
         }
 
         .assembly-preview.filled {
-            border-color: #667eea;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #0d9488;
+            background: rgba(13,148,136,.08);
         }
 
         .tile-columns {
@@ -378,7 +430,7 @@
         }
 
         .tile-column h4 {
-            color: #667eea;
+            color: #0d9488;
             margin-bottom: 15px;
             text-align: center;
         }
@@ -395,14 +447,14 @@
         }
 
         .tile:hover {
-            border-color: #667eea;
+            border-color: #0d9488;
             transform: translateX(5px);
         }
 
         .tile.selected {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             color: white;
-            border-color: #667eea;
+            border-color: #0d9488;
         }
 
         .tile.correct {
@@ -433,7 +485,7 @@
             padding: 20px;
             font-size: 1.3em;
             font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             color: white;
             border: none;
             border-radius: 10px;
@@ -478,14 +530,14 @@
 
         .result-screen h2 {
             font-size: 3em;
-            color: #667eea;
+            color: #0d9488;
             margin-bottom: 20px;
         }
 
         .result-screen .final-score {
             font-size: 4em;
             font-weight: bold;
-            color: #764ba2;
+            color: #0f766e;
             margin: 30px 0;
         }
 
@@ -510,12 +562,12 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #0d9488;
         }
 
         .device-tag {
             display: inline-block;
-            background: #667eea;
+            background: #0d9488;
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -543,9 +595,18 @@
     </style>
 </head>
 <body>
+  <div class="bom-topbar">
+    <div>
+      <div class="bom-course">BE 695 · Design Control</div>
+      <div class="bom-title">Product Mapping Mastery</div>
+    </div>
+    <div class="bom-spacer"></div>
+    <a href="../" class="back-btn">&#8592; Learning Hub</a>
+  </div>
+
     <div class="sidebar" id="sidebar">
         <h2>Product Mapping Mastery</h2>
-        <a href="../" class="nav-btn" style="text-decoration: none;">🏠 Back to Apps Menu</a>
+        
         <button class="nav-btn" onclick="navigateHome()">📖 Activity Home</button>
         <button class="nav-btn" onclick="navigateToGame('game1')">🎮 Game 1: Control Tower</button>
         <button class="nav-btn" onclick="navigateToGame('game2')">🧩 Game 2: Output Assembly</button>
@@ -656,7 +717,7 @@
                 </div>
 
                 <div class="assembly-area">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">Your Output Statement:</h4>
+                    <h4 style="color: #0d9488; margin-bottom: 10px;">Your Output Statement:</h4>
                     <div class="assembly-preview" id="assemblyPreview">
                         Select components from each column below...
                     </div>
