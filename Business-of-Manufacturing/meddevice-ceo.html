@@ -6,6 +6,19 @@
 <title>MedDevice CEO — The Business of Manufacturing</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #475569; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin-left: auto;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+
   /* ── Design Tokens ─────────────────────────────────────── */
   :root {
     --teal:       #0d9488;
@@ -450,7 +463,9 @@
     </div>
     <div class="header-spacer"></div>
     <span class="app-badge">NovaTech Medical</span>
-  </header>
+  
+  <a href="../" class="back-btn">&#8592; Learning Hub</a>
+</header>
 
   <!-- ── Dashboard Bar (hidden until game starts) ── -->
   <div id="dashboard" class="hidden">
