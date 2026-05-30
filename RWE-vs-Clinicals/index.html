@@ -5,6 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RWE vs Trials Decision Simulator</title>
     <style>
+  /* ── BOM overrides ── */
+  :root {
+    --color-bg-base: #f1f5f9;
+    --color-surface: #ffffff;
+    --color-text: #0f172a;
+    --color-accent: #0d9488;
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-error: #dc2626;
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --slate: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-100: #f1f5f9;
+  }
+
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #334155; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+  /* ── BOM top-bar ── */
+  .bom-topbar {
+    background: #0f172a; color: #fff;
+    padding: 12px 28px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 9999;
+    font-family: 'Inter', system-ui, sans-serif;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  .bom-topbar .bom-course {
+    font-size: .65rem; text-transform: uppercase;
+    letter-spacing: .1em; color: #cbd5e1; line-height: 1.2;
+  }
+  .bom-topbar .bom-title {
+    font-size: .95rem; font-weight: 800; color: #fff; line-height: 1.2;
+  }
+  .bom-spacer { flex: 1; }
+  .bom-badge {
+    font-size: .65rem; font-weight: 700; padding: 3px 10px;
+    background: #0d9488; color: #fff;
+    border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+  }
+
         :root {
             --color-bg-base: #0f172a;
             --color-surface: #1e293b;
@@ -19,7 +71,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--color-bg-base);
+            background: var(--color-bg-base);
             color: var(--color-text);
             line-height: 1.6;
         }
@@ -27,9 +79,10 @@
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 
         header {
+    display: flex; align-items: center; flex-wrap: wrap;
             text-align: center;
             margin-bottom: 3rem;
-            border-bottom: 2px solid var(--color-accent);
+            border-bottom: 2px solid #0d9488;
             padding-bottom: 2rem;
         }
 
@@ -470,6 +523,7 @@
 
 <div class="container">
     <header>
+    <a href="../" class="back-btn" style="margin-left:auto;">&#8592; Learning Hub</a>
         <h1>RWE vs Clinical Trials</h1>
         <h3 style="color: #cbd5e1; margin: 1rem 0 0 0;">Interactive Decision Simulator</h3>
         <div class="intro-text" style="margin-top: 1.5rem;">
@@ -477,7 +531,7 @@
             <p>What's at stake: FDA approval determines whether a device reaches patients. The evidence standard you choose affects both <em>how quickly</em> that happens and <em>how confidently</em> we know the device is safe and effective. Getting it wrong in either direction has real consequences — delayed access kills patients who needed the device sooner; premature approval harms patients when the device turns out to be worse than expected.</p>
             <p style="font-size:0.85rem; color:#64748b; margin-bottom:0;">This simulator uses simplified models — real approval decisions involve dozens of additional factors — but the core tradeoffs are drawn from published cases and actual FDA precedent.</p>
         </div>
-    </header>
+</header>
 
     <!-- STEP 1: DEVICE SELECTION -->
     <section class="section">
