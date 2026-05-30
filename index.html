@@ -33,7 +33,6 @@
     line-height: 1.55;
   }
 
-  /* ── Header ── */
   header {
     background: var(--slate);
     color: #fff;
@@ -52,7 +51,6 @@
     border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
   }
 
-  /* ── Hero ── */
   .hero {
     background: linear-gradient(135deg, var(--slate) 0%, #1e3a5f 100%);
     color: #fff;
@@ -88,18 +86,14 @@
     padding: 5px 14px; border-radius: 999px; letter-spacing: .02em;
   }
 
-  /* ── Main ── */
   .main { max-width: 960px; margin: 0 auto; padding: 40px 24px 60px; }
   .section-label {
     font-size: .7rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: .1em; color: var(--slate-500); margin-bottom: 16px;
     display: flex; align-items: center; gap: 10px;
   }
-  .section-label::after {
-    content: ''; flex: 1; height: 1px; background: var(--slate-300);
-  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--slate-300); }
 
-  /* ── Suite Cards ── */
   .suites-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
@@ -135,14 +129,9 @@
   }
   .suite-title { font-size: 1.05rem; font-weight: 800; color: var(--slate); }
   .suite-subtitle { font-size: .8rem; color: var(--slate-500); margin-top: 2px; font-style: italic; }
-
   .suite-card-body { padding: 14px 22px 0; }
   .suite-desc { font-size: .82rem; color: var(--slate-700); line-height: 1.6; }
-
-  .suite-card-meta {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    padding: 12px 22px 0;
-  }
+  .suite-card-meta { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 22px 0; }
   .meta-pill {
     font-size: .68rem; font-weight: 600; padding: 3px 10px;
     border-radius: 999px; letter-spacing: .03em;
@@ -153,41 +142,33 @@
   .pill-red    { background: #fef2f2; color: #991b1b; }
   .pill-blue   { background: #eff6ff; color: #1e40af; }
   .pill-green  { background: #f0fdf4; color: #166534; }
-  .pill-pink   { background: #fdf2f8; color: #9d174d; }
-
-  .suite-card-footer {
-    padding: 16px 22px 20px;
-    margin-top: auto;
-  }
+  .suite-card-footer { padding: 16px 22px 20px; margin-top: auto; }
   .suite-btn {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 10px 20px; border-radius: 8px;
     font-size: .83rem; font-weight: 700;
-    text-decoration: none; transition: background .15s;
     width: 100%; justify-content: center; color: #fff;
+    text-decoration: none;
   }
 
-  .suite-card.c1 { border-top: 3px solid var(--teal); }
+  .suite-card.c1 { border-top: 3px solid var(--amber); }
   .suite-card.c2 { border-top: 3px solid var(--purple); }
-  .suite-card.c3 { border-top: 3px solid var(--amber); }
+  .suite-card.c3 { border-top: 3px solid var(--green); }
   .suite-card.c4 { border-top: 3px solid var(--red); }
   .suite-card.c5 { border-top: 3px solid var(--blue); }
-  .suite-card.c6 { border-top: 3px solid var(--green); }
-  .suite-card.c7 { border-top: 3px solid var(--pink); }
-  .suite-card.c8 { border-top: 3px solid var(--slate-500); }
-  .suite-card.c9 { border-top: 3px solid var(--teal-dark); }
+  .suite-card.c6 { border-top: 3px solid var(--teal-dark); }
+  .suite-card.c7 { border-top: 3px solid var(--slate-500); }
+  .suite-card.c8 { border-top: 3px solid var(--teal); }
 
-  .icon-c1 { background: var(--teal-faint); }
+  .icon-c1 { background: #fffbeb; }
   .icon-c2 { background: #f5f3ff; }
-  .icon-c3 { background: #fffbeb; }
+  .icon-c3 { background: #f0fdf4; }
   .icon-c4 { background: #fef2f2; }
   .icon-c5 { background: #eff6ff; }
-  .icon-c6 { background: #f0fdf4; }
-  .icon-c7 { background: #fdf2f8; }
-  .icon-c8 { background: var(--slate-100); }
-  .icon-c9 { background: var(--teal-faint); }
+  .icon-c6 { background: var(--teal-faint); }
+  .icon-c7 { background: var(--slate-100); }
+  .icon-c8 { background: var(--teal-faint); }
 
-  /* ── Footer ── */
   footer {
     text-align: center;
     padding: 20px;
@@ -207,7 +188,7 @@
 
 <header>
   <div class="logo-wrap">
-    <svg viewBox="0 0 36 36" width="36" height="36" fill="none" aria-label="BE695 logo">
+    <svg viewBox="0 0 36 36" width="36" height="36" fill="none">
       <rect width="36" height="36" rx="8" fill="#0d9488"/>
       <path d="M5 18h5l3-7 5 14 4-10 3 3h6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
@@ -217,14 +198,14 @@
     </div>
   </div>
   <div class="header-spacer"></div>
-  <span class="header-badge">9 Modules</span>
+  <span class="header-badge">8 Modules</span>
 </header>
 
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-eyebrow">Graduate Interactive Learning</div>
     <h1>Medical Device <span>Design Control</span></h1>
-    <p>Nine interactive modules covering FDA design control, manufacturing, risk, and commercialization. Learn by doing — every simulation puts you in the decision seat.</p>
+    <p>Eight interactive modules covering FDA design control, manufacturing, risk, and commercialization. Learn by doing — every simulation puts you in the decision seat.</p>
     <div class="hero-tags">
       <span class="hero-tag">FDA Design Control</span>
       <span class="hero-tag">Risk Management</span>
@@ -236,31 +217,31 @@
 </div>
 
 <div class="main">
-
   <div class="section-label">All Modules</div>
-
   <div class="suites-grid">
 
-    <a class="suite-card c1" href="Business-of-Manufacturing/">
+    <!-- 1 -->
+    <a class="suite-card c1" href="sorting-game/">
       <div class="suite-card-top">
-        <div class="suite-icon icon-c1">🏭</div>
+        <div class="suite-icon icon-c1">📦</div>
         <div>
-          <div class="suite-title">Business of Manufacturing</div>
-          <div class="suite-subtitle">End-to-end medical device supply chain</div>
+          <div class="suite-title">Needs Finding &amp; Sorting Game</div>
+          <div class="suite-subtitle">User Needs vs. Design Inputs vs. Outputs</div>
         </div>
       </div>
       <div class="suite-card-body">
-        <p class="suite-desc">Four simulations covering DFM, scale-up, supply chain resilience, and a full CEO capstone. Every design decision has a cost consequence.</p>
+        <p class="suite-desc">Sort 12 statements into the correct design control category. Build the intuition required by FDA 21 CFR 820.30 before it costs you a 483.</p>
       </div>
       <div class="suite-card-meta">
-        <span class="meta-pill pill-teal">4-App Suite</span>
-        <span class="meta-pill pill-purple">75–90 min</span>
+        <span class="meta-pill pill-amber">12 Statements</span>
+        <span class="meta-pill pill-blue">5–7 min</span>
       </div>
       <div class="suite-card-footer">
-        <span class="suite-btn" style="background:var(--teal);">Enter Suite →</span>
+        <span class="suite-btn" style="background:var(--amber);">Launch →</span>
       </div>
     </a>
 
+    <!-- 2 -->
     <a class="suite-card c2" href="ProductMappingMastery/">
       <div class="suite-card-top">
         <div class="suite-icon icon-c2">🎯</div>
@@ -281,69 +262,10 @@
       </div>
     </a>
 
-    <a class="suite-card c3" href="sorting-game/">
+    <!-- 3 -->
+    <a class="suite-card c3" href="SterileGenius/">
       <div class="suite-card-top">
-        <div class="suite-icon icon-c3">📦</div>
-        <div>
-          <div class="suite-title">Needs Finding & Sorting Game</div>
-          <div class="suite-subtitle">User Needs vs. Design Inputs vs. Outputs</div>
-        </div>
-      </div>
-      <div class="suite-card-body">
-        <p class="suite-desc">Sort 12 statements into the correct design control category. Build the intuition required by FDA 21 CFR 820.30 before it costs you a 483.</p>
-      </div>
-      <div class="suite-card-meta">
-        <span class="meta-pill pill-amber">12 Statements</span>
-        <span class="meta-pill pill-blue">5–7 min</span>
-      </div>
-      <div class="suite-card-footer">
-        <span class="suite-btn" style="background:var(--amber);">Launch →</span>
-      </div>
-    </a>
-
-    <a class="suite-card c4" href="FMEA-risk-explorer/">
-      <div class="suite-card-top">
-        <div class="suite-icon icon-c4">⚠️</div>
-        <div>
-          <div class="suite-title">FMEA Risk Explorer</div>
-          <div class="suite-subtitle">Failure Mode & Effects Analysis</div>
-        </div>
-      </div>
-      <div class="suite-card-body">
-        <p class="suite-desc">Explore failure modes, assign severity/occurrence/detectability scores, and understand how risk controls change your RPN. ISO 14971 grounding throughout.</p>
-      </div>
-      <div class="suite-card-meta">
-        <span class="meta-pill pill-red">Risk Management</span>
-        <span class="meta-pill pill-amber">ISO 14971</span>
-      </div>
-      <div class="suite-card-footer">
-        <span class="suite-btn" style="background:var(--red);">Launch →</span>
-      </div>
-    </a>
-
-    <a class="suite-card c5" href="LaunchIt/">
-      <div class="suite-card-top">
-        <div class="suite-icon icon-c5">🚀</div>
-        <div>
-          <div class="suite-title">Launch It</div>
-          <div class="suite-subtitle">Customer Segmentation & Marketing Claims</div>
-        </div>
-      </div>
-      <div class="suite-card-body">
-        <p class="suite-desc">Simulate commercial launch decisions — segment your market, craft compliant claims, and navigate the line between marketing ambition and regulatory reality.</p>
-      </div>
-      <div class="suite-card-meta">
-        <span class="meta-pill pill-blue">1 Simulation</span>
-        <span class="meta-pill pill-blue">10 min</span>
-      </div>
-      <div class="suite-card-footer">
-        <span class="suite-btn" style="background:var(--blue);">Launch →</span>
-      </div>
-    </a>
-
-    <a class="suite-card c6" href="SterileGenius/">
-      <div class="suite-card-top">
-        <div class="suite-icon icon-c6">💉</div>
+        <div class="suite-icon icon-c3">💉</div>
         <div>
           <div class="suite-title">Sterile Genius</div>
           <div class="suite-subtitle">Swipe right on sterility</div>
@@ -361,47 +283,52 @@
       </div>
     </a>
 
-    <a class="suite-card c7" href="Practera-Content-Map/">
+    <!-- 4 -->
+    <a class="suite-card c4" href="FMEA-risk-explorer/">
       <div class="suite-card-top">
-        <div class="suite-icon icon-c7">🗺️</div>
+        <div class="suite-icon icon-c4">⚠️</div>
         <div>
-          <div class="suite-title">Practera Content Map</div>
-          <div class="suite-subtitle">Course activity navigator</div>
+          <div class="suite-title">FMEA Risk Explorer</div>
+          <div class="suite-subtitle">Failure Mode &amp; Effects Analysis</div>
         </div>
       </div>
       <div class="suite-card-body">
-        <p class="suite-desc">A visual map of all BE695 Practera content — link learning activities to course milestones and design control phases.</p>
+        <p class="suite-desc">Explore failure modes, assign severity/occurrence/detectability scores, and understand how risk controls change your RPN. ISO 14971 grounding throughout.</p>
       </div>
       <div class="suite-card-meta">
-        <span class="meta-pill pill-pink">Reference Tool</span>
+        <span class="meta-pill pill-red">Risk Management</span>
+        <span class="meta-pill pill-amber">ISO 14971</span>
       </div>
       <div class="suite-card-footer">
-        <span class="suite-btn" style="background:var(--pink);">Open →</span>
+        <span class="suite-btn" style="background:var(--red);">Launch →</span>
       </div>
     </a>
 
-    <a class="suite-card c8" href="RetractorProtocol/">
+    <!-- 5 -->
+    <a class="suite-card c5" href="LaunchIt/">
       <div class="suite-card-top">
-        <div class="suite-icon icon-c8">🔬</div>
+        <div class="suite-icon icon-c5">🚀</div>
         <div>
-          <div class="suite-title">Retractor Protocol</div>
-          <div class="suite-subtitle">Clinical validation simulation</div>
+          <div class="suite-title">Launch It</div>
+          <div class="suite-subtitle">Customer Segmentation &amp; Marketing Claims</div>
         </div>
       </div>
       <div class="suite-card-body">
-        <p class="suite-desc">Design and defend a clinical validation protocol for a surgical retractor. Apply the "desperate surgeon" standard to real-world evidence requirements.</p>
+        <p class="suite-desc">Simulate commercial launch decisions — segment your market, craft compliant claims, and navigate the line between marketing ambition and regulatory reality.</p>
       </div>
       <div class="suite-card-meta">
-        <span class="meta-pill pill-teal">Clinical Validation</span>
+        <span class="meta-pill pill-blue">1 Simulation</span>
+        <span class="meta-pill pill-blue">10 min</span>
       </div>
       <div class="suite-card-footer">
-        <span class="suite-btn" style="background:var(--slate-700);">Launch →</span>
+        <span class="suite-btn" style="background:var(--blue);">Launch →</span>
       </div>
     </a>
 
-    <a class="suite-card c9" href="RWE-vs-Clinicals/">
+    <!-- 6 -->
+    <a class="suite-card c6" href="RWE-vs-Clinicals/">
       <div class="suite-card-top">
-        <div class="suite-icon icon-c9">📊</div>
+        <div class="suite-icon icon-c6">📊</div>
         <div>
           <div class="suite-title">RWE vs Clinicals</div>
           <div class="suite-subtitle">Real-world evidence vs. clinical trials</div>
@@ -418,8 +345,48 @@
       </div>
     </a>
 
-  </div>
+    <!-- 7 -->
+    <a class="suite-card c7" href="RetractorProtocol/">
+      <div class="suite-card-top">
+        <div class="suite-icon icon-c7">🔬</div>
+        <div>
+          <div class="suite-title">Retractor Protocol</div>
+          <div class="suite-subtitle">Clinical validation simulation</div>
+        </div>
+      </div>
+      <div class="suite-card-body">
+        <p class="suite-desc">Design and defend a clinical validation protocol for a surgical retractor. Apply the "desperate surgeon" standard to real-world evidence requirements.</p>
+      </div>
+      <div class="suite-card-meta">
+        <span class="meta-pill pill-teal">Clinical Validation</span>
+      </div>
+      <div class="suite-card-footer">
+        <span class="suite-btn" style="background:var(--slate-700);">Launch →</span>
+      </div>
+    </a>
 
+    <!-- 8 -->
+    <a class="suite-card c8" href="Business-of-Manufacturing/">
+      <div class="suite-card-top">
+        <div class="suite-icon icon-c8">🏭</div>
+        <div>
+          <div class="suite-title">Business of Manufacturing</div>
+          <div class="suite-subtitle">End-to-end medical device supply chain</div>
+        </div>
+      </div>
+      <div class="suite-card-body">
+        <p class="suite-desc">Four simulations covering DFM, scale-up, supply chain resilience, and a full CEO capstone. Every design decision has a cost consequence.</p>
+      </div>
+      <div class="suite-card-meta">
+        <span class="meta-pill pill-teal">4-App Suite</span>
+        <span class="meta-pill pill-purple">75–90 min</span>
+      </div>
+      <div class="suite-card-footer">
+        <span class="suite-btn" style="background:var(--teal);">Enter Suite →</span>
+      </div>
+    </a>
+
+  </div>
 </div>
 
 <footer>
