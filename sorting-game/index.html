@@ -752,7 +752,8 @@
                 if (card && targetBucket) {
                     card.classList.add('correct');
                     card.classList.remove('incorrect');
-                    targetBucket.appendChild(card);
+                    const bc = targetBucket.querySelector('.bucket-cards');
+                    (bc || targetBucket).appendChild(card);
                 }
             });
             document.getElementById('completion-status').textContent = '💡 Correct answers shown!';
@@ -761,7 +762,8 @@
         }
 
         function resetSorting() {
-            // Explicitly move all bucket cards back before re-init
+            // Remove ALL statement-cards from anywhere in the buckets (including direct children from showAnswer)
+            document.querySelectorAll('.bucket .statement-card').forEach(c => c.remove());
             document.querySelectorAll('.bucket-cards').forEach(b => b.innerHTML = '');
             window.part1Initialized = false;
             resetErrorCount('part1');
