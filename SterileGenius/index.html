@@ -8,11 +8,63 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+  :root {
+    --teal:       #0d9488;
+    --teal-dark:  #0f766e;
+    --teal-faint: #f0fdfa;
+    --teal-light: #ccfbf1;
+    --slate:      #0f172a;
+    --slate-700:  #334155;
+    --slate-500:  #64748b;
+    --slate-300:  #cbd5e1;
+    --slate-100:  #f1f5f9;
+    --slate-50:   #f8fafc;
+    --white:      #ffffff;
+    --amber:      #d97706;
+    --red:        #dc2626;
+    --green:      #16a34a;
+    --purple:     #7c3aed;
+  }
+
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #334155; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+  /* ── BOM top-bar ── */
+  .bom-topbar {
+    background: #0f172a; color: #fff;
+    padding: 12px 28px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 9999;
+    font-family: 'Inter', system-ui, sans-serif;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  .bom-topbar .bom-course {
+    font-size: .65rem; text-transform: uppercase;
+    letter-spacing: .1em; color: #cbd5e1; line-height: 1.2;
+  }
+  .bom-topbar .bom-title {
+    font-size: .95rem; font-weight: 800; color: #fff; line-height: 1.2;
+  }
+  .bom-spacer { flex: 1; }
+  .bom-badge {
+    font-size: .65rem; font-weight: 700; padding: 3px 10px;
+    background: #0d9488; color: #fff;
+    border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+  }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f1f5f9;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -41,9 +93,7 @@
 
         .logo {
             font-size: 24px; font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; margin-bottom: 4px;
+            color: #0d9488; margin-bottom: 4px;
         }
         .tagline { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 16px; font-style: italic; }
 
@@ -98,13 +148,13 @@
         }
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #0d9488 0%, #0f766e 100%);
             border-radius: 8px; transition: width 0.3s ease;
         }
 
         .btn-new-session {
             width: 100%; padding: 12px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
             color: white; border: none; border-radius: 12px;
             font-size: 14px; font-weight: 600; cursor: pointer;
             transition: all 0.3s ease;
@@ -179,7 +229,7 @@
         /* ========== SWIPE MODE (Round 1) ========== */
         #swipeMode .current-method {
             display: block; padding: 18px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
             color: white; border-radius: 14px; font-size: 20px; font-weight: 800;
             margin-bottom: 28px; box-shadow: 0 8px 24px rgba(102,126,234,0.3);
             text-align: center;
@@ -232,7 +282,7 @@
             text-align: center; line-height: 1.4;
         }
         .method-option-btn:hover:not(:disabled) {
-            border-color: #667eea; color: #667eea;
+            border-color: #0d9488; color: #0d9488;
             background: #f0f4ff; transform: translateY(-1px);
         }
         .method-option-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
@@ -247,7 +297,7 @@
             color: #64748b; padding: 8px 18px; border-radius: 8px;
             font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
         }
-        .btn-hint:hover { border-color: #667eea; color: #667eea; background: rgba(102,126,234,0.05); }
+        .btn-hint:hover { border-color: #0d9488; color: #0d9488; background: rgba(102,126,234,0.05); }
         .btn-hint:disabled { opacity: 0.3; cursor: not-allowed; }
         .hint-display {
             margin-top: 10px; padding: 10px 14px; background: #fef3c7;
@@ -270,12 +320,12 @@
         .feedback-wrong { color: #ef4444; }
         .feedback-warn { color: #f59e0b; }
         .feedback-text { font-size: 13px; color: #475569; line-height: 1.6; margin-bottom: 10px; }
-        .feedback-rationale { background: white; border-left: 4px solid #667eea; padding: 14px; border-radius: 8px; margin-top: 12px; }
-        .rationale-label { font-size: 11px; font-weight: 700; color: #667eea; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .feedback-rationale { background: white; border-left: 4px solid #0d9488; padding: 14px; border-radius: 8px; margin-top: 12px; }
+        .rationale-label { font-size: 11px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         .rationale-text { font-size: 13px; color: #334155; line-height: 1.6; }
         .btn-next {
             width: 100%; padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
             color: white; border: none; border-radius: 12px;
             font-size: 15px; font-weight: 700; cursor: pointer;
             transition: all 0.3s ease; margin-top: 14px;
@@ -325,12 +375,19 @@
     </style>
 </head>
 <body>
+  <div class="bom-topbar">
+    <div>
+      <div class="bom-course">BE 695 · Design Control</div>
+      <div class="bom-title">Sterile Genius 2.0</div>
+    </div>
+    <div class="bom-spacer"></div>
+    <a href="../" class="back-btn">&#8592; Learning Hub</a>
+  </div>
+
 
 <!-- ========== SIDEBAR ========== -->
 <div class="sidebar">
-    <a href="https://emceebe695.github.io/design-control-learning/" class="btn-home">
-        ← Back to Learning Hub
-    </a>
+    <a href="https://emceebe695.github.io/design-control-learning/" class="btn-home">&#8592; Learning Hub</a>
 
     <div class="logo">STERILE GENIUS</div>
     <div class="tagline">3 rounds. 1 expert. Let's go! 💉</div>
@@ -380,7 +437,7 @@
         </div>
         <div class="stat-row" style="margin-top:10px">
             <span class="stat-label">Score</span>
-            <span class="stat-value" id="scoreDisplay" style="color:#667eea">0</span>
+            <span class="stat-value" id="scoreDisplay" style="color:#0d9488">0</span>
         </div>
         <div class="stat-row">
             <span class="stat-label">Errors</span>
