@@ -514,7 +514,7 @@
       <div class="sorting-container">
         <div class="card-pool">
           <h4>Statements to Sort</h4>
-          <div class="cards-wrapper" id="cards-wrapper"></div>
+          <div class="cards-wrapper" id="card-pool"></div>
         </div>
         <div class="buckets">
           <div class="bucket user-need" id="bucket-user-need" ondragover="allowDrop(event)" ondrop="drop(event, 'User Need')">
@@ -536,6 +536,7 @@
         <button class="btn btn-warning" onclick="showAnswer()">💡 Show Answer</button>
         <button class="btn btn-secondary" onclick="resetSorting()">↺ New Session</button>
       </div>
+      <div id="completion-status" class="feedback"></div>
     </div>
   </div>
 
@@ -545,6 +546,7 @@
       <h2>Build Requirements</h2>
       <p class="subtitle">Construct a proper Design Input by selecting the correct components. All requirements use "shall" as the modal verb.</p>
       <div class="challenge-container" id="challenge-container"></div>
+      <div id="feedback" class="feedback"></div>
     </div>
   </div>
 
