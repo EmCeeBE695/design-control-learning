@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,59 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+  /* ── BOM overrides ── */
+  :root {
+    --color-bg: #f1f5f9 !important;
+    --color-surface: #ffffff !important;
+    --color-surface-2: #f8fafc !important;
+    --color-surface-offset: #f1f5f9 !important;
+    --color-primary: #0d9488 !important;
+    --color-primary-hover: #0f766e !important;
+    --color-primary-highlight: #f0fdfa !important;
+    --color-text: #0f172a !important;
+    --color-text-muted: #64748b !important;
+    --color-border: #cbd5e1 !important;
+    --color-divider: #e2e8f0 !important;
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --slate: #0f172a;
+    --slate-100: #f1f5f9;
+  }
+
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #334155; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+  /* ── BOM top-bar ── */
+  .bom-topbar {
+    background: #0f172a; color: #fff;
+    padding: 12px 28px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 9999;
+    font-family: 'Inter', system-ui, sans-serif;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  .bom-topbar .bom-course {
+    font-size: .65rem; text-transform: uppercase;
+    letter-spacing: .1em; color: #cbd5e1; line-height: 1.2;
+  }
+  .bom-topbar .bom-title {
+    font-size: .95rem; font-weight: 800; color: #fff; line-height: 1.2;
+  }
+  .bom-spacer { flex: 1; }
+  .bom-badge {
+    font-size: .65rem; font-weight: 700; padding: 3px 10px;
+    background: #0d9488; color: #fff;
+    border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+  }
+
 /* ==================== DESIGN TOKENS ==================== */
 :root, [data-theme="light"] {
   --color-bg: #f7f6f2;
@@ -248,6 +301,15 @@ table.fmea tbody td:first-child{font-weight:600;color:var(--color-text)}
 </style>
 </head>
 <body>
+  <div class="bom-topbar">
+    <div>
+      <div class="bom-course">BE 695 · Design Control</div>
+      <div class="bom-title">FMEA Risk Explorer</div>
+    </div>
+    <div class="bom-spacer"></div>
+    <a href="../" class="back-btn">&#8592; Learning Hub</a>
+  </div>
+
 
 <div class="app-shell">
   <!-- TOPBAR -->
