@@ -888,17 +888,39 @@
             .main-content { margin-left: 260px; }
             .sorting-container, .trace-grid { grid-template-columns: 1fr; }
         }
+
+        /* Back to Hub button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+            white-space: nowrap;
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 2000;
+        }
+        .back-btn:hover { border-color: #60a5fa; color: #60a5fa; }
     </style>
 </head>
 <body>
+    <a href="../" class="back-btn">← Back to Learning Hub</a>
     <div class="sidebar">
         <div class="sidebar-logo">BE 695</div>
         <div class="sidebar-title">Design Control Learning</div>
         <div class="sidebar-subtitle">Master user needs, design inputs, and design outputs</div>
 
-       <a href="../" class="nav-btn" style="text-decoration: none; margin-bottom: 10px;">
-    <span class="icon">🏠</span><span>Back to Apps Menu</span>
-</a>
+
 
 <button class="nav-btn active" onclick="showScreen('home')">
     <span class="icon">📖</span><span>Activity Home</span>
@@ -1603,3 +1625,4 @@
     </script>
 </body>
 </html>
+
