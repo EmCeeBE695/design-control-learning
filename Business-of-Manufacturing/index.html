@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Business of Manufacturing — BE 695</title>
 <style>
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #475569; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin-left: auto;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+
   :root {
     --teal:       #0d9488;
     --teal-dark:  #0f766e;
@@ -264,6 +277,8 @@
   </div>
   <div class="header-spacer"></div>
   <span class="header-badge">4-App Suite</span>
+
+  <a href="../" class="back-btn">&#8592; Learning Hub</a>
 </header>
 
 <div class="hero">
