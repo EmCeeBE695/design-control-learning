@@ -7,6 +7,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #475569; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin-left: auto;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+
   /* ===== DESIGN TOKENS ===== */
   :root {
     --teal: #0d9488;
@@ -1028,6 +1041,8 @@
     <strong>BE 695</strong>
     Boston University BME
   </div>
+
+  <a href="../" class="back-btn">&#8592; Learning Hub</a>
 </header>
 
 <!-- ===== TOP NAV ===== -->
