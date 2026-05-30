@@ -517,15 +517,15 @@
           <div class="cards-wrapper" id="card-pool"></div>
         </div>
         <div class="buckets">
-          <div class="bucket user-need" id="bucket-user-need" ondragover="allowDrop(event)" ondrop="drop(event, 'User Need')">
+          <div class="bucket user-need" id="bucket-user-need" data-category="User Need" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'User Need')">
             <div class="bucket-header">User Needs</div>
             <div class="bucket-cards" id="bucket-user-need-cards"></div>
           </div>
-          <div class="bucket design-input" id="bucket-design-input" ondragover="allowDrop(event)" ondrop="drop(event, 'Design Input')">
+          <div class="bucket design-input" id="bucket-design-input" data-category="Design Input" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'Design Input')">
             <div class="bucket-header">Design Inputs</div>
             <div class="bucket-cards" id="bucket-design-input-cards"></div>
           </div>
-          <div class="bucket design-output" id="bucket-design-output" ondragover="allowDrop(event)" ondrop="drop(event, 'Design Output')">
+          <div class="bucket design-output" id="bucket-design-output" data-category="Design Output" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'Design Output')">
             <div class="bucket-header">Design Outputs</div>
             <div class="bucket-cards" id="bucket-design-output-cards"></div>
           </div>
@@ -761,6 +761,8 @@
         }
 
         function resetSorting() {
+            // Explicitly move all bucket cards back before re-init
+            document.querySelectorAll('.bucket-cards').forEach(b => b.innerHTML = '');
             window.part1Initialized = false;
             resetErrorCount('part1');
             initPart1();
