@@ -18,8 +18,10 @@
     --slate-50:   #f8fafc;
     --white:      #ffffff;
     --amber:      #d97706;
+    --amber-dark: #b45309;
     --red:        #dc2626;
     --green:      #16a34a;
+    --green-faint:#f0fdf4;
     --purple:     #7c3aed;
   }
 
@@ -27,16 +29,17 @@
   .back-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 7px 14px; border-radius: 8px;
-    border: 1px solid #334155; background: transparent;
+    border: 1px solid var(--slate-700); background: transparent;
     color: #94a3b8; font-size: 12px; font-weight: 600;
     cursor: pointer; text-decoration: none;
     transition: all .2s; white-space: nowrap;
     font-family: 'Inter', system-ui, sans-serif;
   }
-  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+  .back-btn:hover { border-color: var(--teal); color: var(--teal); }
+
   /* ── BOM top-bar ── */
   .bom-topbar {
-    background: #0f172a; color: #fff;
+    background: var(--slate); color: #fff;
     padding: 12px 28px;
     display: flex; align-items: center; gap: 16px;
     position: sticky; top: 0; z-index: 9999;
@@ -45,553 +48,557 @@
   }
   .bom-topbar .bom-course {
     font-size: .65rem; text-transform: uppercase;
-    letter-spacing: .1em; color: #cbd5e1; line-height: 1.2;
+    letter-spacing: .1em; color: var(--slate-300); line-height: 1.2;
   }
   .bom-topbar .bom-title {
     font-size: .95rem; font-weight: 800; color: #fff; line-height: 1.2;
   }
   .bom-spacer { flex: 1; }
-  .bom-badge {
-    font-size: .65rem; font-weight: 700; padding: 3px 10px;
-    background: #0d9488; color: #fff;
-    border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--slate-100);
+    min-height: 100vh;
+    color: #333;
   }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f1f5f9;
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 250px;
-            height: 100vh;
-            background: #ffffff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(-250px);
-        }
-
-        .sidebar-toggle {
-            position: fixed;
-            left: 260px;
-            top: 20px;
-            background: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 999;
-            transition: left 0.3s ease;
-        }
-
-        .sidebar-toggle.collapsed {
-            left: 10px;
-        }
-
-        .sidebar h2 {
-            color: #0d9488;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: #f1f5f9;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .main-content {
-            margin-left: 270px;
-            padding: 40px;
-            transition: margin-left 0.3s ease;
-        }
-
-        .main-content.expanded {
-            margin-left: 20px;
-        }
-
-        .screen {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .landing {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
-        .landing h1 {
-            font-size: 3em;
-            color: #0d9488;
-            margin-bottom: 20px;
-        }
-
-        .landing p {
-            font-size: 1.2em;
-            color: #666;
-            margin-bottom: 40px;
-        }
-
-        .game-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .game-card {
-            background: #f1f5f9;
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .game-card h3 {
-            font-size: 1.8em;
-            margin-bottom: 15px;
-        }
-
-        .game-card p {
-            color: rgba(255,255,255,0.9);
-        }
-
-        .game-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .game-header h2 {
-            color: #0d9488;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .score-board {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 15px;
-            color: white;
-        }
-
-        .score-item {
-            text-align: center;
-        }
-
-        .score-item .label {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-
-        .score-item .value {
-            font-size: 2em;
-            font-weight: bold;
-        }
-
-        .streak-glow {
-            animation: glow 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-            to { box-shadow: 0 0 20px rgba(255,255,255,1); }
-        }
-
-        .conveyor {
-            position: relative;
-            height: 150px;
-            background: linear-gradient(to bottom, #e0e0e0, #f5f5f5);
-            border: 3px solid #999;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        .variable-card {
-            position: absolute;
-            left: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            font-size: 1.1em;
-            font-weight: 500;
-            animation: moveLeft 7s linear;
-            white-space: nowrap;
-            max-width: 80%;
-        }
-
-        @keyframes moveLeft {
-            from { left: 100%; }
-            to { left: -50%; }
-        }
-
-        .variable-card.explode {
-            animation: explode 0.5s ease;
-        }
-
-        @keyframes explode {
-            0% { transform: translateY(-50%) scale(1); opacity: 1; }
-            50% { transform: translateY(-50%) scale(1.5) rotate(10deg); opacity: 0.5; background: #ff4444; }
-            100% { transform: translateY(-50%) scale(0); opacity: 0; }
-        }
-
-        .variable-card.success {
-            animation: success 0.5s ease;
-        }
-
-        @keyframes success {
-            0% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.2); }
-            100% { transform: translateY(-50%) scale(0); opacity: 0; }
-        }
-
-        .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .control-btn {
-            flex: 1;
-            max-width: 200px;
-            padding: 20px;
-            font-size: 1.3em;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .control-btn.left {
-            background: #f1f5f9;
-            color: white;
-        }
-
-        .control-btn.right {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .control-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .control-btn:active {
-            transform: scale(0.95);
-        }
-
-        .feedback-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            z-index: 2000;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-        }
-
-        .feedback-modal.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .feedback-modal.correct {
-            border: 5px solid #4CAF50;
-        }
-
-        .feedback-modal.incorrect {
-            border: 5px solid #ff4444;
-        }
-
-        .feedback-modal h3 {
-            margin-bottom: 15px;
-        }
-
-        .feedback-modal.correct h3 {
-            color: #4CAF50;
-        }
-
-        .feedback-modal.incorrect h3 {
-            color: #ff4444;
-        }
-
-        .round-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f1f5f9;
-            color: white;
-            border-radius: 10px;
-        }
-
-        .assembly-area {
-            margin-bottom: 30px;
-        }
-
-        .assembly-preview {
-            background: #f5f5f5;
-            padding: 30px;
-            border-radius: 10px;
-            min-height: 120px;
-            border: 3px dashed #ccc;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.1em;
-            line-height: 1.8;
-        }
-
-        .assembly-preview.filled {
-            border-color: #0d9488;
-            background: rgba(13,148,136,.08);
-        }
-
-        .tile-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .tile-column {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .tile-column h4 {
-            color: #0d9488;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .tile {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            font-size: 0.95em;
-        }
-
-        .tile:hover {
-            border-color: #0d9488;
-            transform: translateX(5px);
-        }
-
-        .tile.selected {
-            background: #f1f5f9;
-            color: white;
-            border-color: #0d9488;
-        }
-
-        .tile.correct {
-            background: #4CAF50;
-            color: white;
-            animation: pulse 0.5s ease;
-        }
-
-        .tile.incorrect {
-            background: #ff4444;
-            color: white;
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 20px;
-            font-size: 1.3em;
-            font-weight: bold;
-            background: #f1f5f9;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .submit-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .next-btn {
-            width: 100%;
-            padding: 20px;
-            font-size: 1.3em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s;
-        }
-
-        .next-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
-        }
-
-        .result-screen {
-            text-align: center;
-            padding: 50px;
-        }
-
-        .result-screen h2 {
-            font-size: 3em;
-            color: #0d9488;
-            margin-bottom: 20px;
-        }
-
-        .result-screen .final-score {
-            font-size: 4em;
-            font-weight: bold;
-            color: #0f766e;
-            margin: 30px 0;
-        }
-
-        .achievement-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.2em;
-            margin: 10px;
-            animation: bounce 1s ease infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .instruction-text {
-            background: #f0f7ff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 5px solid #0d9488;
-        }
-
-        .device-tag {
-            display: inline-block;
-            background: #0d9488;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-            .main-content {
-                margin-left: 220px;
-            }
-            .game-cards {
-                grid-template-columns: 1fr;
-            }
-            .tile-columns {
-                grid-template-columns: 1fr;
-            }
-            .landing h1 {
-                font-size: 2em;
-            }
-        }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    background: var(--white);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    padding: 70px 20px 20px;
+    z-index: 1500;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.collapsed { transform: translateX(-260px); }
+
+  .sidebar-toggle {
+    position: fixed;
+    left: 260px;
+    top: 70px;
+    background: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1600;
+    transition: left 0.3s ease;
+    font-size: 1em;
+  }
+
+  .sidebar-toggle.collapsed { left: 10px; }
+
+  .sidebar h2 {
+    color: var(--teal);
+    margin-bottom: 20px;
+    font-size: 1.3em;
+  }
+
+  .nav-btn {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    text-align: left;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .nav-btn:hover {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+  }
+
+  .main-content {
+    margin-left: 270px;
+    padding: 40px;
+    transition: margin-left 0.3s ease;
+  }
+
+  .main-content.expanded { margin-left: 20px; }
+
+  .screen { display: none; animation: fadeIn 0.5s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .landing {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  }
+
+  .landing h1 {
+    font-size: 3em;
+    color: var(--teal);
+    margin-bottom: 20px;
+  }
+
+  .landing > p {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .primer {
+    text-align: left;
+    background: var(--teal-faint);
+    border-left: 5px solid var(--teal);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    font-size: 0.98em;
+    line-height: 1.6;
+    color: var(--slate-700);
+  }
+  .primer strong { color: var(--teal-dark); }
+  .primer p + p { margin-top: 10px; }
+
+  .game-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+  }
+
+  .game-card {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: left;
+  }
+
+  .game-card:hover, .game-card:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(13, 148, 136, 0.35);
+    outline: none;
+  }
+
+  .game-card h3 { font-size: 1.8em; margin-bottom: 15px; }
+  .game-card p { color: rgba(255,255,255,0.92); }
+
+  .game-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  }
+
+  .game-header { text-align: center; margin-bottom: 30px; }
+  .game-header h2 { color: var(--teal); font-size: 2.5em; margin-bottom: 10px; }
+
+  .score-board {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    border-radius: 15px;
+    color: white;
+  }
+
+  .score-item { text-align: center; }
+  .score-item .label { font-size: 0.9em; opacity: 0.9; }
+  .score-item .value { font-size: 2em; font-weight: bold; }
+
+  .streak-glow { animation: glow 1s ease-in-out infinite alternate; }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 10px rgba(13,148,136,0.5); }
+    to { box-shadow: 0 0 22px rgba(13,148,136,0.95); }
+  }
+
+  .conveyor {
+    position: relative;
+    height: 170px;
+    background: linear-gradient(to bottom, #e0e0e0, #f5f5f5);
+    border: 3px solid #999;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .variable-card {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    padding: 14px 22px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    font-size: 1.05em;
+    font-weight: 500;
+    animation: moveLeft 7s linear forwards;
+    max-width: 70%;
+    line-height: 1.35;
+  }
+
+  @keyframes moveLeft {
+    from { left: 100%; }
+    to { left: -70%; }
+  }
+
+  .variable-card.explode { animation: explode 0.5s ease forwards; }
+
+  @keyframes explode {
+    0% { transform: translateY(-50%) scale(1); opacity: 1; }
+    50% { transform: translateY(-50%) scale(1.5) rotate(10deg); opacity: 0.5; background: #ff4444; }
+    100% { transform: translateY(-50%) scale(0); opacity: 0; }
+  }
+
+  .variable-card.success { animation: success 0.5s ease forwards; }
+
+  @keyframes success {
+    0% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-50%) scale(1.2); }
+    100% { transform: translateY(-50%) scale(0); opacity: 0; }
+  }
+
+  .timer-bar {
+    height: 6px;
+    background: var(--slate-300);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .timer-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--teal);
+    transform-origin: left;
+  }
+  .timer-bar-fill.running { animation: shrink 6.8s linear forwards; }
+  @keyframes shrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+  .controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .control-btn {
+    flex: 1;
+    max-width: 220px;
+    padding: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+  }
+
+  .control-btn.left { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); }
+  .control-btn.right { background: linear-gradient(135deg, var(--amber) 0%, var(--amber-dark) 100%); }
+
+  .control-btn:hover { transform: scale(1.05); }
+  .control-btn:active { transform: scale(0.95); }
+
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    z-index: 1900;
+  }
+  .modal-backdrop.show { display: block; }
+
+  .feedback-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 2000;
+    width: min(600px, calc(100vw - 30px));
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+
+  .feedback-modal.show { transform: translate(-50%, -50%) scale(1); }
+  .feedback-modal.correct { border: 5px solid var(--green); }
+  .feedback-modal.incorrect { border: 5px solid #ff4444; }
+  .feedback-modal h3 { margin-bottom: 15px; }
+  .feedback-modal.correct h3 { color: var(--green); }
+  .feedback-modal.incorrect h3 { color: #ff4444; }
+
+  .round-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--teal-faint);
+    border: 1px solid var(--teal-light);
+    color: var(--slate-700);
+    border-radius: 10px;
+  }
+  .round-header h3 { color: var(--teal-dark); }
+
+  .assembly-area { margin-bottom: 30px; }
+
+  .assembly-preview {
+    background: #f5f5f5;
+    padding: 30px;
+    border-radius: 10px;
+    min-height: 120px;
+    border: 3px dashed #ccc;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: var(--slate-700);
+  }
+
+  .assembly-preview.filled {
+    border-color: var(--teal);
+    background: rgba(13,148,136,.08);
+  }
+
+  .tile-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .tile-column {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .tile-column h4 {
+    color: var(--teal);
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .tile {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    font-size: 0.95em;
+    width: 100%;
+    text-align: left;
+    display: block;
+    font-family: inherit;
+    color: inherit;
+  }
+
+  .tile:hover, .tile:focus-visible {
+    border-color: var(--teal);
+    transform: translateX(5px);
+    outline: none;
+  }
+
+  .tile.selected {
+    background: var(--teal);
+    color: white;
+    border-color: var(--teal-dark);
+  }
+
+  .tile.correct {
+    background: var(--green);
+    color: white;
+    animation: pulse 0.5s ease;
+  }
+
+  .tile.incorrect {
+    background: #ff4444;
+    color: white;
+    animation: shake 0.5s ease;
+  }
+
+  /* The answer you SHOULD have picked (revealed after a wrong submit) —
+     styled differently from a tile you picked correctly. */
+  .tile.reveal {
+    background: var(--green-faint);
+    color: var(--slate-700);
+    border: 2px dashed var(--green);
+  }
+  .tile.reveal::before {
+    content: "✓ Correct answer: ";
+    font-weight: bold;
+    color: var(--green);
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+  }
+
+  .submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .next-btn {
+    width: 100%;
+    padding: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--slate-700) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s;
+  }
+
+  .next-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(15, 118, 110, 0.4);
+  }
+
+  .result-screen { text-align: center; padding: 30px 10px; }
+  .result-screen h2 { font-size: 2.6em; color: var(--teal); margin-bottom: 20px; }
+
+  .result-screen .final-score {
+    font-size: 4em;
+    font-weight: bold;
+    color: var(--teal-dark);
+    margin: 20px 0 6px;
+  }
+
+  .best-score { color: var(--slate-500); margin-bottom: 20px; }
+
+  .achievement-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    margin: 10px;
+    animation: bounce 1s ease infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .miss-recap {
+    text-align: left;
+    margin: 25px auto 0;
+    max-width: 700px;
+  }
+  .miss-recap h3 { color: var(--slate-700); margin-bottom: 12px; }
+  .miss-item {
+    background: var(--slate-50);
+    border-left: 4px solid var(--red);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-size: 0.95em;
+    line-height: 1.5;
+  }
+  .miss-item .miss-head { font-weight: bold; color: var(--slate); margin-bottom: 4px; }
+  .miss-item .miss-answer { color: var(--teal-dark); font-weight: 600; }
+  .recap-perfect {
+    color: var(--green);
+    font-weight: bold;
+    margin-top: 20px;
+  }
+
+  .instruction-text {
+    background: #f0f7ff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-left: 5px solid var(--teal);
+  }
+
+  .device-tag {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 250px; }
+    .main-content { margin-left: 0; padding: 60px 14px 20px; }
+    .main-content.expanded { margin-left: 0; }
+    .sidebar-toggle { left: 10px; }
+    .sidebar:not(.collapsed) ~ .sidebar-toggle,
+    .sidebar-toggle:not(.collapsed) { left: 260px; }
+    .landing { padding: 26px 18px; }
+    .game-container { padding: 22px 14px; }
+    .game-cards { grid-template-columns: 1fr; }
+    .tile-columns { grid-template-columns: 1fr; }
+    .landing h1 { font-size: 2em; }
+    .game-header h2 { font-size: 1.8em; }
+    .score-board { padding: 12px; }
+    .score-item .value { font-size: 1.4em; }
+    .controls { gap: 10px; }
+    .control-btn { padding: 16px 8px; font-size: 1em; max-width: none; }
+    .variable-card { font-size: 0.92em; max-width: 82%; }
+  }
     </style>
 </head>
 <body>
@@ -606,13 +613,13 @@
 
     <div class="sidebar" id="sidebar">
         <h2>Product Mapping Mastery</h2>
-        
+
         <button class="nav-btn" onclick="navigateHome()">📖 Activity Home</button>
         <button class="nav-btn" onclick="navigateToGame('game1')">🎮 Game 1: Control Tower</button>
         <button class="nav-btn" onclick="navigateToGame('game2')">🧩 Game 2: Output Assembly</button>
     </div>
 
-    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle navigation menu">☰</button>
 
     <div class="main-content" id="mainContent">
 
@@ -621,17 +628,43 @@
                 <h1>🎯 Product Mapping Mastery</h1>
                 <p>Master the essential skills for medical device development through interactive gameplay</p>
 
+                <!-- CONTENT JUDGMENT (audit item 6): Added this primer to connect the
+                     Control/Noise vocabulary (which comes from robust design / Taguchi
+                     methods, not from 21 CFR 820.30 itself) to design control concepts.
+                     Review the framing below. -->
+                <div class="primer">
+                    <p><strong>How this connects to design controls:</strong> The Control vs. Noise
+                    distinction comes from robust design methods (P-diagrams, Taguchi). It matters for
+                    design controls because <strong>Control factors become design input requirements and
+                    specifications</strong> — things your team specifies, documents, and verifies.
+                    <strong>Noise factors define the use conditions and ranges</strong> your requirements
+                    must cover (patient variation, user variation, environment) and drive your
+                    verification and validation strategy.</p>
+                    <!-- CONTENT JUDGMENT (audit item 5): Game 2's statements are functional
+                         requirements derived from use-step analysis — material for DESIGN INPUTS
+                         per 21 CFR 820.30(c). "Design outputs" in 820.30(d) means drawings, specs,
+                         and procedures. The paragraph below (and the Game 2 header text) makes that
+                         distinction explicit while keeping the game's existing name. -->
+                    <p><strong>A note on Game 2's name:</strong> the "output statements" you assemble are
+                    <strong>functional requirement statements</strong> — the functional result each use
+                    step must produce. These feed your <strong>design inputs</strong> (21 CFR 820.30(c)).
+                    Don't confuse them with formal <em>design outputs</em> (820.30(d)), which are the
+                    drawings, specifications, and procedures that result from design work.</p>
+                </div>
+
                 <div class="game-cards">
-                    <div class="game-card" onclick="startGame1()">
+                    <div class="game-card" onclick="startGame1()" role="button" tabindex="0"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startGame1();}">
                         <h3>🎮 Control Tower</h3>
                         <p>Classify input variables as Control or Noise at lightning speed. Build your streak and become an expert!</p>
-                        <p style="margin-top: 15px;"><strong>15 Variables • 7 Minutes</strong></p>
+                        <p style="margin-top: 15px;"><strong>15 Variables • ~7 Minutes</strong></p>
                     </div>
 
-                    <div class="game-card" onclick="startGame2()">
+                    <div class="game-card" onclick="startGame2()" role="button" tabindex="0"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startGame2();}">
                         <h3>🧩 Output Assembly</h3>
-                        <p>Build perfect output statements by selecting the right components. Learn to write requirements like a pro!</p>
-                        <p style="margin-top: 15px;"><strong>8 Rounds • 10 Minutes</strong></p>
+                        <p>Build functional requirement statements by selecting the right components. Learn to write requirements like a pro!</p>
+                        <p style="margin-top: 15px;"><strong>8 Rounds • ~10 Minutes</strong></p>
                     </div>
                 </div>
             </div>
@@ -660,10 +693,11 @@
                 </div>
 
                 <div class="instruction-text">
-                    <strong>Instructions:</strong> Click LEFT for Control (design specifications you own) or RIGHT for Noise (external factors you design around). Use keyboard: Arrow keys or C/N keys.
+                    <strong>Instructions:</strong> Tap CONTROL for design specifications your team owns, or NOISE for external factors you must design around. Keyboard: Arrow keys or C/N. The bar below the conveyor shows your remaining time.
                 </div>
 
                 <div class="conveyor" id="conveyor"></div>
+                <div class="timer-bar"><div class="timer-bar-fill" id="timerBarFill"></div></div>
 
                 <div class="controls">
                     <button class="control-btn left" onclick="classify('C')">
@@ -678,7 +712,9 @@
                     <div class="result-screen">
                         <h2>Game Complete! 🎉</h2>
                         <div class="final-score" id="finalScore1">0</div>
+                        <div class="best-score" id="bestScore1"></div>
                         <div id="achievements"></div>
+                        <div class="miss-recap" id="missRecap1"></div>
                         <button class="next-btn" onclick="showScreen('landing')">Back to Home</button>
                         <button class="next-btn" onclick="startGame1()">Play Again</button>
                     </div>
@@ -690,6 +726,7 @@
             <div class="game-container">
                 <div class="game-header">
                     <h2>🧩 Output Assembly Line</h2>
+                    <p>Build the functional requirement statement for each use step</p>
                 </div>
 
                 <div class="round-header" id="roundHeader">
@@ -713,11 +750,11 @@
                 </div>
 
                 <div class="instruction-text">
-                    <strong>Instructions:</strong> Select ONE tile from each column to build the perfect output statement
+                    <strong>Instructions:</strong> Select ONE tile from each column to build the strongest functional requirement statement
                 </div>
 
                 <div class="assembly-area">
-                    <h4 style="color: #0d9488; margin-bottom: 10px;">Your Output Statement:</h4>
+                    <h4 style="color: #0d9488; margin-bottom: 10px;">Your Statement:</h4>
                     <div class="assembly-preview" id="assemblyPreview">
                         Select components from each column below...
                     </div>
@@ -733,8 +770,10 @@
                     <div class="result-screen">
                         <h2>All Rounds Complete! 🎉</h2>
                         <div class="final-score" id="finalScore2">0</div>
+                        <div class="best-score" id="bestScore2"></div>
                         <p id="perfectionMessage" style="font-size: 1.5em; margin: 20px 0;"></p>
                         <div id="achievements2"></div>
+                        <div class="miss-recap" id="missRecap2"></div>
                         <button class="next-btn" onclick="showScreen('landing')">Back to Home</button>
                         <button class="next-btn" onclick="startGame2()">Play Again</button>
                     </div>
@@ -744,9 +783,10 @@
 
     </div>
 
-    <div class="feedback-modal" id="feedbackModal">
+    <div class="modal-backdrop" id="modalBackdrop" onclick="closeFeedback()"></div>
+    <div class="feedback-modal" id="feedbackModal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
         <h3 id="feedbackTitle">Feedback</h3>
-        <p id="feedbackText" style="white-space: pre-line; line-height: 1.6;"></p>
+        <p id="feedbackText" style="white-space: pre-line; line-height: 1.6;" aria-live="polite"></p>
         <button class="next-btn" onclick="closeFeedback()">Continue</button>
     </div>
 
@@ -756,7 +796,9 @@
         const VARIABLES = [
   {id: 1, device: "Arthroscopic Trocar", variable: "Trocar material (stainless steel vs titanium)", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies material selection. This becomes a design requirement with properties to test (yield strength, corrosion resistance, etc.)."},
   {id: 2, device: "Arthroscopic Trocar", variable: "Trocar tip sharpness", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies tip geometry and hardness (e.g., 42 Rockwell). This is a testable design specification."},
-  {id: 3, device: "Arthroscopic Trocar", variable: "Surgeon hand size", answer: "N", difficulty: "easy", explanation: "NOISE: Cannot control which surgeon operates. Must design ergonomics for 5th-95th percentile range. This informs testing strategy, not specs."},
+  // CONTENT JUDGMENT (audit item 6): explanation below revised — noise factors DO become
+  // design input requirements (the percentile range becomes a spec), not just test strategy.
+  {id: 3, device: "Arthroscopic Trocar", variable: "Surgeon hand size", answer: "N", difficulty: "easy", explanation: "NOISE: Cannot control which surgeon operates. The 5th-95th percentile hand size range becomes a design input requirement for ergonomics — the noise factor defines the range your design must accommodate and your testing must cover."},
   {id: 4, device: "Arthroscopic Trocar", variable: "Soft tissue density/quality", answer: "N", difficulty: "easy", explanation: "NOISE: Patient anatomy varies (age, health, scarring). Your device must be robust across this range. This is a Noise factor requiring design robustness."},
   {id: 5, device: "Arthroscopic Trocar", variable: "Sheath inner diameter", answer: "C", difficulty: "easy", explanation: "CONTROL: Design team specifies dimension with tolerance (e.g., 5.0mm ±0.1mm). This is directly controllable and verifiable."},
   {id: 6, device: "Arthroscopic Trocar", variable: "Blood/fluid on surgical gloves", answer: "N", difficulty: "medium", explanation: "NOISE: Environmental condition during surgery. Cannot eliminate. Design must accommodate slippery handling (e.g., textured grips, larger contact areas)."},
@@ -797,53 +839,59 @@
 ];
 
         const ROUNDS = [
-  {round: 1, difficulty: "easy", step: "Attach trocar to sheath", 
+  {round: 1, difficulty: "easy", step: "Attach trocar to sheath",
    column1_tiles: [
      {text: "Trocar attached to sheath securely", correct: false, feedback: "Restates the action but doesn't define the functional result. What KIND of attachment? What properties does it have?"},
      {text: "Rigid construct assembly created", correct: false, feedback: "Close, but 'construct' is vague. What components? Missing the specific elements being joined."},
      {text: "Trocar and sheath locked as rigid construct", correct: true, feedback: "Specific functional result - identifies BOTH components AND the critical property (rigidity)."}
-   ], 
+   ],
    column2_tiles: [
      {text: "that maintains position during use", correct: false, feedback: "Position maintenance is a symptom, not the mechanical performance. Doesn't specify the loading condition."},
      {text: "able to withstand insertion forces without separation", correct: true, feedback: "Specific mechanical performance - defines the LOADING condition and what must not happen under that load."},
      {text: "that remains connected throughout procedure", correct: false, feedback: "Time-based description ('throughout procedure') rather than performance under specific loads."}
-   ], 
+   ],
    column3_tiles: [
      {text: "to enable device functionality in surgery", correct: false, feedback: "Too generic - doesn't specify WHAT function this particular assembly enables."},
      {text: "for surgeon convenience and efficiency", correct: false, feedback: "User benefit, not the biomechanical purpose. This is HOW surgeons feel about it, not WHAT it does."},
      {text: "to enable tissue penetration during insertion", correct: true, feedback: "Specific clinical purpose - defines the exact biomechanical function requiring this rigid assembly."}
    ]
   },
-  {round: 2, difficulty: "easy", step: "Clean device for reuse", 
+  {round: 2, difficulty: "easy", step: "Clean device for reuse",
    column1_tiles: [
      {text: "Device reprocessed per protocol", correct: false, feedback: "Process compliance statement. Doesn't define WHAT state is achieved, just that a protocol was followed."},
      {text: "Device reprocessed to validated cleanliness", correct: true, feedback: "Specifies achievement of a validated standard - this is measurable and testable against acceptance criteria."},
      {text: "Device surface cleaning completed", correct: false, feedback: "Describes completion of an action, not the RESULT. What level of cleanliness? How is it verified?"}
-   ], 
+   ],
    column2_tiles: [
      {text: "that passes visual inspection criteria", correct: false, feedback: "Visual inspection is a verification METHOD, not the cleanliness state. Contaminants can exist invisibly."},
      {text: "without visible residue or contamination", correct: false, feedback: "'Without visible' is subjective and incomplete - biological contaminants may not be visible."},
      {text: "free of biological contaminants and debris", correct: true, feedback: "Specific performance standard - defines WHAT is absent measurably, not just appearance."}
-   ], 
+   ],
    column3_tiles: [
      {text: "to meet hospital reprocessing standards", correct: false, feedback: "Compliance goal, not functional purpose. Design controls define DEVICE requirements, not hospital policies."},
-     {text: "for cost savings through reuse", correct: false, feedback: "Business/economic consideration - design controls NEVER include financial motivations."},
+     // CONTENT JUDGMENT (audit item 7): softened the original "design controls NEVER
+     // include financial motivations" — cost legitimately shapes design decisions; it
+     // just doesn't belong inside a functional requirement statement.
+     {text: "for cost savings through reuse", correct: false, feedback: "Business/economic consideration. Cost shapes design decisions, but it is not a functional requirement - it doesn't belong in the requirement statement itself."},
      {text: "ready for sterile use in next procedure", correct: true, feedback: "Functional purpose - defines the preparation state enabling subsequent clinical use."}
    ]
   },
-  {round: 3, difficulty: "medium", step: "Insert implant into disc space", 
+  {round: 3, difficulty: "medium", step: "Insert implant into disc space",
    column1_tiles: [
      {text: "Implant inserted into disc space", correct: false, feedback: "Restates action. WHERE in disc space? How far? Initial or final position?"},
      {text: "Implant placed in anatomical position", correct: false, feedback: "'Anatomical position' is ambiguous - could mean initial placement or final seating. Lacks precision."},
-     {text: "Implant initiated into prepared disc space", correct: true, feedback: "Specific - 'initiated' clearly signals START of insertion. 'Prepared disc space' identifies the anatomical target."},
+     // CONTENT JUDGMENT (audit item 7): reworded from "Implant initiated into prepared
+     // disc space" — "implant initiated" was ungrammatical; the pedagogical point
+     // (distinguishing start of insertion from final seating) is preserved.
+     {text: "Implant insertion initiated into prepared disc space", correct: true, feedback: "Specific - 'insertion initiated' clearly signals the START of insertion, distinct from final seating. 'Prepared disc space' identifies the anatomical target."},
      {text: "Surgical placement step performed", correct: false, feedback: "Process description with no functional information. Could mean any phase of implantation."}
-   ], 
+   ],
    column2_tiles: [
      {text: "without exceeding force limits", correct: false, feedback: "Negative constraint (what doesn't happen). Doesn't positively specify WHERE the implant must be."},
      {text: "positioned within anatomical boundaries", correct: true, feedback: "Specific spatial requirement - defines safe zones (avoiding anterior vessels, posterior neural elements)."},
      {text: "that aligns with fluoroscopic landmarks", correct: false, feedback: "Verification method (imaging), not the actual spatial requirement. Describes HOW you check, not WHAT you require."},
      {text: "meeting placement specifications", correct: false, feedback: "Circular reasoning - doesn't define WHICH specifications. Meaningless without referencing specific requirements."}
-   ], 
+   ],
    column3_tiles: [
      {text: "to achieve surgical objectives safely", correct: false, feedback: "Generic safety statement. Doesn't specify WHAT biomechanical outcome is needed."},
      {text: "to facilitate spinal stabilization", correct: false, feedback: "Long-term outcome, but not the IMMEDIATE biomechanical function of insertion step."},
@@ -851,19 +899,19 @@
      {text: "as intended by surgical plan", correct: false, feedback: "References external plan, doesn't define the device's functional purpose independently."}
    ]
   },
-  {round: 4, difficulty: "medium", step: "Attach endoscope to camera coupler", 
+  {round: 4, difficulty: "medium", step: "Attach endoscope to camera coupler",
    column1_tiles: [
      {text: "Hermetically sealed optical connection", correct: true, feedback: "Specific - defines sealing property (hermetic = fluid-tight) AND function (optical connection)."},
      {text: "Secure mechanical and optical interface", correct: false, feedback: "Uses generic terms 'secure' and 'interface' without defining the SEALING requirement critical for endoscopy."},
      {text: "Endoscope coupled to camera system", correct: false, feedback: "Describes components being joined but not the critical properties (sealing, optical alignment)."},
      {text: "Connection established between devices", correct: false, feedback: "Extremely generic - could apply to any connection. No functional detail about sealing or optics."}
-   ], 
+   ],
    column2_tiles: [
      {text: "with proper alignment and seal integrity", correct: false, feedback: "'Proper' is subjective. Doesn't specify WHAT the seal prevents or what alignment achieves."},
      {text: "preventing fluid ingress and maintaining focus", correct: true, feedback: "Dual specific performance - seal function (fluid exclusion) AND optical function (focus maintenance)."},
      {text: "that meets coupling specifications", correct: false, feedback: "Circular and uninformative - doesn't state WHAT the specifications require functionally."},
      {text: "ensuring reliable optical transmission", correct: false, feedback: "'Reliable' is vague quality statement. Missing the critical SEALING function. Focus on optics only."}
-   ], 
+   ],
    column3_tiles: [
      {text: "for consistent image quality during procedures", correct: false, feedback: "Generic quality outcome. Doesn't specify the PATHWAY from lens to sensor."},
      {text: "so camera can capture surgical field", correct: false, feedback: "Ultimate goal but doesn't define the MECHANISM - what must the connection physically do?"},
@@ -871,19 +919,19 @@
      {text: "for visualization during surgery", correct: false, feedback: "Generic use case. Doesn't specify this connection's specific role in the imaging pathway."}
    ]
   },
-  {round: 5, difficulty: "medium-hard", step: "Impact implant into final position", 
+  {round: 5, difficulty: "medium-hard", step: "Impact implant into final position",
    column1_tiles: [
      {text: "Implant fully seated in position", correct: false, feedback: "Describes LOCATION but not ENGAGEMENT state. 'Fully seated' could still lack bone purchase."},
      {text: "Implant positioned at target depth with endplate engagement", correct: true, feedback: "Specific - combines spatial position (target depth) with mechanical state (endplate engagement)."},
      {text: "Final implant placement achieved", correct: false, feedback: "Generic completion statement. 'Final placement' doesn't specify depth, orientation, or fixation."},
      {text: "Impaction completed per technique", correct: false, feedback: "Process compliance, not functional state. Doesn't describe the resulting position or engagement."}
-   ], 
+   ],
    column2_tiles: [
      {text: "without structural failure occurring", correct: false, feedback: "Negative framing (what didn't break). Doesn't positively specify the engagement achieved."},
      {text: "that provides stable construct", correct: false, feedback: "'Stable construct' is outcome, not the MECHANISM. Doesn't specify HOW stability is achieved."},
      {text: "with teeth engaged in bone", correct: true, feedback: "Specific mechanism - identifies the interfacial engagement providing immediate fixation."},
      {text: "per biomechanical requirements", correct: false, feedback: "References requirements without stating WHAT they are. Circular and uninformative."}
-   ], 
+   ],
    column3_tiles: [
      {text: "to complete implant insertion safely", correct: false, feedback: "Process completion + generic safety. Doesn't specify the biomechanical function."},
      {text: "to achieve immediate fixation and load distribution", correct: true, feedback: "Specific biomechanical functions - defines BOTH fixation (resistance to motion) AND mechanical function (load transfer)."},
@@ -891,19 +939,23 @@
      {text: "for optimal patient outcomes", correct: false, feedback: "Ultimate clinical goal - too distant from the specific biomechanical function of impaction."}
    ]
   },
-  {round: 6, difficulty: "hard", step: "Focus image with coupler adjustment ring", 
+  {round: 6, difficulty: "hard", step: "Focus image with coupler adjustment ring",
    column1_tiles: [
      {text: "Image brought into sharp focus", correct: false, feedback: "Describes RESULT but not the MECHANISM - how is focus achieved mechanically?"},
-     {text: "Optimized optical alignment between lens and camera sensor", correct: true, feedback: "Specific mechanism - focus results from precise ALIGNMENT of optical elements."},
+     // CONTENT JUDGMENT (audit item 7): reworded from "Optimized optical alignment..." —
+     // "optimized" is the same subjective language the game penalizes elsewhere.
+     {text: "Precise optical alignment between lens and camera sensor", correct: true, feedback: "Specific mechanism - focus results from precise ALIGNMENT of optical elements along the light path."},
      {text: "Coupler adjusted to optimal setting", correct: false, feedback: "Action + vague outcome. 'Optimal setting' doesn't explain WHAT changed mechanically."},
      {text: "Focus adjustment completed successfully", correct: false, feedback: "Process completion statement. 'Successfully' is subjective without defining the achieved state."}
-   ], 
+   ],
    column2_tiles: [
      {text: "meeting surgeon preference for clarity", correct: false, feedback: "Subjective user preference - not a measurable design specification."},
      {text: "better than previous generation devices", correct: false, feedback: "Comparative statement. Design controls require absolute specifications, not relative performance."},
-     {text: "achieving maximum sharpness across entire field of view", correct: true, feedback: "Specific optical performance - defines both the metric (sharpness) AND spatial requirement (entire FOV)."},
+     // CONTENT JUDGMENT (audit item 7): reworded from "achieving maximum sharpness..." —
+     // "maximum" is unverifiable; a resolvable-detail criterion across the full FOV is testable.
+     {text: "achieving sharp focus across the entire field of view", correct: true, feedback: "Specific optical performance - defines the metric (focus/sharpness) AND the spatial requirement (entire FOV), which can be verified with resolution targets."},
      {text: "consistent with industry standards", correct: false, feedback: "External reference without defining WHAT the output IS functionally. Doesn't specify the optical performance."}
-   ], 
+   ],
    column3_tiles: [
      {text: "so surgeon can perform procedure", correct: false, feedback: "Ultimate goal but too generic. Doesn't specify WHAT must be visualized."},
      {text: "to improve image quality overall", correct: false, feedback: "Generic quality improvement. 'Overall' is vague - doesn't specify what anatomical elements need visualization."},
@@ -911,19 +963,19 @@
      {text: "for adequate procedural documentation", correct: false, feedback: "Secondary purpose (recording). Primary function is real-time surgical guidance."}
    ]
   },
-  {round: 7, difficulty: "hard", step: "Lock camera coupling into sheath", 
+  {round: 7, difficulty: "hard", step: "Lock camera coupling into sheath",
    column1_tiles: [
      {text: "Camera and sheath firmly connected", correct: false, feedback: "'Firmly connected' is subjective. Doesn't specify rigidity or angular relationship."},
      {text: "Rigid fixed-angle assembly of camera and sheath", correct: true, feedback: "Specific mechanical state - defines BOTH rigidity AND the critical fixed angular relationship."},
      {text: "Locking mechanism engaged completely", correct: false, feedback: "Process completion. 'Completely' doesn't define the resulting mechanical properties."},
      {text: "Components securely joined together", correct: false, feedback: "Generic joining description. 'Securely' is subjective without defining mechanical constraints."}
-   ], 
+   ],
    column2_tiles: [
      {text: "tight enough for clinical use", correct: false, feedback: "Subjective threshold ('tight enough'). Not quantifiable or testable."},
      {text: "without visible looseness or movement", correct: false, feedback: "'Visible' and 'without' are negative/subjective. Doesn't positively specify the mechanical constraints."},
      {text: "eliminating axial and rotational slop", correct: true, feedback: "Specific mechanical performance - defines constraints in BOTH linear (axial) and rotational degrees of freedom."},
      {text: "per assembly procedure requirements", correct: false, feedback: "Process compliance. Doesn't specify WHAT mechanical state is achieved."}
-   ], 
+   ],
    column3_tiles: [
      {text: "for system stability during surgery", correct: false, feedback: "Generic stability benefit. Doesn't specify WHAT clinical functions require this mechanical constraint."},
      {text: "to enable precise instrument control and prevent image shift during manipulation", correct: true, feedback: "Specific clinical functions - instrument control (mechanical stability) AND image stability (no FOV shift)."},
@@ -931,19 +983,19 @@
      {text: "so equipment functions as designed", correct: false, feedback: "Circular logic. 'As designed' doesn't independently define functional purpose."}
    ]
   },
-  {round: 8, difficulty: "boss", step: "Remove implant from sterile packaging", 
+  {round: 8, difficulty: "boss", step: "Remove implant from sterile packaging",
    column1_tiles: [
      {text: "Implant removed from package successfully", correct: false, feedback: "Action + generic outcome. 'Successfully' is subjective. Doesn't define the critical STATE (sterility)."},
      {text: "Sterile implant accessible on sterile field", correct: true, feedback: "Defines BOTH the sterility state (critical for use) AND spatial location (sterile field)."},
      {text: "Package opened and implant retrieved", correct: false, feedback: "Process description. Focuses on package/action, not the implant's resulting state."},
      {text: "Implant extracted and ready", correct: false, feedback: "'Ready' is vague. Ready for what? Missing critical sterility specification."}
-   ], 
+   ],
    column2_tiles: [
      {text: "using aseptic handling techniques", correct: false, feedback: "Describes user BEHAVIOR (process), not the functional OUTPUT state achieved."},
      {text: "without compromising package integrity", correct: false, feedback: "Package-focused, not implant-focused. Also negative framing (what didn't happen)."},
      {text: "maintaining sterility throughout transfer", correct: true, feedback: "Positive specification of critical performance - sterility maintained during the transition state."},
      {text: "according to IFU protocol", correct: false, feedback: "Process compliance reference. Doesn't define WHAT functional state is achieved."}
-   ], 
+   ],
    column3_tiles: [
      {text: "to prepare for use in patient", correct: false, feedback: "Generic preparation. Doesn't specify what NEXT steps this enables or what state is required."},
      {text: "to prevent surgical site infection", correct: false, feedback: "Risk being mitigated (ultimate goal), not the immediate functional purpose of THIS step."},
@@ -958,6 +1010,7 @@
 
         let gameState = {
             game1: {
+                started: false,
                 score: 0,
                 streak: 0,
                 maxStreak: 0,
@@ -966,28 +1019,43 @@
                 variables: [],
                 currentVariable: null,
                 animating: false,
-                timer: null
+                timer: null,
+                cleanupTimer: null,
+                cardStartTime: 0,
+                responseTimes: [],
+                timeouts: 0,
+                misses: []
             },
             game2: {
+                started: false,
+                finished: false,
                 currentRound: 0,
                 roundScore: 0,
                 totalScore: 0,
                 perfectRounds: 0,
                 selected: {col1: null, col2: null, col3: null},
-                submitted: false
+                submitted: false,
+                roundResults: []
             }
         };
+
+        // Callback fired when the feedback modal closes. Set per showFeedback()
+        // call so closing feedback in Game 2 never advances Game 1's state.
+        let feedbackCloseCallback = null;
 
         // ==================== NAVIGATION ====================
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.getElementById('sidebarToggle');
-            const content = document.getElementById('mainContent');
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('sidebarToggle').classList.toggle('collapsed');
+            document.getElementById('mainContent').classList.toggle('expanded');
+        }
 
-            sidebar.classList.toggle('collapsed');
-            toggle.classList.toggle('collapsed');
-            content.classList.toggle('expanded');
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 768 &&
+                !document.getElementById('sidebar').classList.contains('collapsed')) {
+                toggleSidebar();
+            }
         }
 
         function showScreen(screenId) {
@@ -995,64 +1063,75 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        function navigateHome() {
-            if (gameState.game1.animating) {
-                if (confirm('Exit current game? Your progress will be lost.')) {
-                    abortGame1();
-                    showScreen('landing');
-                }
-            } else {
-                showScreen('landing');
+        function game1InProgress() {
+            const s = gameState.game1;
+            return s.started && s.current < s.total;
+        }
+
+        function game2InProgress() {
+            const s = gameState.game2;
+            return s.started && !s.finished &&
+                (s.currentRound > 0 || s.selected.col1 !== null ||
+                 s.selected.col2 !== null || s.selected.col3 !== null || s.submitted);
+        }
+
+        function confirmLeaveActiveGame() {
+            if (game1InProgress() || game2InProgress()) {
+                if (!confirm('Exit current game? Your progress will be lost.')) return false;
             }
+            abortActiveGames();
+            return true;
+        }
+
+        function abortActiveGames() {
+            abortGame1();
+            gameState.game2.started = false;
+            hideFeedbackImmediately();
+        }
+
+        function navigateHome() {
+            closeSidebarOnMobile();
+            if (!confirmLeaveActiveGame()) return;
+            showScreen('landing');
         }
 
         function navigateToGame(gameId) {
-            const currentGame1Active = document.getElementById('game1').classList.contains('active');
-            const currentGame2Active = document.getElementById('game2').classList.contains('active');
-
-            if (gameId === 'game1') {
-                if (currentGame2Active && !gameState.game2.submitted) {
-                    if (confirm('Exit current game? Your progress will be lost.')) {
-                        startGame1();
-                    }
-                } else {
-                    startGame1();
-                }
-            } else if (gameId === 'game2') {
-                if (currentGame1Active && gameState.game1.animating) {
-                    if (confirm('Exit current game? Your progress will be lost.')) {
-                        abortGame1();
-                        startGame2();
-                    }
-                } else {
-                    startGame2();
-                }
-            }
+            closeSidebarOnMobile();
+            if (!confirmLeaveActiveGame()) return;
+            if (gameId === 'game1') startGame1();
+            else if (gameId === 'game2') startGame2();
         }
 
         function abortGame1() {
             const state = gameState.game1;
+            state.started = false;
             state.animating = false;
-            if (state.timer) {
-                clearTimeout(state.timer);
-                state.timer = null;
-            }
+            if (state.timer) { clearTimeout(state.timer); state.timer = null; }
+            if (state.cleanupTimer) { clearTimeout(state.cleanupTimer); state.cleanupTimer = null; }
             document.getElementById('conveyor').innerHTML = '';
+            document.getElementById('timerBarFill').classList.remove('running');
         }
 
         // ==================== GAME 1: CONTROL TOWER ====================
 
         function startGame1() {
+            abortGame1();
             gameState.game1 = {
+                started: true,
                 score: 0,
                 streak: 0,
                 maxStreak: 0,
                 current: 0,
                 total: 15,
-                variables: selectRandomVariables(15),
+                variables: selectBalancedVariables(15),
                 currentVariable: null,
                 animating: false,
-                timer: null
+                timer: null,
+                cleanupTimer: null,
+                cardStartTime: 0,
+                responseTimes: [],
+                timeouts: 0,
+                misses: []
             };
 
             document.getElementById('game1Result').style.display = 'none';
@@ -1062,9 +1141,35 @@
             presentNextVariable();
         }
 
-        function selectRandomVariables(count) {
-            const shuffled = [...VARIABLES].sort(() => Math.random() - 0.5);
-            return shuffled.slice(0, count);
+        function shuffle(arr) {
+            // Fisher-Yates
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function selectBalancedVariables(count) {
+            // Draw a mix of difficulties so a run is never all-easy or all-hard.
+            const easy = shuffle(VARIABLES.filter(v => v.difficulty === 'easy'));
+            const medium = shuffle(VARIABLES.filter(v => v.difficulty === 'medium'));
+            const hard = shuffle(VARIABLES.filter(v => v.difficulty === 'hard'));
+
+            const picked = [
+                ...easy.slice(0, 7),
+                ...medium.slice(0, 6),
+                ...hard.slice(0, 2)
+            ];
+
+            if (picked.length < count) {
+                const pickedIds = new Set(picked.map(v => v.id));
+                const rest = shuffle(VARIABLES.filter(v => !pickedIds.has(v.id)));
+                picked.push(...rest.slice(0, count - picked.length));
+            }
+
+            return shuffle(picked).slice(0, count);
         }
 
         function updateGame1Display() {
@@ -1083,14 +1188,22 @@
 
         function presentNextVariable() {
             const state = gameState.game1;
+            if (!state.started) return;
 
             if (state.current >= state.total) {
                 endGame1();
                 return;
             }
 
+            // Cancel any pending cleanup so it can't wipe the new card.
+            if (state.cleanupTimer) {
+                clearTimeout(state.cleanupTimer);
+                state.cleanupTimer = null;
+            }
+
             state.currentVariable = state.variables[state.current];
             state.animating = true;
+            state.cardStartTime = Date.now();
 
             const conveyor = document.getElementById('conveyor');
             conveyor.innerHTML = '';
@@ -1101,89 +1214,133 @@
                 <div class="device-tag">${state.currentVariable.device}</div>
                 <div>${state.currentVariable.variable}</div>
             `;
-
             conveyor.appendChild(card);
 
-            // Clear any existing timer
-            if (state.timer) {
-                clearTimeout(state.timer);
-            }
+            // Restart the countdown bar animation
+            const bar = document.getElementById('timerBarFill');
+            bar.classList.remove('running');
+            void bar.offsetWidth; // force reflow so the animation restarts
+            bar.classList.add('running');
 
-            // Set new timer - 6.8 seconds
+            if (state.timer) clearTimeout(state.timer);
             state.timer = setTimeout(() => {
-                if (state.animating) {
-                    classify(null);
-                }
+                if (state.animating) classify(null);
             }, 6800);
         }
 
         function classify(answer) {
             const state = gameState.game1;
-
             if (!state.animating || !state.currentVariable) return;
 
             state.animating = false;
 
-            // Clear the timer immediately when answer is selected
             if (state.timer) {
                 clearTimeout(state.timer);
                 state.timer = null;
             }
+            document.getElementById('timerBarFill').classList.remove('running');
 
             const card = document.querySelector('.variable-card');
             const correct = answer === state.currentVariable.answer;
 
+            if (answer !== null) {
+                state.responseTimes.push(Date.now() - state.cardStartTime);
+            } else {
+                state.timeouts++;
+            }
+
             if (correct) {
-                card.classList.add('success');
-                state.score += 100 * (1 + Math.floor(state.streak / 5));
+                if (card) card.classList.add('success');
                 state.streak++;
                 if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+                // Multiplier computed after incrementing so the 5th consecutive
+                // correct answer earns 2x, matching the streak-glow threshold.
+                state.score += 100 * (1 + Math.floor(state.streak / 5));
 
-                showFeedback(true, `✅ Correct! ${state.currentVariable.answer}`, state.currentVariable.explanation);
+                showFeedback(true, `✅ Correct! ${state.currentVariable.answer}`,
+                    state.currentVariable.explanation, advanceGame1);
             } else {
-                card.classList.add('explode');
+                if (card) card.classList.add('explode');
                 state.streak = 0;
+                state.misses.push(state.currentVariable);
 
                 const title = answer === null ? '⏱️ Too Slow!' : '❌ Incorrect';
-                const correctAnswer = `Correct answer: ${state.currentVariable.answer}`;
-                showFeedback(false, title, `${correctAnswer}\n\n${state.currentVariable.explanation}`);
+                const correctAnswer = `Correct answer: ${state.currentVariable.answer === 'C' ? 'CONTROL' : 'NOISE'}`;
+                showFeedback(false, title, `${correctAnswer}\n\n${state.currentVariable.explanation}`, advanceGame1);
             }
 
             state.current++;
             updateGame1Display();
 
-            setTimeout(() => {
-                document.getElementById('conveyor').innerHTML = '';
+            // Remove this specific card after its exit animation; tracked so a
+            // fast "Continue" can cancel it before it touches the next card.
+            state.cleanupTimer = setTimeout(() => {
+                if (card && card.parentNode) card.remove();
+                state.cleanupTimer = null;
             }, 500);
         }
 
-        function showFeedback(isCorrect, title, text) {
+        function advanceGame1() {
+            presentNextVariable();
+        }
+
+        function showFeedback(isCorrect, title, text, onClose) {
+            feedbackCloseCallback = onClose || null;
             const modal = document.getElementById('feedbackModal');
             modal.className = 'feedback-modal show ' + (isCorrect ? 'correct' : 'incorrect');
+            document.getElementById('modalBackdrop').classList.add('show');
             document.getElementById('feedbackTitle').textContent = title;
             document.getElementById('feedbackText').textContent = text;
         }
 
+        function hideFeedbackImmediately() {
+            feedbackCloseCallback = null;
+            document.getElementById('feedbackModal').classList.remove('show');
+            document.getElementById('modalBackdrop').classList.remove('show');
+        }
+
         function closeFeedback() {
             const modal = document.getElementById('feedbackModal');
+            if (!modal.classList.contains('show')) return;
             modal.classList.remove('show');
+            document.getElementById('modalBackdrop').classList.remove('show');
 
-            setTimeout(() => {
-                presentNextVariable();
-            }, 300);
+            const cb = feedbackCloseCallback;
+            feedbackCloseCallback = null;
+            if (cb) setTimeout(cb, 300);
         }
 
         function endGame1() {
             const state = gameState.game1;
+            state.started = false;
             document.getElementById('finalScore1').textContent = state.score;
+
+            const best = updateBestScore('pmm_best_game1', state.score);
+            document.getElementById('bestScore1').textContent = `Personal best: ${best}`;
+
+            const avgTime = state.responseTimes.length
+                ? state.responseTimes.reduce((a, b) => a + b, 0) / state.responseTimes.length
+                : Infinity;
 
             const achievements = [];
             if (state.maxStreak >= 10) achievements.push('🔥 Streak Master');
             if (state.score >= 2000) achievements.push('🏆 High Scorer');
-            if (state.current === state.total && state.streak >= 5) achievements.push('⚡ Speed Demon');
+            if (state.timeouts === 0 && avgTime < 3500) achievements.push('⚡ Speed Demon');
 
-            document.getElementById('achievements').innerHTML = 
+            document.getElementById('achievements').innerHTML =
                 achievements.map(a => `<div class="achievement-badge">${a}</div>`).join('');
+
+            const recap = document.getElementById('missRecap1');
+            if (state.misses.length === 0) {
+                recap.innerHTML = '<p class="recap-perfect">🌟 Perfect run — every variable classified correctly!</p>';
+            } else {
+                recap.innerHTML = '<h3>Review your misses:</h3>' + state.misses.map(m => `
+                    <div class="miss-item">
+                        <div class="miss-head">${m.device}: ${m.variable}</div>
+                        <div class="miss-answer">Answer: ${m.answer === 'C' ? 'CONTROL' : 'NOISE'}</div>
+                        <div>${m.explanation}</div>
+                    </div>`).join('');
+            }
 
             document.getElementById('game1Result').style.display = 'block';
         }
@@ -1191,13 +1348,17 @@
         // ==================== GAME 2: OUTPUT ASSEMBLY ====================
 
         function startGame2() {
+            abortGame1();
             gameState.game2 = {
+                started: true,
+                finished: false,
                 currentRound: 0,
                 roundScore: 0,
                 totalScore: 0,
                 perfectRounds: 0,
                 selected: {col1: null, col2: null, col3: null},
-                submitted: false
+                submitted: false,
+                roundResults: []
             };
 
             document.getElementById('game2Result').style.display = 'none';
@@ -1234,11 +1395,8 @@
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('submitBtn').style.display = 'block';
 
-            // Remove any existing next button
             const existingNextBtn = document.querySelector('.tile-columns + .next-btn');
-            if (existingNextBtn) {
-                existingNextBtn.remove();
-            }
+            if (existingNextBtn) existingNextBtn.remove();
         }
 
         function renderTiles(round) {
@@ -1246,20 +1404,20 @@
             container.innerHTML = `
                 <div class="tile-column">
                     <h4>Component 1:<br/>What's Created</h4>
-                    ${round.column1_tiles.map((tile, i) => 
-                        `<div class="tile" onclick="selectTile(1, ${i})">${tile.text}</div>`
+                    ${round.column1_tiles.map((tile, i) =>
+                        `<button type="button" class="tile" onclick="selectTile(1, ${i})">${tile.text}</button>`
                     ).join('')}
                 </div>
                 <div class="tile-column">
                     <h4>Component 2:<br/>Performance</h4>
-                    ${round.column2_tiles.map((tile, i) => 
-                        `<div class="tile" onclick="selectTile(2, ${i})">${tile.text}</div>`
+                    ${round.column2_tiles.map((tile, i) =>
+                        `<button type="button" class="tile" onclick="selectTile(2, ${i})">${tile.text}</button>`
                     ).join('')}
                 </div>
                 <div class="tile-column">
                     <h4>Component 3:<br/>Purpose</h4>
-                    ${round.column3_tiles.map((tile, i) => 
-                        `<div class="tile" onclick="selectTile(3, ${i})">${tile.text}</div>`
+                    ${round.column3_tiles.map((tile, i) =>
+                        `<button type="button" class="tile" onclick="selectTile(3, ${i})">${tile.text}</button>`
                     ).join('')}
                 </div>
             `;
@@ -1270,21 +1428,19 @@
             if (state.submitted) return;
 
             const colKey = `col${column}`;
-            const round = ROUNDS[state.currentRound];
+            const tiles = document.querySelectorAll(`.tile-column:nth-child(${column}) .tile`);
 
             if (state.selected[colKey] !== null) {
-                const tiles = document.querySelectorAll(`.tile-column:nth-child(${column}) .tile`);
                 tiles[state.selected[colKey]].classList.remove('selected');
             }
 
             state.selected[colKey] = index;
-            const tiles = document.querySelectorAll(`.tile-column:nth-child(${column}) .tile`);
             tiles[index].classList.add('selected');
 
             updatePreview();
 
-            const allSelected = state.selected.col1 !== null && 
-                               state.selected.col2 !== null && 
+            const allSelected = state.selected.col1 !== null &&
+                               state.selected.col2 !== null &&
                                state.selected.col3 !== null;
             document.getElementById('submitBtn').disabled = !allSelected;
         }
@@ -1294,15 +1450,9 @@
             const round = ROUNDS[state.currentRound];
 
             const parts = [];
-            if (state.selected.col1 !== null) {
-                parts.push(round.column1_tiles[state.selected.col1].text);
-            }
-            if (state.selected.col2 !== null) {
-                parts.push(round.column2_tiles[state.selected.col2].text);
-            }
-            if (state.selected.col3 !== null) {
-                parts.push(round.column3_tiles[state.selected.col3].text);
-            }
+            if (state.selected.col1 !== null) parts.push(round.column1_tiles[state.selected.col1].text);
+            if (state.selected.col2 !== null) parts.push(round.column2_tiles[state.selected.col2].text);
+            if (state.selected.col3 !== null) parts.push(round.column3_tiles[state.selected.col3].text);
 
             const preview = document.getElementById('assemblyPreview');
             if (parts.length > 0) {
@@ -1323,12 +1473,17 @@
 
             let correctCount = 0;
             let feedbackParts = [];
+            const yourParts = [];
+            const correctParts = [];
 
             [1, 2, 3].forEach(col => {
                 const colKey = `col${col}`;
                 const tiles = round[`column${col}_tiles`];
                 const selectedIndex = state.selected[colKey];
                 const tile = tiles[selectedIndex];
+
+                yourParts.push(tile.text);
+                correctParts.push(tiles.find(t => t.correct).text);
 
                 const tileElements = document.querySelectorAll(`.tile-column:nth-child(${col}) .tile`);
                 const selectedElement = tileElements[selectedIndex];
@@ -1343,10 +1498,17 @@
 
                     tiles.forEach((t, i) => {
                         if (t.correct && i !== selectedIndex) {
-                            tileElements[i].classList.add('correct');
+                            tileElements[i].classList.add('reveal');
                         }
                     });
                 }
+            });
+
+            state.roundResults.push({
+                step: round.step,
+                correctCount: correctCount,
+                yourStatement: yourParts.join(' '),
+                correctStatement: correctParts.join(' ')
             });
 
             if (correctCount === 3) {
@@ -1371,7 +1533,7 @@
             nextBtn.className = 'next-btn';
             nextBtn.textContent = state.currentRound < ROUNDS.length - 1 ? 'Next Round →' : 'See Results';
             nextBtn.onclick = () => {
-                closeFeedback();
+                hideFeedbackImmediately();
                 state.currentRound++;
                 loadRound();
             };
@@ -1380,9 +1542,13 @@
 
         function endGame2() {
             const state = gameState.game2;
+            state.finished = true;
             document.getElementById('finalScore2').textContent = state.totalScore;
 
-            const perfectMsg = state.perfectRounds === ROUNDS.length 
+            const best = updateBestScore('pmm_best_game2', state.totalScore);
+            document.getElementById('bestScore2').textContent = `Personal best: ${best}`;
+
+            const perfectMsg = state.perfectRounds === ROUNDS.length
                 ? '🌟 PERFECT! All rounds completed flawlessly!'
                 : `${state.perfectRounds} out of ${ROUNDS.length} rounds perfect`;
             document.getElementById('perfectionMessage').textContent = perfectMsg;
@@ -1392,37 +1558,70 @@
             if (state.totalScore >= 3000) achievements.push('🏆 High Scorer');
             if (state.perfectRounds === ROUNDS.length) achievements.push('💎 Perfectionist');
 
-            document.getElementById('achievements2').innerHTML = 
+            document.getElementById('achievements2').innerHTML =
                 achievements.map(a => `<div class="achievement-badge">${a}</div>`).join('');
 
+            const missed = state.roundResults.filter(r => r.correctCount < 3);
+            const recap = document.getElementById('missRecap2');
+            if (missed.length === 0) {
+                recap.innerHTML = '';
+            } else {
+                recap.innerHTML = '<h3>Review the rounds you missed:</h3>' + missed.map(r => `
+                    <div class="miss-item">
+                        <div class="miss-head">${r.step} (${r.correctCount}/3 correct)</div>
+                        <div>Your statement: ${r.yourStatement}</div>
+                        <div class="miss-answer">Model statement: ${r.correctStatement}</div>
+                    </div>`).join('');
+            }
+
             document.getElementById('game2Result').style.display = 'block';
+        }
+
+        // ==================== SCORE PERSISTENCE ====================
+
+        function updateBestScore(key, score) {
+            let best = score;
+            try {
+                const prev = parseInt(localStorage.getItem(key), 10);
+                if (!isNaN(prev) && prev > score) best = prev;
+                localStorage.setItem(key, String(best));
+            } catch (e) { /* localStorage unavailable (private mode) - ignore */ }
+            return best;
         }
 
         // ==================== KEYBOARD SHORTCUTS ====================
 
         document.addEventListener('keydown', (e) => {
             const game1Active = document.getElementById('game1').classList.contains('active');
-            const modal = document.getElementById('feedbackModal').classList.contains('show');
+            const modalOpen = document.getElementById('feedbackModal').classList.contains('show');
 
-            if (game1Active && !modal && gameState.game1.animating) {
-                if (e.key === 'ArrowLeft' || e.key === 'c' || e.key === 'C') {
-                    classify('C');
-                } else if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
-                    classify('N');
+            if (modalOpen) {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                    e.preventDefault();
+                    closeFeedback();
                 }
+                return;
             }
 
-            if (modal && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault();
-                closeFeedback();
+            if (game1Active && gameState.game1.animating) {
+                if (e.key === 'ArrowLeft' || e.key === 'c' || e.key === 'C') {
+                    e.preventDefault();
+                    classify('C');
+                } else if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
+                    e.preventDefault();
+                    classify('N');
+                }
             }
         });
 
         // ==================== INITIALIZE ====================
 
-        window.onload = () => {
-            showScreen('landing');
-        };
+        // Start with the sidebar closed on phones so the play area gets full width.
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.add('collapsed');
+            document.getElementById('sidebarToggle').classList.add('collapsed');
+            document.getElementById('mainContent').classList.add('expanded');
+        }
     </script>
 </body>
 </html>
