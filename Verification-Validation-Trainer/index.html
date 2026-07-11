@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V&amp;V Trainer — BE695</title>
+<style>
+  :root {
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --slate: #0f172a;
+    --slate-100: #f1f5f9;
+  }
+
+  /* ── Back button ── */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid #334155; background: transparent;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .back-btn:hover { border-color: #0d9488; color: #0d9488; }
+
+/* ==================== DESIGN TOKENS ==================== */
+:root, [data-theme="light"] {
+  /* BOM palette (teal/slate) applied directly so [data-theme="dark"] can override */
+  --color-bg: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-offset: #f1f5f9;
+  --color-surface-dynamic: #e2e8f0;
+  --color-divider: #e2e8f0;
+  --color-border: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+  --color-text-inverse: #ffffff;
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-highlight: #f0fdfa;
+  --color-warning: #964219;
+  --color-warning-highlight: #ddcfc6;
+  --color-error: #a12c7b;
+  --color-error-highlight: #e0ced7;
+  --color-success: #437a22;
+  --color-success-highlight: #d4dfcc;
+  --color-orange: #da7101;
+  --color-gold: #d19900;
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;
+  --space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0f1112;
+  --color-surface: #161a1c;
+  --color-surface-2: #1c2124;
+  --color-surface-offset: #1a1e21;
+  --color-surface-dynamic: #252c30;
+  --color-divider: #232a2e;
+  --color-border: #2e3740;
+  --color-text: #d0d8de;
+  --color-text-muted: #7a8892;
+  --color-text-faint: #4a5560;
+  --color-text-inverse: #0f1112;
+  --color-primary: #4fb8c0;
+  --color-primary-hover: #2fa0a9;
+  --color-primary-highlight: #1d3538;
+  --color-warning: #e08040;
+  --color-warning-highlight: #3a2a1e;
+  --color-error: #d468b5;
+  --color-error-highlight: #3a1e30;
+  --color-success: #72bb50;
+  --color-success-highlight: #1e2e18;
+  --color-orange: #f5a040;
+  --color-gold: #e8c050;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.5);
+}
+
+/* ==================== BASE ==================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+img,canvas,svg{display:block;max-width:100%;height:auto}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition)}
+
+/* ==================== LAYOUT ==================== */
+.app-shell{display:grid;grid-template-rows:56px 1fr;min-height:100dvh}
+.topbar{display:flex;align-items:center;gap:var(--space-4);padding:0 var(--space-6);background:var(--color-surface);border-bottom:1px solid var(--color-border);position:sticky;top:0;z-index:50}
+.topbar-logo{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:var(--color-text)}
+.topbar-logo svg{flex-shrink:0}
+.logo-text{display:block;font-size:var(--text-sm);font-weight:600;letter-spacing:-0.01em}
+.logo-sub{display:block;font-size:var(--text-xs);color:var(--color-text-muted);font-weight:400}
+.topbar-spacer{flex:1}
+.topbar-badge{font-size:var(--text-xs);padding:var(--space-1) var(--space-3);background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-full);font-weight:600;white-space:nowrap}
+.theme-toggle{padding:var(--space-2);border-radius:var(--radius-md);color:var(--color-text-muted)}
+.theme-toggle:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+
+.panel{overflow-y:auto;padding:var(--space-6)}
+.container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:var(--space-6)}
+
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Page header */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap}
+.page-title{font-size:var(--text-xl);font-weight:700;letter-spacing:-0.02em;line-height:1.1;color:var(--color-text)}
+.page-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-1)}
+
+/* Card */
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.card-title{font-size:var(--text-sm);font-weight:700;color:var(--color-text);text-transform:uppercase;letter-spacing:0.06em}
+.card-hint{font-size:var(--text-xs);color:var(--color-text-muted)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);gap:var(--space-3);flex-wrap:wrap}
+
+/* Definition split */
+.defs-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+.def-box{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.def-box.ver{border-color:var(--color-primary)}
+.def-box.val{border-color:var(--color-orange)}
+.def-tag{display:inline-block;font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px var(--space-3);border-radius:var(--radius-full);margin-bottom:var(--space-2)}
+.def-box.ver .def-tag{background:var(--color-primary-highlight);color:var(--color-primary)}
+.def-box.val .def-tag{background:oklch(from var(--color-orange) l c h / 0.15);color:var(--color-orange)}
+.def-q{font-weight:700;font-size:var(--text-base);margin-bottom:var(--space-1)}
+.def-body{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.55}
+.def-cite{font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-text-faint);margin-top:var(--space-2)}
+
+/* Waterfall diagram */
+.waterfall-wrap{overflow-x:auto}
+.waterfall-wrap svg{min-width:640px;width:100%;height:auto}
+
+/* Mode cards */
+.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+.mode-card{background:var(--color-surface);border:1.5px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm);cursor:pointer;text-align:left;transition:all var(--transition);display:flex;flex-direction:column;gap:var(--space-2)}
+.mode-card:hover,.mode-card:focus-visible{border-color:var(--color-primary);box-shadow:var(--shadow-md);transform:translateY(-3px);outline:none}
+.mode-num{font-size:var(--text-xs);font-family:var(--font-mono);font-weight:600;color:var(--color-primary);text-transform:uppercase;letter-spacing:0.08em}
+.mode-name{font-size:var(--text-lg);font-weight:700;letter-spacing:-0.01em}
+.mode-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.55;flex:1}
+.mode-meta{font-size:var(--text-xs);color:var(--color-text-faint);font-weight:600}
+.mode-go{display:inline-flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2);padding:var(--space-2) var(--space-5);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;align-self:flex-start}
+.mode-card:hover .mode-go{background:var(--color-primary-hover)}
+
+.footnote{font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.6}
+
+/* Score strip */
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)}
+.kpi-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-3) var(--space-5);box-shadow:var(--shadow-sm)}
+.kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+.kpi-value{font-size:var(--text-xl);font-weight:700;line-height:1.1;margin-top:2px;font-family:var(--font-mono)}
+.kpi-card.glow{border-color:var(--color-primary);animation:glowPulse 1.2s ease-in-out infinite alternate}
+@keyframes glowPulse{from{box-shadow:0 0 4px oklch(from var(--color-primary) l c h / .35)}to{box-shadow:0 0 16px oklch(from var(--color-primary) l c h / .7)}}
+
+/* Classify */
+.device-tag{display:inline-block;font-size:var(--text-xs);font-weight:600;padding:2px var(--space-3);border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);margin-bottom:var(--space-3)}
+.scenario-text{font-size:var(--text-lg);font-weight:500;line-height:1.5}
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-top:var(--space-5)}
+.choice-btn{padding:var(--space-4) var(--space-5);border-radius:var(--radius-lg);font-weight:700;font-size:var(--text-base);color:var(--color-text-inverse);min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.choice-btn small{font-weight:500;font-size:var(--text-xs);opacity:.85}
+.choice-btn.ver{background:var(--color-primary)}
+.choice-btn.ver:hover:not(:disabled){background:var(--color-primary-hover)}
+.choice-btn.val{background:var(--color-orange)}
+.choice-btn.val:hover:not(:disabled){filter:brightness(0.92)}
+.choice-btn:disabled{opacity:.45;cursor:not-allowed}
+.choice-btn:active:not(:disabled){transform:scale(.98)}
+.kbd-hint{font-size:var(--text-xs);color:var(--color-text-faint);text-align:center;margin-top:var(--space-3)}
+kbd{font-family:var(--font-mono);font-size:.85em;border:1px solid var(--color-border);border-bottom-width:2px;border-radius:var(--radius-sm);padding:0 5px;background:var(--color-surface-2)}
+
+/* Feedback */
+.feedback-card{border-left:4px solid var(--color-success);margin-top:var(--space-4)}
+.feedback-card.incorrect{border-left-color:var(--color-error)}
+.feedback-verdict{font-size:var(--text-base);font-weight:700;margin-bottom:var(--space-2)}
+.feedback-card .feedback-verdict{color:var(--color-success)}
+.feedback-card.incorrect .feedback-verdict{color:var(--color-error)}
+.feedback-body{font-size:var(--text-sm);color:var(--color-text);line-height:1.65}
+.basis-chips{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-3)}
+.basis-chip{font-size:var(--text-xs);font-family:var(--font-mono);padding:2px var(--space-3);border-radius:var(--radius-full);background:var(--color-surface-offset);border:1px solid var(--color-border);color:var(--color-text-muted)}
+.pts-pop{font-family:var(--font-mono);font-weight:700;color:var(--color-success)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-3) var(--space-6);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;min-height:44px}
+.btn:hover:not(:disabled){background:var(--color-primary-hover)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.secondary{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn.secondary:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.btn-row{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4)}
+
+/* Design mode */
+.brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+.brief-box{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.brief-box.need{border-color:var(--color-orange)}
+.brief-box.input{border-color:var(--color-primary)}
+.brief-label{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:var(--space-2)}
+.brief-box.need .brief-label{color:var(--color-orange)}
+.brief-box.input .brief-label{color:var(--color-primary)}
+.brief-text{font-size:var(--text-sm);line-height:1.55}
+.brief-box.input .brief-text{font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7}
+
+.q-section{margin-top:var(--space-5)}
+.q-title{font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+.q-title .def-tag{margin-bottom:0}
+.option-tile{display:block;width:100%;text-align:left;border:1.5px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface-2);padding:var(--space-3) var(--space-4);margin-bottom:var(--space-2);font-size:var(--text-sm);line-height:1.5;min-height:44px;transition:all var(--transition)}
+.option-tile:hover:not(:disabled),.option-tile:focus-visible{border-color:var(--color-primary);background:var(--color-surface-dynamic);outline:none}
+.option-tile.selected,.option-tile.selected:hover:not(:disabled){border-color:var(--color-primary);background:var(--color-primary-highlight);font-weight:600}
+.option-tile.correct{border-color:var(--color-success);background:var(--color-success-highlight)}
+.option-tile.incorrect{border-color:var(--color-error);background:var(--color-error-highlight)}
+.option-tile.reveal{border:2px dashed var(--color-success);background:var(--color-surface-2)}
+.option-tile.reveal::before{content:"✓ Correct answer — ";font-weight:700;color:var(--color-success)}
+.option-tile:disabled{cursor:not-allowed}
+.tile-fb{font-size:var(--text-xs);color:var(--color-text-muted);margin:calc(-1*var(--space-1)) 0 var(--space-3) var(--space-4);padding-left:var(--space-3);border-left:2px solid var(--color-divider);line-height:1.55}
+
+/* Results */
+.result-hero{text-align:center;padding:var(--space-6) var(--space-4)}
+.result-title{font-size:var(--text-xl);font-weight:700;letter-spacing:-0.02em}
+.final-score{font-size:clamp(3rem,8vw,4.5rem);font-weight:700;font-family:var(--font-mono);color:var(--color-primary);line-height:1.1;margin:var(--space-3) 0 var(--space-1)}
+.best-score{font-size:var(--text-sm);color:var(--color-text-muted)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-top:var(--space-5)}
+.achievements{display:flex;gap:var(--space-2);justify-content:center;flex-wrap:wrap;margin-top:var(--space-4)}
+.achievement{font-size:var(--text-sm);font-weight:600;padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);border:1px solid var(--color-primary)}
+.miss-item{background:var(--color-surface-2);border-left:3px solid var(--color-error);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);margin-bottom:var(--space-3);font-size:var(--text-sm);line-height:1.55}
+.miss-head{font-weight:600;margin-bottom:2px}
+.miss-answer{color:var(--color-primary);font-weight:600}
+.recap-perfect{color:var(--color-success);font-weight:700;text-align:center;font-size:var(--text-base)}
+
+/* Responsive */
+@media(max-width:720px){
+  .panel{padding:var(--space-4)}
+  .defs-grid,.mode-cards,.brief-grid{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:repeat(3,1fr);gap:var(--space-2)}
+  .kpi-card{padding:var(--space-2) var(--space-3)}
+  .kpi-value{font-size:var(--text-lg)}
+  .choice-row{grid-template-columns:1fr 1fr;gap:var(--space-2)}
+  .choice-btn{min-height:72px;padding:var(--space-3)}
+  .result-stats{grid-template-columns:1fr;gap:var(--space-2)}
+  .kbd-hint{display:none}
+  .logo-sub{display:none}
+  .topbar{padding:0 var(--space-3);gap:var(--space-2)}
+  .topbar-badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <a class="topbar-logo" href="#" onclick="goHome(event)">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="V&amp;V Trainer logo">
+        <rect width="28" height="28" rx="7" fill="var(--color-primary)" opacity="0.15"/>
+        <path d="M5 9l4 10 4-10" stroke="var(--color-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 9l4 10 4-10" stroke="var(--color-orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>
+        <span class="logo-text">V&amp;V Trainer</span>
+        <span class="logo-sub">Verification vs Validation · BE695</span>
+      </span>
+    </a>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-badge">21 CFR 820.30(f)–(g)</span>
+    <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="../" class="back-btn" style="margin-left:8px;">&#8592; Learning Hub</a>
+  </header>
+
+  <!-- PANEL -->
+  <main class="panel">
+    <div class="container">
+
+      <!-- ============ HOME ============ -->
+      <section class="screen active" id="screen-home">
+        <div style="display:flex;flex-direction:column;gap:var(--space-6)">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Verification vs Validation Trainer</div>
+              <div class="page-subtitle">The back half of the design-controls waterfall — where Product Mapping Mastery leaves off at design inputs, this trainer picks up.</div>
+            </div>
+          </div>
+
+          <div class="defs-grid">
+            <div class="def-box ver">
+              <span class="def-tag">Verification</span>
+              <div class="def-q">“Did we build it right?”</div>
+              <div class="def-body">Design verification confirms that <strong>design outputs meet design input requirements</strong>. Methods include tests, inspections, and analyses against documented acceptance criteria.</div>
+              <div class="def-cite">21 CFR 820.30(f) · ISO 13485:2016 §7.3.6</div>
+            </div>
+            <div class="def-box val">
+              <span class="def-tag">Validation</span>
+              <div class="def-q">“Did we build the right thing?”</div>
+              <div class="def-body">Design validation ensures the device conforms to <strong>defined user needs and intended uses</strong> — testing production units (or equivalents) under actual or simulated use conditions, including software validation and risk analysis where appropriate.</div>
+              <div class="def-cite">21 CFR 820.30(g) · ISO 13485:2016 §7.3.7</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">The Design-Controls Waterfall</div>
+                <div class="card-hint">Verification closes the loop from outputs back to inputs; validation closes the loop from the finished device back to user needs.</div>
+              </div>
+            </div>
+            <div class="waterfall-wrap">
+              <svg viewBox="0 0 880 340" role="img" aria-label="Design controls waterfall: user needs to design inputs to design process to design outputs to medical device. A verification arrow connects design outputs back to design inputs. A validation arrow connects the medical device back to user needs.">
+                <defs>
+                  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0 0L10 5L0 10z" fill="var(--color-text-muted)"/>
+                  </marker>
+                  <marker id="arrVer" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0 0L10 5L0 10z" fill="var(--color-primary)"/>
+                  </marker>
+                  <marker id="arrVal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0 0L10 5L0 10z" fill="var(--color-orange)"/>
+                  </marker>
+                </defs>
+                <!-- validation arc (behind boxes) -->
+                <path d="M 690 268 C 780 120, 520 30, 192 52" fill="none" stroke="var(--color-orange)" stroke-width="2.5" marker-end="url(#arrVal)"/>
+                <text x="560" y="66" font-size="15" font-weight="700" fill="var(--color-orange)" font-family="var(--font-body)">VALIDATION</text>
+                <text x="560" y="84" font-size="12" fill="var(--color-text-muted)" font-family="var(--font-body)">device meets user needs &amp; intended use</text>
+                <!-- verification arc -->
+                <path d="M 540 216 C 570 130, 420 110, 336 130" fill="none" stroke="var(--color-primary)" stroke-width="2.5" marker-end="url(#arrVer)"/>
+                <text x="420" y="100" font-size="15" font-weight="700" fill="var(--color-primary)" font-family="var(--font-body)">VERIFICATION</text>
+                <text x="420" y="118" font-size="12" fill="var(--color-text-muted)" font-family="var(--font-body)">outputs meet inputs</text>
+                <!-- waterfall boxes -->
+                <g font-family="var(--font-body)" font-size="14" font-weight="600" text-anchor="middle">
+                  <rect x="20" y="30" width="160" height="46" rx="10" fill="var(--color-surface-2)" stroke="var(--color-border)" stroke-width="1.5"/>
+                  <text x="100" y="58" fill="var(--color-text)">User Needs</text>
+                  <rect x="165" y="108" width="160" height="46" rx="10" fill="var(--color-surface-2)" stroke="var(--color-border)" stroke-width="1.5"/>
+                  <text x="245" y="136" fill="var(--color-text)">Design Inputs</text>
+                  <rect x="310" y="186" width="160" height="46" rx="10" fill="var(--color-surface-2)" stroke="var(--color-border)" stroke-width="1.5"/>
+                  <text x="390" y="214" fill="var(--color-text)">Design Process</text>
+                  <rect x="455" y="264" width="160" height="46" rx="10" fill="var(--color-surface-2)" stroke="var(--color-border)" stroke-width="1.5"/>
+                  <text x="535" y="292" fill="var(--color-text)">Design Outputs</text>
+                  <rect x="660" y="264" width="170" height="46" rx="10" fill="var(--color-primary-highlight)" stroke="var(--color-primary)" stroke-width="1.5"/>
+                  <text x="745" y="292" fill="var(--color-text)">Medical Device</text>
+                </g>
+                <!-- downstream arrows -->
+                <path d="M 118 76 L 210 108" fill="none" stroke="var(--color-text-muted)" stroke-width="1.8" marker-end="url(#arr)"/>
+                <path d="M 263 154 L 355 186" fill="none" stroke="var(--color-text-muted)" stroke-width="1.8" marker-end="url(#arr)"/>
+                <path d="M 408 232 L 500 264" fill="none" stroke="var(--color-text-muted)" stroke-width="1.8" marker-end="url(#arr)"/>
+                <path d="M 615 287 L 655 287" fill="none" stroke="var(--color-text-muted)" stroke-width="1.8" marker-end="url(#arr)"/>
+                <text x="20" y="330" font-size="11" fill="var(--color-text-faint)" font-family="var(--font-body)">Adapted from FDA Design Control Guidance (1997), Figure 1 — simplified; review loops omitted.</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="mode-cards">
+            <button class="mode-card" onclick="startClassify()">
+              <span class="mode-num">Mode 1</span>
+              <span class="mode-name">🔍 Classify</span>
+              <span class="mode-desc">16 real V&amp;V activities land on your desk. Tag each one <strong>Verification</strong> or <strong>Validation</strong> — and get the regulatory basis for every answer. Watch for the traps: a bench test in fake anatomy is still verification, and a “test” run by real clinicians answers a different question entirely.</span>
+              <span class="mode-meta">16 scenarios · streak multiplier · ~8 min</span>
+              <span class="mode-go">Start Classifying →</span>
+            </button>
+            <button class="mode-card" onclick="startDesign()">
+              <span class="mode-num">Mode 2</span>
+              <span class="mode-name">🧪 Design</span>
+              <span class="mode-desc">Given a <strong>user need</strong> and the <strong>design input</strong> derived from it, pick the right <strong>verification method</strong> for the input and the right <strong>validation method</strong> for the need. The distractors are the mistakes real teams make.</span>
+              <span class="mode-meta">6 rounds · perfect-round streak · ~10 min</span>
+              <span class="mode-go">Start Designing →</span>
+            </button>
+          </div>
+
+          <p class="footnote">Grounding: 21 CFR 820.30(f) design verification and 820.30(g) design validation; ISO 13485:2016 §7.3.6 and §7.3.7. Note: FDA's Quality Management System Regulation (QMSR, effective Feb 2026) incorporates ISO 13485:2016 by reference — the 820.30(f)/(g) concepts taught here map directly to ISO 13485 §7.3.6–7.3.7. This is a framework trainer: classifications reflect the design-controls logic of those clauses, and real programs document their own V&amp;V rationale in the design plan.</p>
+        </div>
+      </section>
+
+      <!-- ============ CLASSIFY ============ -->
+      <section class="screen" id="screen-classify">
+        <div style="display:flex;flex-direction:column;gap:var(--space-5)">
+          <div class="page-header">
+            <div>
+              <div class="page-title" style="font-size:var(--text-lg)">🔍 Classify — Verification or Validation?</div>
+              <div class="page-subtitle">Correct = +100 × multiplier. Every 5-streak raises the multiplier (streak 5–9 pays ×2, 10+ pays ×3).</div>
+            </div>
+            <button class="btn secondary" onclick="quitToHome()">Exit</button>
+          </div>
+
+          <div class="kpi-strip">
+            <div class="kpi-card"><div class="kpi-label">Score</div><div class="kpi-value" id="c-score">0</div></div>
+            <div class="kpi-card" id="c-streak-card"><div class="kpi-label">Streak</div><div class="kpi-value" id="c-streak">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Progress</div><div class="kpi-value" id="c-progress">0/16</div></div>
+          </div>
+
+          <div id="c-play">
+            <div class="card">
+              <span class="device-tag" id="c-device">Device</span>
+              <div class="scenario-text" id="c-text">…</div>
+              <div class="choice-row">
+                <button class="choice-btn ver" id="c-btn-ver" onclick="answerClassify('VER')">VERIFICATION<small>outputs meet inputs — 820.30(f)</small></button>
+                <button class="choice-btn val" id="c-btn-val" onclick="answerClassify('VAL')">VALIDATION<small>device meets user needs — 820.30(g)</small></button>
+              </div>
+              <div class="kbd-hint"><kbd>←</kbd> or <kbd>1</kbd> Verification &nbsp;·&nbsp; <kbd>→</kbd> or <kbd>2</kbd> Validation &nbsp;·&nbsp; <kbd>Enter</kbd> next</div>
+            </div>
+
+            <div class="card feedback-card" id="c-feedback" style="display:none">
+              <div class="feedback-verdict" id="c-fb-verdict"></div>
+              <div class="feedback-body" id="c-fb-body"></div>
+              <div class="basis-chips" id="c-fb-chips"></div>
+              <div class="btn-row"><button class="btn" id="c-next-btn" onclick="nextClassify()">Next Scenario →</button></div>
+            </div>
+          </div>
+
+          <div id="c-result" style="display:none">
+            <div class="card">
+              <div class="result-hero">
+                <div class="result-title">Classification Complete 🎉</div>
+                <div class="final-score" id="c-final-score">0</div>
+                <div class="best-score" id="c-best-score"></div>
+                <div class="result-stats">
+                  <div class="kpi-card"><div class="kpi-label">Accuracy</div><div class="kpi-value" id="c-stat-acc">—</div></div>
+                  <div class="kpi-card"><div class="kpi-label">Max Streak</div><div class="kpi-value" id="c-stat-streak">—</div></div>
+                  <div class="kpi-card"><div class="kpi-label">Correct</div><div class="kpi-value" id="c-stat-correct">—</div></div>
+                </div>
+                <div class="achievements" id="c-achievements"></div>
+              </div>
+              <div id="c-miss-recap"></div>
+              <div class="btn-row" style="justify-content:center">
+                <button class="btn" onclick="startClassify()">Play Again</button>
+                <button class="btn secondary" onclick="quitToHome()">Back to Home</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ DESIGN ============ -->
+      <section class="screen" id="screen-design">
+        <div style="display:flex;flex-direction:column;gap:var(--space-5)">
+          <div class="page-header">
+            <div>
+              <div class="page-title" style="font-size:var(--text-lg)">🧪 Design — Specify the V&amp;V Methods</div>
+              <div class="page-subtitle">Each correct method = +150. Both correct = perfect round: +400 plus +100 per extra consecutive perfect round.</div>
+            </div>
+            <button class="btn secondary" onclick="quitToHome()">Exit</button>
+          </div>
+
+          <div class="kpi-strip">
+            <div class="kpi-card"><div class="kpi-label">Score</div><div class="kpi-value" id="d-score">0</div></div>
+            <div class="kpi-card" id="d-streak-card"><div class="kpi-label">Perfect Streak</div><div class="kpi-value" id="d-streak">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Round</div><div class="kpi-value" id="d-progress">1/6</div></div>
+          </div>
+
+          <div id="d-play">
+            <div class="card">
+              <span class="device-tag" id="d-device">Device</span>
+              <div class="brief-grid">
+                <div class="brief-box need">
+                  <div class="brief-label">User Need — validate against this</div>
+                  <div class="brief-text" id="d-need">…</div>
+                </div>
+                <div class="brief-box input">
+                  <div class="brief-label">Design Input (derived) — verify against this</div>
+                  <div class="brief-text" id="d-input">…</div>
+                </div>
+              </div>
+
+              <div class="q-section">
+                <div class="q-title"><span class="def-tag" style="background:var(--color-primary-highlight);color:var(--color-primary)">Verification</span> Which method verifies the design input? <span class="card-hint">(820.30(f))</span></div>
+                <div id="d-ver-options"></div>
+              </div>
+              <div class="q-section">
+                <div class="q-title"><span class="def-tag" style="background:oklch(from var(--color-orange) l c h / 0.15);color:var(--color-orange)">Validation</span> Which method validates the user need? <span class="card-hint">(820.30(g))</span></div>
+                <div id="d-val-options"></div>
+              </div>
+
+              <div class="card feedback-card" id="d-feedback" style="display:none;margin-top:var(--space-4)">
+                <div class="feedback-verdict" id="d-fb-verdict"></div>
+                <div class="feedback-body" id="d-fb-body"></div>
+              </div>
+              <div class="btn-row">
+                <button class="btn" id="d-submit-btn" onclick="submitDesign()" disabled>Check Methods</button>
+                <button class="btn" id="d-next-btn" onclick="nextDesign()" style="display:none">Next Round →</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="d-result" style="display:none">
+            <div class="card">
+              <div class="result-hero">
+                <div class="result-title">All Rounds Complete 🎉</div>
+                <div class="final-score" id="d-final-score">0</div>
+                <div class="best-score" id="d-best-score"></div>
+                <div class="result-stats">
+                  <div class="kpi-card"><div class="kpi-label">Perfect Rounds</div><div class="kpi-value" id="d-stat-perfect">—</div></div>
+                  <div class="kpi-card"><div class="kpi-label">Best Streak</div><div class="kpi-value" id="d-stat-streak">—</div></div>
+                  <div class="kpi-card"><div class="kpi-label">Methods Correct</div><div class="kpi-value" id="d-stat-correct">—</div></div>
+                </div>
+                <div class="achievements" id="d-achievements"></div>
+              </div>
+              <div id="d-miss-recap"></div>
+              <div class="btn-row" style="justify-content:center">
+                <button class="btn" onclick="startDesign()">Play Again</button>
+                <button class="btn secondary" onclick="quitToHome()">Back to Home</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ==================== MODE 1 DATA: CLASSIFY ====================
+// answer: 'VER' (design verification, 820.30(f) / ISO 13485 §7.3.6)
+//         'VAL' (design validation,  820.30(g) / ISO 13485 §7.3.7)
+const SCENARIOS = [
+  {id:1, device:"Arthroscopic Trocar", answer:"VER", difficulty:"easy",
+   text:"A bench tensile test pulls the trocar-to-sheath locking mechanism to failure and records whether retention strength meets the 50 N minimum stated in the design inputs.",
+   fb:"A bench test against a numeric acceptance criterion from the design inputs is classic verification: it confirms the design output (the locking mechanism as built) meets the design input requirement (≥50 N). No user, no use environment, no user need in the loop — “did we build it right.”",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6"]},
+  {id:2, device:"Infusion Pump", answer:"VAL", difficulty:"easy",
+   text:"Practicing ICU nurses program dosing on production-equivalent infusion pumps in a simulated ICU, and use errors are scored against use-related acceptance criteria.",
+   fb:"Representative intended users, simulated use environment, production-equivalent units, acceptance criteria tied to safe use — every element of design validation is here. This asks whether the device conforms to user needs and intended use: “did we build the right thing.”",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7"]},
+  {id:3, device:"Surgical Catheter", answer:"VER", difficulty:"medium",
+   text:"An engineer compares the output specification “outer diameter 5.0 ± 0.1 mm” against the input requirement “shall pass through a 5.4 mm working channel” and documents the comparison in the trace matrix.",
+   fb:"Verification is not only testing — analyses, inspections, and documented comparisons count. Comparing an output specification directly to its input requirement is verification by analysis: the worst-case output (5.1 mm) is shown to meet the input (≤5.4 mm). FDA's Design Control Guidance explicitly lists analyses alongside tests and inspections as verification methods.",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6","FDA Design Control Guidance (1997) §F"]},
+  {id:4, device:"Auto-Injector", answer:"VAL", difficulty:"medium",
+   text:"A summative usability study: 15 intended users complete the critical injection tasks with the final device and its IFU in a simulated home environment.",
+   fb:"Summative human factors testing with intended users, the final design, and simulated use conditions feeds design validation — it demonstrates the device can be used safely for its intended use by its intended users. FDA's human factors guidance ties HF validation directly to design validation under 820.30(g).",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7","FDA HF Guidance (2016)"]},
+  {id:5, device:"Spinal Implant", answer:"VER", difficulty:"easy",
+   text:"Molded instrument housings are measured on a CMM and each dimension is checked against the tolerances on the engineering drawing.",
+   fb:"Dimensional inspection against drawing tolerances confirms design outputs (physical parts) meet the documented specifications derived from design inputs. Inspection is one of the three canonical verification methods: tests, inspections, analyses.",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6"]},
+  {id:6, device:"Endoscope System", answer:"VER", difficulty:"medium",
+   text:"Software unit and integration tests confirm each camera-control module meets the requirements allocated to it in the software requirements specification.",
+   fb:"Testing software modules against their documented requirements is verification — outputs checked against inputs at the software level. (IEC 62304 treats unit/integration testing as verification activities.) Don't confuse this with software validation, which asks whether the software serves user needs in the context of the whole device.",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6","IEC 62304"]},
+  {id:7, device:"Endoscope System", answer:"VAL", difficulty:"hard",
+   text:"Before release, the complete device software is exercised in the context of the whole endoscope system to confirm it meets user needs and intended uses.",
+   fb:"820.30(g) states it directly: “Design validation shall include software validation … where appropriate.” Confirming that software meets user needs and intended uses in the whole-device context is validation. Contrast with the unit/integration testing scenario — same software, different question.",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7"]},
+  {id:8, device:"Surgical Catheter", answer:"VER", difficulty:"hard",
+   text:"Cytotoxicity testing per ISO 10993-5 confirms the patient-contacting polymer meets the design input “materials shall be non-cytotoxic.”",
+   fb:"Tricky — biocompatibility feels “biological,” but classify by what's being confirmed: a design output (the chosen material) is tested against a documented design input (non-cytotoxic per ISO 10993-5). Output vs input = verification. It doesn't ask whether the device meets a user need in its use environment.",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6","ISO 10993-5"]},
+  {id:9, device:"Arthroscopic Trocar", answer:"VAL", difficulty:"medium",
+   text:"Three orthopedic surgeons perform the complete intended procedure on cadaver knees using trocars built with production processes, and clinical acceptance criteria are scored.",
+   fb:"Intended users performing the intended use under simulated use conditions, on units made by production processes — this is design validation. Note 820.30(g)'s unit requirement: validation uses initial production units, lots, or batches, or their equivalents, so the results represent what patients will actually receive.",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7"]},
+  {id:10, device:"Spinal Implant", answer:"VER", difficulty:"medium",
+   text:"After accelerated aging, sterile-barrier pouch seals are peel-tested per ASTM F88 and compared to the input requirement of ≥1.2 N/15 mm seal strength.",
+   fb:"A standardized bench test with a quantitative acceptance criterion traced to a design input — verification. The aging and the ASTM method are just how the test is run; the question being answered is still “does the output meet the input requirement?”",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6","ASTM F88"]},
+  {id:11, device:"Spinal Implant", answer:"VAL", difficulty:"medium",
+   text:"A clinical investigation collects data on whether the implant actually relieves the symptoms it is intended to treat in the target patient population.",
+   fb:"Clinical investigations under actual use conditions in the intended population are the strongest form of design validation evidence — the device is confirmed against user needs and intended use, not against a spec. FDA's Design Control Guidance lists clinical evaluation as a validation activity.",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7","FDA Design Control Guidance (1997) §G"]},
+  {id:12, device:"Vascular Stent", answer:"VER", difficulty:"hard",
+   text:"R&D engineers deploy the stent in a benchtop anatomical vessel model and confirm deployment force stays below the 8 N limit in the design inputs.",
+   fb:"The trap: “anatomical model” sounds like simulated use, but look at who is testing and against what. Engineers confirming a numeric design input on a bench fixture = verification. Simulated anatomy is just tooling here. It would lean toward validation only if intended users performed the intended clinical workflow and the criteria traced to user needs.",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6"]},
+  {id:13, device:"Infusion Pump", answer:"VER", difficulty:"easy",
+   text:"The pump undergoes EMC testing per IEC 60601-1-2, and the results are compared against the immunity levels called out in the design inputs.",
+   fb:"Standards-based bench testing against requirements captured in the design inputs is verification. The standard defines the method; the design input defines the acceptance criterion; the test confirms the output meets it.",
+   chips:["21 CFR 820.30(f)","ISO 13485 §7.3.6","IEC 60601-1-2"]},
+  {id:14, device:"OTC Glucose Meter", answer:"VAL", difficulty:"hard",
+   text:"A label-comprehension study asks lay users — with no training — to read the OTC package labeling and demonstrate they can determine correct use.",
+   fb:"Labeling is a design output, which makes this feel like verification — but the question being answered is whether intended users can use the device correctly for its intended use. That's conformance to user needs, i.e., validation. Labeling and IFU are validated with users, not just checked against a spec.",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7"]},
+  {id:15, device:"Vascular Stent", answer:"VAL", difficulty:"hard",
+   text:"As part of concluding design validation, the team reviews the risk analysis to confirm the final design's residual risks are acceptable for the intended use.",
+   fb:"820.30(g) names it: “Design validation shall include software validation and risk analysis, where appropriate.” Confirming residual risk acceptability against the intended use is part of showing you built the right thing — a validation activity, not an output-vs-input check.",
+   chips:["21 CFR 820.30(g)","ISO 14971","ISO 13485 §7.3.7"]},
+  {id:16, device:"OTC Glucose Meter", answer:"VAL", difficulty:"medium",
+   text:"First production units of the home-use glucose meter are given to representative lay users, who follow their normal testing routine at home for two weeks per protocol.",
+   fb:"Actual use conditions, intended users, initial production units — 820.30(g) nearly verbatim. Home use by lay users is the intended use, so this study confirms the device meets user needs where it will really be used.",
+   chips:["21 CFR 820.30(g)","ISO 13485 §7.3.7"]},
+];
+
+// ==================== MODE 2 DATA: DESIGN ====================
+const ROUNDS = [
+  {device:"Arthroscopic Trocar",
+   need:"Surgeons need to create an access portal into the knee joint quickly, without damaging surrounding cartilage.",
+   input:"The trocar tip shall penetrate a standardized joint-capsule tissue surrogate with a peak insertion force ≤ 30 N.",
+   ver:[
+     {text:"Bench test: drive the trocar tip through the standardized tissue surrogate on a force-instrumented fixture; record peak insertion force against the 30 N acceptance criterion.", correct:true,
+      fb:"Correct — a repeatable bench method with a quantitative acceptance criterion traced to the input. Test, criterion, output vs input: 820.30(f)."},
+     {text:"Have orthopedic surgeons create portals in a cadaver lab and rate how easily they gained access.", correct:false,
+      fb:"That's a validation-shaped activity (users, simulated use, need-level criteria). It can't verify the 30 N input — nobody measured force against the criterion."},
+     {text:"Ask three senior surgeons on the design team whether the tip feels sharp enough.", correct:false,
+      fb:"Subjective opinion with no method, no measurement, and no acceptance criterion. Verification must confirm the input requirement objectively."},
+     {text:"Review the tip drawing to confirm it was released and approved in the DHF.", correct:false,
+      fb:"Document-control check. It confirms the output exists and is approved — not that the built output meets the 30 N input requirement."}],
+   val:[
+     {text:"Simulated-use study: orthopedic surgeons create access portals in cadaver knees with production-equivalent trocars; portal creation time and cartilage damage are scored against clinical acceptance criteria.", correct:true,
+      fb:"Correct — intended users, intended use, simulated use environment, production-equivalent units, criteria traced to the user need. 820.30(g) end to end."},
+     {text:"Repeat the tissue-surrogate insertion-force bench test on three production lots.", correct:false,
+      fb:"Still verification — more lots doesn't change the question. It confirms the input requirement, not whether surgeons can create portals quickly without cartilage damage."},
+     {text:"Compare the tip geometry specification against the insertion-force input requirement by analysis.", correct:false,
+      fb:"Verification by analysis (output vs input). Validation must involve the device meeting the user need under actual or simulated use."},
+     {text:"Survey the sales team on whether surgeons are likely to be satisfied with portal creation.", correct:false,
+      fb:"Market opinion is not objective evidence of conformance to user needs. Validation requires defined conditions, representative product, and acceptance criteria."}]},
+  {device:"Insulin Pen",
+   need:"Patients with reduced hand dexterity need to self-administer an accurate insulin dose.",
+   input:"Delivered dose shall be within ±5% of the set dose across the 1–60 unit range (dose-accuracy method per ISO 11608-1).",
+   ver:[
+     {text:"Gravimetric dose-accuracy testing per ISO 11608-1 across the 1–60 unit range; compare every delivered dose to the ±5% criterion.", correct:true,
+      fb:"Correct — a standardized bench method covering the full specified range, with the acceptance criterion straight from the input. 820.30(f)."},
+     {text:"Have arthritic patients self-inject into an injection pad and report whether the dose felt right.", correct:false,
+      fb:"Users can't perceive ±5% dose accuracy. This is validation-flavored, and it also fails as a method: no measurement against the criterion."},
+     {text:"Test dose accuracy at the 30-unit midpoint only, since it represents typical use.", correct:false,
+      fb:"Method is right, coverage is wrong: the input specifies 1–60 units, and dosing mechanisms often err worst at range extremes. Verification must cover the requirement as written."},
+     {text:"Confirm the dosing mechanism drawings match the 3D CAD model.", correct:false,
+      fb:"An output-to-output consistency check. It never touches the ±5% delivered-dose requirement."}],
+   val:[
+     {text:"Summative usability study: patients with rheumatoid arthritis and limited dexterity (the intended user group) self-inject using the final pen and IFU in a simulated home setting; task success scored against use-related acceptance criteria.", correct:true,
+      fb:"Correct — the need names a specific user population (reduced dexterity), so validation must include those users performing the intended use. 820.30(g) + FDA HF guidance."},
+     {text:"Gravimetric dose-accuracy testing on production units per ISO 11608-1.", correct:false,
+      fb:"Verification. It proves the pen delivers accurate doses on a bench — not that a patient with limited dexterity can actually achieve an accurate dose."},
+     {text:"Summative usability study with healthy engineering staff standing in for patients.", correct:false,
+      fb:"Wrong users. The need is defined around reduced dexterity; validation participants must represent the intended user population, or the study can't demonstrate conformance to the need."},
+     {text:"Verify actuation force is ≤ 15 N per the design input, since low force implies usable.", correct:false,
+      fb:"Verifying one input is not validating the need. Meeting every input still doesn't prove the whole device works for the intended users — that's exactly why validation exists."}]},
+  {device:"Surgical Catheter",
+   need:"Interventional cardiologists need to track the catheter through tortuous vasculature to reach the target treatment site.",
+   input:"The catheter shall traverse a standardized two-turn tortuous-path fixture with a peak track force ≤ 2.5 N.",
+   ver:[
+     {text:"Bench trackability test: advance the catheter through the standardized tortuous-path fixture on an instrumented tester; record peak track force against the 2.5 N criterion.", correct:true,
+      fb:"Correct — fixture, instrument, numeric criterion from the input. Repeatable and objective: 820.30(f)."},
+     {text:"Have physicians navigate the catheter in a perfused vascular simulator and rate trackability on a 5-point scale.", correct:false,
+      fb:"That's simulated-use evaluation against the need — validation territory. It doesn't measure track force against the 2.5 N input."},
+     {text:"Analyze the shaft's flexural modulus and conclude the track force is probably acceptable.", correct:false,
+      fb:"Analysis can be a verification method, but “probably acceptable” isn't a documented, criterion-based analysis. Where a direct test method exists and the input is force-based, test it."},
+     {text:"Check that the trackability requirement appears in the trace matrix.", correct:false,
+      fb:"Traceability bookkeeping confirms the requirement is tracked — not that the catheter meets it."}],
+   val:[
+     {text:"Simulated-use study: interventional cardiologists navigate production-equivalent catheters to defined target sites in a perfused anatomical vascular model; success rate and access time scored against clinical acceptance criteria.", correct:true,
+      fb:"Correct — intended users performing the intended task under simulated use, on production-equivalent units, with need-level criteria. 820.30(g)."},
+     {text:"Run the tortuous-path bench test on catheters from three production lots.", correct:false,
+      fb:"Production units alone don't make it validation — the question is still output vs input on a bench fixture, with no user or intended-use task."},
+     {text:"Have R&D engineers navigate the vascular model and log completion times.", correct:false,
+      fb:"Right environment, wrong users. Engineers who designed the device are not representative of intended users; their success doesn't demonstrate the need is met."},
+     {text:"Confirm by analysis that the catheter's dimensions are compatible with standard guide catheters.", correct:false,
+      fb:"A compatibility analysis verifies interface requirements. It says nothing about whether cardiologists can reach targets through tortuous anatomy."}]},
+  {device:"Endoscope System",
+   need:"Surgeons need clear visualization of anatomical detail in the surgical field to guide the procedure.",
+   input:"The optical system shall resolve ≥ 20 lp/mm on a standard resolution target across the working distance of 5–50 mm.",
+   ver:[
+     {text:"Bench optical test: image a USAF 1951 resolution target at defined working distances from 5 to 50 mm; confirm ≥ 20 lp/mm at each distance.", correct:true,
+      fb:"Correct — standard target, defined distances covering the specified range, quantitative criterion from the input. 820.30(f)."},
+     {text:"Have a surgeon look through the scope in the lab and confirm the image looks sharp.", correct:false,
+      fb:"Subjective impression, no metric, no criterion, one uncontrolled distance. Cannot verify a 20 lp/mm requirement."},
+     {text:"Verify resolution at 25 mm working distance only, the nominal case.", correct:false,
+      fb:"The input spans 5–50 mm, and optical performance varies across working distance. Verification coverage must match the requirement's stated range."},
+     {text:"Confirm the camera sensor datasheet claims 4K resolution.", correct:false,
+      fb:"Supplier datasheet review isn't a test of your integrated optical system — resolution is limited by the whole optical chain, not the sensor alone."}],
+   val:[
+     {text:"Simulated-use study: surgeons perform defined visualization tasks (identify anatomical landmarks, assess tissue planes) during simulated procedures on cadaveric or high-fidelity models with production-equivalent systems; adequacy scored against predefined clinical criteria.", correct:true,
+      fb:"Correct — this asks the need's actual question: can surgeons see what they clinically need to see, during the intended use? 820.30(g)."},
+     {text:"Repeat the USAF resolution-target test using production units.", correct:false,
+      fb:"Verification on production units is still verification. Resolving 20 lp/mm on a test chart doesn't demonstrate surgeons can discriminate anatomy in a bloody, variable surgical field."},
+     {text:"Compare the optical resolution spec against a competitor's published spec.", correct:false,
+      fb:"Competitive benchmarking is a marketing analysis. Validation compares the device to user needs, not to other products."},
+     {text:"Collect image-quality ratings from the internal optics team using recorded test videos.", correct:false,
+      fb:"Wrong users and an artificial task. The optics team is neither representative of surgeons nor performing the intended use."}]},
+  {device:"Spinal Implant",
+   need:"Surgeons need the interbody implant to restore disc height and remain rigidly fixed in the disc space until fusion occurs.",
+   input:"The implant shall withstand a static axial compression load of 10 kN without functional failure, tested per ASTM F2077.",
+   ver:[
+     {text:"Static axial compression testing per ASTM F2077 on a defined sample size; confirm no functional failure at 10 kN against the acceptance criterion.", correct:true,
+      fb:"Correct — the recognized standard method named in the input, a defined sample, and the criterion straight from the requirement. 820.30(f); ISO 13485 §7.3.6 also expects a rationale for sample size."},
+     {text:"Perform finite-element analysis and skip physical testing, since the model predicts a 14 kN failure load.", correct:false,
+      fb:"FEA supports design, and analysis can serve verification — but when the input names a physical test method (ASTM F2077), an unvalidated model prediction doesn't discharge it."},
+     {text:"Implant the device in cadaveric spines and check whether surgeons think it feels stable.", correct:false,
+      fb:"Simulated-use, subjective, need-level — validation-shaped. It cannot confirm a 10 kN quantitative structural requirement."},
+     {text:"Verify the implant material certificate matches the titanium alloy specification.", correct:false,
+      fb:"Material conformance is a different (incoming/output) check. Right alloy ≠ demonstrated structural performance of the design at 10 kN."}],
+   val:[
+     {text:"Simulated-use cadaver study: spine surgeons implant production-equivalent devices via the intended technique, then assess achieved disc-height restoration and immediate fixation against clinical acceptance criteria — with clinical follow-up data planned to confirm fusion-term performance.", correct:true,
+      fb:"Correct — users, intended technique, need-level criteria on representative product. Note the honest limit: “remains fixed until fusion” ultimately needs clinical evidence; the cadaver study validates what can be validated pre-clinically and the plan documents the rest."},
+     {text:"Complete the ASTM F2077 test series (compression, shear, torsion) on production implants.", correct:false,
+      fb:"A full mechanical test battery is thorough verification. None of it shows a surgeon achieves height restoration and fixation in real anatomy."},
+     {text:"Confirm by analysis that implant heights offered match the anthropometric range of disc heights.", correct:false,
+      fb:"A design-input coverage analysis — useful, but it verifies a sizing requirement rather than validating the clinical need."},
+     {text:"Have the R&D team impact implants into foam blocks and measure pull-out force.", correct:false,
+      fb:"Foam-block fixation testing is a bench surrogate (verification-shaped), run by non-users on non-anatomy. It informs design, not validation."}]},
+  {device:"OTC Glucose Meter",
+   need:"Lay users need to accurately measure their blood glucose at home to manage their diabetes.",
+   input:"≥ 95% of meter results shall fall within ±15% of the laboratory reference method for glucose ≥ 100 mg/dL (accuracy per ISO 15197).",
+   ver:[
+     {text:"Analytical accuracy study per ISO 15197: trained technicians run meter measurements against the laboratory reference method across the specified glucose range; confirm ≥ 95% of results within ±15%.", correct:true,
+      fb:"Correct — controlled method execution against the reference, with the statistical acceptance criterion from the input. 820.30(f)."},
+     {text:"Have diabetic patients test at home and mail in their strips for later comparison.", correct:false,
+      fb:"Uncontrolled conditions and users in the loop make this a (poorly designed) validation-shaped study — it can't isolate analytical accuracy against the reference method."},
+     {text:"Compare readings between two meters off the same production line and confirm they agree.", correct:false,
+      fb:"Meter-to-meter agreement is precision/repeatability against itself, not accuracy against the laboratory reference the input specifies."},
+     {text:"Confirm the strip chemistry supplier's CoA states the required accuracy.", correct:false,
+      fb:"A supplier certificate doesn't verify your integrated meter+strip system against the input requirement."}],
+   val:[
+     {text:"Lay-user performance study: untrained intended users perform fingerstick self-testing with production units following only the IFU (ISO 15197 user performance evaluation style); accuracy of user-obtained results and task success scored against acceptance criteria.", correct:true,
+      fb:"Correct — untrained lay users, real self-testing, production units, IFU as the only instruction: exactly the intended use. ISO 15197 itself splits analytical accuracy (verification-shaped) from user performance (validation-shaped)."},
+     {text:"Repeat the technician-run analytical accuracy study on three production lots.", correct:false,
+      fb:"Technicians executing a controlled protocol don't represent lay users at home. Accuracy in expert hands doesn't validate the need."},
+     {text:"Verify the display font size meets the legibility design input.", correct:false,
+      fb:"Verifying a single human-factors input doesn't demonstrate that lay users can carry out the whole measurement task correctly."},
+     {text:"Run a focus group asking prospective users whether they would trust the meter.", correct:false,
+      fb:"Perceived trust is market research. Validation needs objective evidence of correct, accurate use by intended users under defined conditions."}]},
+];
+
+// ==================== SCORING ====================
+// CLASSIFY: correct → streak++, points = 100 × (1 + floor(streak/5))  (same rule as
+// Product Mapping Mastery's Control Tower). Wrong → streak resets, 0 points.
+// DESIGN: each correct method +150; both correct = perfect round → +400 total
+// plus +100 × (consecutive perfect rounds beyond the first).
+const CLASSIFY_BASE = 100, DESIGN_ONE = 150, DESIGN_PERFECT = 400, DESIGN_STREAK_BONUS = 100;
+
+// ==================== STATE ====================
+let cState = null; // classify
+let dState = null; // design
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function $(id){return document.getElementById(id);}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelector('.panel').scrollTop=0;
+  window.scrollTo(0,0);
+}
+function getBest(key){
+  try{return parseInt(localStorage.getItem(key),10)||0;}catch(e){return 0;}
+}
+function setBest(key,val){
+  try{const b=getBest(key);if(val>b)localStorage.setItem(key,String(val));return Math.max(b,val);}catch(e){return val;}
+}
+
+// ==================== NAVIGATION ====================
+function classifyInProgress(){return cState && !cState.done && cState.idx < cState.items.length;}
+function designInProgress(){return dState && !dState.done && dState.round < ROUNDS.length;}
+function quitToHome(){
+  if((classifyInProgress()&&cState.answered>0)||(designInProgress()&&(dState.round>0||dState.pickVer!==null||dState.pickVal!==null))){
+    if(!confirm('Leave the current game? Your progress will be lost.'))return;
+  }
+  cState=null;dState=null;
+  showScreen('screen-home');
+}
+function goHome(e){if(e)e.preventDefault();quitToHome();}
+
+// ==================== MODE 1: CLASSIFY ====================
+function startClassify(){
+  cState={items:shuffle(SCENARIOS),idx:0,score:0,streak:0,maxStreak:0,correct:0,answered:0,locked:false,done:false,misses:[]};
+  $('c-play').style.display='block';
+  $('c-result').style.display='none';
+  $('c-feedback').style.display='none';
+  showScreen('screen-classify');
+  renderClassify();
+}
+function renderClassify(){
+  const s=cState,item=s.items[s.idx];
+  $('c-score').textContent=s.score;
+  $('c-streak').textContent=s.streak;
+  $('c-progress').textContent=`${s.answered}/${s.items.length}`;
+  $('c-streak-card').classList.toggle('glow',s.streak>=5);
+  $('c-device').textContent=item.device;
+  $('c-text').textContent=item.text;
+  $('c-btn-ver').disabled=false;
+  $('c-btn-val').disabled=false;
+  $('c-feedback').style.display='none';
+  s.locked=false;
+}
+function answerClassify(choice){
+  const s=cState;
+  if(!s||s.locked||s.done)return;
+  s.locked=true;
+  const item=s.items[s.idx];
+  const correct=choice===item.answer;
+  s.answered++;
+  let pts=0;
+  if(correct){
+    s.streak++;
+    if(s.streak>s.maxStreak)s.maxStreak=s.streak;
+    s.correct++;
+    pts=CLASSIFY_BASE*(1+Math.floor(s.streak/5));
+    s.score+=pts;
+  }else{
+    s.streak=0;
+    s.misses.push(item);
+  }
+  $('c-btn-ver').disabled=true;
+  $('c-btn-val').disabled=true;
+  $('c-score').textContent=s.score;
+  $('c-streak').textContent=s.streak;
+  $('c-progress').textContent=`${s.answered}/${s.items.length}`;
+  $('c-streak-card').classList.toggle('glow',s.streak>=5);
+
+  const label=item.answer==='VER'?'VERIFICATION':'VALIDATION';
+  const fb=$('c-feedback');
+  fb.classList.toggle('incorrect',!correct);
+  $('c-fb-verdict').innerHTML=correct
+    ?`✓ Correct — this is ${label} <span class="pts-pop">+${pts}</span>`
+    :`✗ Not quite — this is ${label}`;
+  $('c-fb-body').textContent=item.fb;
+  $('c-fb-chips').innerHTML=item.chips.map(c=>`<span class="basis-chip">${c}</span>`).join('');
+  fb.style.display='block';
+  $('c-next-btn').textContent=(s.idx===s.items.length-1)?'See Results →':'Next Scenario →';
+  $('c-next-btn').focus({preventScroll:true});
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function nextClassify(){
+  const s=cState;
+  if(!s||!s.locked)return;
+  if(s.idx>=s.items.length-1){finishClassify();return;}
+  s.idx++;
+  renderClassify();
+}
+function finishClassify(){
+  const s=cState;
+  s.done=true;
+  $('c-play').style.display='none';
+  $('c-result').style.display='block';
+  $('c-final-score').textContent=s.score;
+  const best=setBest('vvtrainer-best-classify',s.score);
+  $('c-best-score').textContent=`Personal best: ${best}`;
+  const acc=Math.round(100*s.correct/s.items.length);
+  $('c-stat-acc').textContent=acc+'%';
+  $('c-stat-streak').textContent=s.maxStreak;
+  $('c-stat-correct').textContent=`${s.correct}/${s.items.length}`;
+  const ach=[];
+  if(s.correct===s.items.length)ach.push('🏆 Flawless — V&V Master');
+  if(s.maxStreak>=10)ach.push('🔥 Streak ×3 Unlocked');
+  else if(s.maxStreak>=5)ach.push('⚡ Streak ×2 Unlocked');
+  if(acc>=80&&s.correct<s.items.length)ach.push('🎯 Sharp Eye (80%+)');
+  $('c-achievements').innerHTML=ach.map(a=>`<span class="achievement">${a}</span>`).join('');
+  $('c-miss-recap').innerHTML=s.misses.length===0
+    ?'<p class="recap-perfect">Perfect run — every scenario classified correctly. ✓</p>'
+    :'<div class="card-title" style="margin-bottom:var(--space-3)">Review Your Misses</div>'+
+      s.misses.map(m=>`<div class="miss-item"><div class="miss-head">${m.device}: ${m.text}</div><span class="miss-answer">${m.answer==='VER'?'VERIFICATION':'VALIDATION'}</span> — ${m.fb}</div>`).join('');
+  window.scrollTo(0,0);
+}
+
+// Keyboard shortcuts for Classify
+document.addEventListener('keydown',e=>{
+  if(!$('screen-classify').classList.contains('active')||!cState||cState.done)return;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(cState.locked){
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();nextClassify();}
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='1'){e.preventDefault();answerClassify('VER');}
+  else if(e.key==='ArrowRight'||e.key==='2'){e.preventDefault();answerClassify('VAL');}
+});
+
+// ==================== MODE 2: DESIGN ====================
+function startDesign(){
+  dState={round:0,score:0,streak:0,maxStreak:0,perfect:0,methodsCorrect:0,pickVer:null,pickVal:null,submitted:false,done:false,misses:[],order:[]};
+  $('d-play').style.display='block';
+  $('d-result').style.display='none';
+  showScreen('screen-design');
+  renderDesign();
+}
+function renderDesign(){
+  const s=dState,r=ROUNDS[s.round];
+  s.pickVer=null;s.pickVal=null;s.submitted=false;
+  s.order=[shuffle(r.ver.map((_,i)=>i)),shuffle(r.val.map((_,i)=>i))];
+  $('d-score').textContent=s.score;
+  $('d-streak').textContent=s.streak;
+  $('d-progress').textContent=`${s.round+1}/${ROUNDS.length}`;
+  $('d-streak-card').classList.toggle('glow',s.streak>=2);
+  $('d-device').textContent=r.device;
+  $('d-need').textContent='“'+r.need+'”';
+  $('d-input').textContent=r.input;
+  renderOptions('ver');
+  renderOptions('val');
+  $('d-submit-btn').style.display='inline-flex';
+  $('d-submit-btn').disabled=true;
+  $('d-next-btn').style.display='none';
+  $('d-feedback').style.display='none';
+}
+function renderOptions(kind){
+  const s=dState,r=ROUNDS[s.round];
+  const opts=r[kind],order=s.order[kind==='ver'?0:1];
+  $(`d-${kind}-options`).innerHTML=order.map(oi=>
+    `<button class="option-tile" id="d-${kind}-${oi}" onclick="pickOption('${kind}',${oi})">${opts[oi].text}</button>`
+  ).join('');
+}
+function pickOption(kind,oi){
+  const s=dState;
+  if(!s||s.submitted)return;
+  if(kind==='ver')s.pickVer=oi;else s.pickVal=oi;
+  const r=ROUNDS[s.round];
+  r[kind].forEach((_,i)=>{
+    const el=$(`d-${kind}-${i}`);
+    if(el)el.classList.toggle('selected',i===oi);
+  });
+  $('d-submit-btn').disabled=!(s.pickVer!==null&&s.pickVal!==null);
+}
+function submitDesign(){
+  const s=dState;
+  if(!s||s.submitted||s.pickVer===null||s.pickVal===null)return;
+  s.submitted=true;
+  const r=ROUNDS[s.round];
+  const verOK=r.ver[s.pickVer].correct;
+  const valOK=r.val[s.pickVal].correct;
+  const nCorrect=(verOK?1:0)+(valOK?1:0);
+  s.methodsCorrect+=nCorrect;
+  let pts=0;
+  if(nCorrect===2){
+    s.streak++;
+    if(s.streak>s.maxStreak)s.maxStreak=s.streak;
+    s.perfect++;
+    pts=DESIGN_PERFECT+DESIGN_STREAK_BONUS*(s.streak-1);
+  }else{
+    s.streak=0;
+    pts=nCorrect*DESIGN_ONE;
+  }
+  s.score+=pts;
+  if(nCorrect<2)s.misses.push({round:r,pickVer:s.pickVer,pickVal:s.pickVal,verOK,valOK});
+
+  ['ver','val'].forEach(kind=>{
+    const pick=kind==='ver'?s.pickVer:s.pickVal;
+    r[kind].forEach((opt,i)=>{
+      const el=$(`d-${kind}-${i}`);
+      if(!el)return;
+      el.disabled=true;
+      el.classList.remove('selected');
+      if(i===pick)el.classList.add(opt.correct?'correct':'incorrect');
+      else if(opt.correct)el.classList.add('reveal');
+      if(i===pick||opt.correct){
+        el.insertAdjacentHTML('afterend',`<div class="tile-fb">${opt.fb}</div>`);
+      }
+    });
+  });
+
+  $('d-score').textContent=s.score;
+  $('d-streak').textContent=s.streak;
+  $('d-streak-card').classList.toggle('glow',s.streak>=2);
+  const fb=$('d-feedback');
+  fb.classList.toggle('incorrect',nCorrect<2);
+  $('d-fb-verdict').innerHTML=nCorrect===2
+    ?`✓ Perfect round <span class="pts-pop">+${pts}</span>${s.streak>1?` — ${s.streak} perfect in a row!`:''}`
+    :nCorrect===1?`◐ One of two correct <span class="pts-pop">+${pts}</span> — streak reset`
+    :'✗ Neither method fits — streak reset';
+  $('d-fb-body').textContent=nCorrect===2
+    ?'You matched the verification method to the design input and the validation method to the user need — the two loops of the waterfall closed correctly.'
+    :'Check the explanations above each revealed answer. Verification methods must objectively confirm the design input (820.30(f)); validation methods must show intended users meeting the user need under actual or simulated use (820.30(g)).';
+  fb.style.display='block';
+  $('d-submit-btn').style.display='none';
+  const nb=$('d-next-btn');
+  nb.textContent=(s.round===ROUNDS.length-1)?'See Results →':'Next Round →';
+  nb.style.display='inline-flex';
+  nb.focus({preventScroll:true});
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function nextDesign(){
+  const s=dState;
+  if(!s||!s.submitted)return;
+  if(s.round>=ROUNDS.length-1){finishDesign();return;}
+  s.round++;
+  renderDesign();
+  window.scrollTo(0,0);
+}
+function finishDesign(){
+  const s=dState;
+  s.done=true;
+  $('d-play').style.display='none';
+  $('d-result').style.display='block';
+  $('d-final-score').textContent=s.score;
+  const best=setBest('vvtrainer-best-design',s.score);
+  $('d-best-score').textContent=`Personal best: ${best}`;
+  $('d-stat-perfect').textContent=`${s.perfect}/${ROUNDS.length}`;
+  $('d-stat-streak').textContent=s.maxStreak;
+  $('d-stat-correct').textContent=`${s.methodsCorrect}/${ROUNDS.length*2}`;
+  const ach=[];
+  if(s.perfect===ROUNDS.length)ach.push('🏆 Protocol Architect — all perfect');
+  else if(s.perfect>=4)ach.push('🧪 Method Matcher');
+  if(s.maxStreak>=3)ach.push('🔥 Perfect-Round Streak');
+  $('d-achievements').innerHTML=ach.map(a=>`<span class="achievement">${a}</span>`).join('');
+  $('d-miss-recap').innerHTML=s.misses.length===0
+    ?'<p class="recap-perfect">Every method matched on the first try. ✓</p>'
+    :'<div class="card-title" style="margin-bottom:var(--space-3)">Review Your Misses</div>'+
+      s.misses.map(m=>{
+        const parts=[];
+        if(!m.verOK)parts.push(`<div><strong>Verification</strong> — you picked: “${m.round.ver[m.pickVer].text}”<br><span class="miss-answer">Correct:</span> ${m.round.ver.find(o=>o.correct).text}</div>`);
+        if(!m.valOK)parts.push(`<div style="margin-top:var(--space-2)"><strong>Validation</strong> — you picked: “${m.round.val[m.pickVal].text}”<br><span class="miss-answer">Correct:</span> ${m.round.val.find(o=>o.correct).text}</div>`);
+        return `<div class="miss-item"><div class="miss-head">${m.round.device} — “${m.round.need}”</div>${parts.join('')}</div>`;
+      }).join('');
+  window.scrollTo(0,0);
+}
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  const t=document.querySelector('[data-theme-toggle]');
+  const r=document.documentElement;
+  let d=r.getAttribute('data-theme')||'light';
+  r.setAttribute('data-theme',d);
+  function updateIcon(){
+    if(!t)return;
+    t.innerHTML=d==='dark'
+      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+  updateIcon();
+  if(t)t.addEventListener('click',()=>{
+    d=d==='dark'?'light':'dark';
+    r.setAttribute('data-theme',d);
+    updateIcon();
+  });
+})();
+</script>
+</body>
+</html>
