@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Use-Error Explorer — BE695</title>
+<style>
+/* ==================== DESIGN TOKENS ==================== */
+:root, [data-theme="light"] {
+  --color-bg: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-offset: #f1f5f9;
+  --color-surface-dynamic: #e2e8f0;
+  --color-divider: #e2e8f0;
+  --color-border: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+  --color-text-inverse: #f8fafc;
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-highlight: #f0fdfa;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-orange: #ea580c;
+  --color-gold: #ca8a04;
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 260 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 260 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 260 / 0.12);
+  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;
+  --space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0b1220;
+  --color-surface: #101a2c;
+  --color-surface-2: #16223a;
+  --color-surface-offset: #0e1728;
+  --color-surface-dynamic: #22304a;
+  --color-divider: #1c2a44;
+  --color-border: #2d3d5c;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-text-faint: #64748b;
+  --color-text-inverse: #0b1220;
+  --color-primary: #2dd4bf;
+  --color-primary-hover: #5eead4;
+  --color-primary-highlight: #113c38;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-success: #4ade80;
+  --color-orange: #fb923c;
+  --color-gold: #facc15;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.5);
+}
+
+/* ==================== BASE ==================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+img,canvas,svg{display:block;max-width:100%;height:auto}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition)}
+
+/* ==================== LAYOUT ==================== */
+.app-shell{display:grid;grid-template-rows:56px 1fr;min-height:100dvh}
+.topbar{display:flex;align-items:center;gap:var(--space-3);padding:0 var(--space-6);background:var(--color-surface);border-bottom:1px solid var(--color-border);position:sticky;top:0;z-index:50}
+.topbar-logo{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:var(--color-text)}
+.topbar-logo svg{flex-shrink:0}
+.logo-text{font-size:var(--text-sm);font-weight:600;letter-spacing:-0.01em;line-height:1.3}
+.logo-sub{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:400;line-height:1.3}
+.topbar-spacer{flex:1}
+.topbar-badge{font-size:var(--text-xs);padding:var(--space-1) var(--space-3);background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-full);font-weight:600;white-space:nowrap}
+.theme-toggle{padding:var(--space-2);border-radius:var(--radius-md);color:var(--color-text-muted)}
+.theme-toggle:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+
+.back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap;font-family:var(--font-body)}
+.back-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+
+.main-content{display:grid;grid-template-columns:280px 1fr;overflow:hidden;height:calc(100dvh - 56px)}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar{background:var(--color-surface);border-right:1px solid var(--color-border);overflow-y:auto;display:flex;flex-direction:column;gap:0}
+.sidebar-section{padding:var(--space-4) var(--space-4) var(--space-2)}
+.sidebar-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-faint);margin-bottom:var(--space-3)}
+.device-card{padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);cursor:pointer;border:1.5px solid transparent;transition:all var(--transition);margin-bottom:var(--space-2)}
+.device-card:hover{background:var(--color-surface-dynamic)}
+.device-card.active{background:var(--color-primary-highlight);border-color:var(--color-primary)}
+.device-card-name{font-size:var(--text-sm);font-weight:600;color:var(--color-text)}
+.device-card.active .device-card-name{color:var(--color-primary)}
+.device-card-code{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+.device-card-count{display:inline-block;font-size:var(--text-xs);padding:1px var(--space-2);background:var(--color-surface-offset);border-radius:var(--radius-full);color:var(--color-text-muted);margin-top:var(--space-1);font-family:var(--font-mono)}
+.device-card.active .device-card-count{background:var(--color-primary);color:var(--color-text-inverse)}
+.sidebar-divider{height:1px;background:var(--color-divider);margin:var(--space-2) var(--space-4)}
+.sidebar-note{padding:var(--space-2) var(--space-4) var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6}
+.sidebar-note strong{color:var(--color-text);font-weight:600}
+.sidebar-note em{color:var(--color-primary);font-style:normal;font-weight:600}
+
+/* ==================== MAIN PANEL ==================== */
+.panel{overflow-y:auto;padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-6)}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap}
+.page-title{font-size:var(--text-xl);font-weight:700;letter-spacing:-0.02em;line-height:1.1;color:var(--color-text)}
+.page-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-1)}
+.load-btn{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;cursor:pointer;white-space:nowrap}
+.load-btn:hover{background:var(--color-primary-hover)}
+
+/* KPI strip */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4)}
+.kpi-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-4) var(--space-5);box-shadow:var(--shadow-sm)}
+.kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+.kpi-value{font-size:var(--text-xl);font-weight:700;line-height:1.1;margin-top:var(--space-1);font-family:var(--font-mono)}
+.kpi-sub{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-1)}
+.kpi-card.danger .kpi-value{color:var(--color-error)}
+.kpi-card.warn .kpi-value{color:var(--color-orange)}
+.kpi-card.ok .kpi-value{color:var(--color-success)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);gap:var(--space-3)}
+.card-title{font-size:var(--text-sm);font-weight:700;color:var(--color-text);text-transform:uppercase;letter-spacing:0.06em}
+.card-hint{font-size:var(--text-xs);color:var(--color-text-muted)}
+
+/* Hierarchy visual */
+.hier-row{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-lg);border:1px solid var(--color-border);margin-bottom:var(--space-2);background:var(--color-surface-2)}
+.hier-row:last-of-type{margin-bottom:0}
+.hier-rank{width:34px;height:34px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-mono);flex-shrink:0;font-size:var(--text-sm)}
+.hier-1 .hier-rank{background:oklch(from var(--color-success) l c h / 0.15);color:var(--color-success)}
+.hier-2 .hier-rank{background:oklch(from var(--color-gold) l c h / 0.15);color:var(--color-gold)}
+.hier-3 .hier-rank{background:oklch(from var(--color-error) l c h / 0.15);color:var(--color-error)}
+.hier-name{font-size:var(--text-sm);font-weight:600}
+.hier-desc{font-size:var(--text-xs);color:var(--color-text-muted)}
+.hier-eff{margin-left:auto;font-size:var(--text-xs);font-weight:600;white-space:nowrap}
+.hier-1 .hier-eff{color:var(--color-success)}
+.hier-2 .hier-eff{color:var(--color-gold)}
+.hier-3 .hier-eff{color:var(--color-error)}
+.hier-foot{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);line-height:1.6}
+
+/* Compare table */
+table.compare{font-size:var(--text-xs)}
+table.compare th{text-align:left;padding:var(--space-2);font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);vertical-align:bottom}
+table.compare td{padding:var(--space-2);border-bottom:1px solid var(--color-divider);color:var(--color-text-muted);vertical-align:top;line-height:1.5}
+table.compare td:first-child{font-weight:600;color:var(--color-text);white-space:nowrap}
+table.compare tr:last-child td{border-bottom:none}
+.compare-foot{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);line-height:1.6}
+
+/* Flow strip */
+.flow-strip{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+.flow-step{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+.flow-step b{color:var(--color-primary);font-family:var(--font-mono)}
+.flow-arrow{color:var(--color-text-faint);font-size:var(--text-xs)}
+
+/* Task list */
+.task-row{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);margin-bottom:var(--space-3);cursor:pointer;transition:all var(--transition);background:var(--color-surface-2);min-height:64px}
+.task-row:hover{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.task-row:last-of-type{margin-bottom:0}
+.task-num{width:34px;height:34px;border-radius:var(--radius-full);background:var(--color-surface-dynamic);color:var(--color-text-muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-mono);flex-shrink:0;font-size:var(--text-sm)}
+.task-row.done .task-num{background:var(--color-primary);color:var(--color-text-inverse)}
+.task-name{font-size:var(--text-sm);font-weight:600}
+.task-desc{font-size:var(--text-xs);color:var(--color-text-muted)}
+.task-status{margin-left:auto;font-size:var(--text-xs);font-weight:600;white-space:nowrap;padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+.st-todo{background:var(--color-surface-dynamic);color:var(--color-text-muted)}
+.st-progress{background:oklch(from var(--color-gold) l c h / 0.15);color:var(--color-gold)}
+.st-done{background:oklch(from var(--color-success) l c h / 0.15);color:var(--color-success);font-family:var(--font-mono)}
+
+/* URRA table */
+.urra-table-wrap{overflow-x:auto;border:1px solid var(--color-border);border-radius:var(--radius-xl);background:var(--color-surface)}
+table.urra{width:100%;font-size:var(--text-sm);min-width:720px}
+table.urra thead th{padding:var(--space-3) var(--space-4);text-align:left;font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);border-bottom:1px solid var(--color-border);background:var(--color-surface-offset);white-space:nowrap}
+table.urra tbody tr{border-bottom:1px solid var(--color-divider);transition:background var(--transition);cursor:pointer}
+table.urra tbody tr:hover{background:var(--color-surface-dynamic)}
+table.urra tbody tr:last-child{border-bottom:none}
+table.urra tbody td{padding:var(--space-3) var(--space-4);vertical-align:middle}
+table.urra tbody td:first-child{font-weight:600;color:var(--color-text)}
+.urra-empty{padding:var(--space-8);text-align:center;color:var(--color-text-muted);font-size:var(--text-sm)}
+
+.sev-badge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:var(--space-1) var(--space-2);border-radius:var(--radius-md);font-weight:700;font-family:var(--font-mono);font-size:var(--text-xs)}
+.sev-5{background:oklch(from var(--color-error) l c h / 0.15);color:var(--color-error)}
+.sev-4{background:oklch(from var(--color-orange) l c h / 0.15);color:var(--color-orange)}
+.sev-3{background:oklch(from var(--color-gold) l c h / 0.15);color:var(--color-gold)}
+.sev-2{background:oklch(from var(--color-success) l c h / 0.15);color:var(--color-success)}
+.sev-1{background:var(--color-surface-dynamic);color:var(--color-text-muted)}
+
+.type-badge{font-size:var(--text-xs);padding:2px var(--space-2);border-radius:var(--radius-full);font-weight:500;background:var(--color-surface-dynamic);color:var(--color-text-muted);white-space:nowrap}
+.tier-badge{font-size:var(--text-xs);padding:2px var(--space-2);border-radius:var(--radius-full);font-weight:600;white-space:nowrap}
+.tier-1{background:oklch(from var(--color-success) l c h / 0.15);color:var(--color-success)}
+.tier-2{background:oklch(from var(--color-gold) l c h / 0.15);color:var(--color-gold)}
+.tier-3{background:oklch(from var(--color-error) l c h / 0.15);color:var(--color-error)}
+.weak-flag{font-size:var(--text-xs);font-weight:700;color:var(--color-error);letter-spacing:0.04em}
+.crit-yes{color:var(--color-error);font-weight:700;font-size:var(--text-xs);letter-spacing:0.04em}
+.crit-no{color:var(--color-text-faint);font-size:var(--text-xs)}
+
+/* ==================== DRAWER ==================== */
+.drawer-overlay{position:fixed;inset:0;background:oklch(0 0 0 / 0.4);z-index:100;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:560px;max-width:100%;background:var(--color-surface);border-left:1px solid var(--color-border);z-index:101;transform:translateX(100%);transition:transform 300ms cubic-bezier(0.16,1,0.3,1);overflow-y:auto;padding:var(--space-6)}
+.drawer.open{transform:translateX(0)}
+.drawer-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-5)}
+.drawer-close{padding:var(--space-2);border-radius:var(--radius-md);color:var(--color-text-muted);min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.drawer-close:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.drawer-title{font-size:var(--text-lg);font-weight:700;line-height:1.2;flex:1;padding-right:var(--space-4)}
+.drawer-kicker{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-primary);margin-bottom:2px}
+
+.hf-section{margin-bottom:var(--space-6)}
+.hf-section-title{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-primary);margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+.hf-section-title::after{content:'';flex:1;height:1px;background:var(--color-primary-highlight)}
+.hf-field{margin-bottom:var(--space-3)}
+.hf-label{font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--space-1)}
+.hf-value{font-size:var(--text-sm);color:var(--color-text);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);line-height:1.5}
+
+/* PCA table */
+.pca-grid{display:grid;grid-template-columns:auto 1fr;gap:1px;background:var(--color-border);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden}
+.pca-cell{background:var(--color-surface-2);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);line-height:1.5}
+.pca-key{font-weight:700;color:var(--color-primary);white-space:nowrap;display:flex;align-items:center}
+
+/* Steps */
+.step-box{border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4);background:var(--color-surface-2)}
+.step-box.locked{opacity:0.5}
+.step-head{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2)}
+.step-num{width:26px;height:26px;border-radius:var(--radius-full);background:var(--color-primary);color:var(--color-text-inverse);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--text-xs);font-family:var(--font-mono);flex-shrink:0}
+.step-num.done{background:var(--color-success)}
+.step-title{font-size:var(--text-sm);font-weight:700}
+.step-prompt{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);line-height:1.6}
+
+/* Spot items */
+.spot-item{border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-3);background:var(--color-surface)}
+.spot-text{font-size:var(--text-sm);line-height:1.5;margin-bottom:var(--space-2)}
+.chip-row{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.chip{font-size:var(--text-xs);font-weight:600;padding:var(--space-2) var(--space-3);border-radius:var(--radius-full);border:1.5px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;min-height:36px}
+.chip:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.chip.sel{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse)}
+.chip:disabled{cursor:default;opacity:0.85}
+.chip.right{background:oklch(from var(--color-success) l c h / 0.15);border-color:var(--color-success);color:var(--color-success)}
+.chip.wrong{background:oklch(from var(--color-error) l c h / 0.15);border-color:var(--color-error);color:var(--color-error)}
+.spot-explain{font-size:var(--text-xs);line-height:1.6;color:var(--color-text-muted);border-top:1px dashed var(--color-border);margin-top:var(--space-2);padding-top:var(--space-2)}
+.spot-explain b{color:var(--color-text)}
+
+/* Severity options */
+.sev-opt{display:flex;align-items:center;gap:var(--space-3);width:100%;text-align:left;border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-2);background:var(--color-surface);min-height:52px}
+.sev-opt:hover{border-color:var(--color-primary)}
+.sev-opt.sel{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.sev-opt:disabled{cursor:default}
+.sev-opt.expert{border-color:var(--color-success);box-shadow:0 0 0 1px var(--color-success)}
+.sev-opt-name{font-size:var(--text-sm);font-weight:600}
+.sev-opt-desc{font-size:var(--text-xs);color:var(--color-text-muted)}
+
+/* Mitigation options */
+.mit-opt{display:block;width:100%;text-align:left;border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-2);background:var(--color-surface);font-size:var(--text-sm);line-height:1.5;min-height:52px}
+.mit-opt:hover{border-color:var(--color-primary)}
+.mit-opt.sel{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.mit-opt:disabled{cursor:default}
+.mit-opt.best-reveal{border-color:var(--color-success)}
+.mit-tier-line{margin-top:var(--space-2);display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap}
+
+/* Feedback */
+.feedback{border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-xs);line-height:1.6;margin-top:var(--space-3)}
+.feedback b{font-weight:700}
+.fb-good{background:oklch(from var(--color-success) l c h / 0.12);border:1px solid oklch(from var(--color-success) l c h / 0.4);color:var(--color-text)}
+.fb-mid{background:oklch(from var(--color-gold) l c h / 0.12);border:1px solid oklch(from var(--color-gold) l c h / 0.4);color:var(--color-text)}
+.fb-bad{background:oklch(from var(--color-error) l c h / 0.12);border:1px solid oklch(from var(--color-error) l c h / 0.4);color:var(--color-text)}
+.fb-info{background:var(--color-primary-highlight);border:1px solid oklch(from var(--color-primary) l c h / 0.4);color:var(--color-text)}
+
+.check-btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;margin-top:var(--space-2);min-height:44px}
+.check-btn:hover{background:var(--color-primary-hover)}
+.check-btn:disabled{opacity:0.45;cursor:not-allowed}
+.ghost-btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:transparent;border:1px solid var(--color-border);color:var(--color-text-muted);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;min-height:44px}
+.ghost-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+
+/* Summary */
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:var(--space-2) 0;border-bottom:1px dashed var(--color-divider);font-size:var(--text-sm)}
+.score-row:last-child{border-bottom:none;font-weight:700}
+.score-pts{font-family:var(--font-mono);font-weight:700}
+
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:var(--space-16) var(--space-8);gap:var(--space-4)}
+.empty-icon{width:64px;height:64px;color:var(--color-text-faint)}
+.empty-title{font-size:var(--text-lg);font-weight:700;color:var(--color-text)}
+.empty-sub{font-size:var(--text-sm);color:var(--color-text-muted);max-width:40ch}
+
+/* ==================== RESPONSIVE ==================== */
+@media(max-width:900px){
+  .main-content{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+  .drawer{width:100%;max-width:100%}
+  .topbar{padding:0 var(--space-4)}
+  .panel{padding:var(--space-4)}
+  .topbar-badge{display:none}
+}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200}
+.sidebar-overlay.open{display:block}
+@media(max-width:900px){
+  .sidebar{display:flex!important;position:fixed;left:0;top:0;bottom:0;width:280px;z-index:201;transform:translateX(-100%);transition:transform 280ms cubic-bezier(0.16,1,0.3,1)}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .menu-btn{display:inline-flex!important}
+}
+.menu-btn{display:none;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--radius-md);border:1px solid var(--color-border);color:var(--color-text-muted);background:none;cursor:pointer;flex-shrink:0}
+.menu-btn:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+<div class="app-shell">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <a class="topbar-logo" href="#">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Use-Error Explorer logo">
+        <rect width="28" height="28" rx="7" fill="var(--color-primary)" opacity="0.15"/>
+        <circle cx="10" cy="9" r="3.2" stroke="var(--color-primary)" stroke-width="2"/>
+        <path d="M4.5 21c.8-3.4 3-5 5.5-5s4.7 1.6 5.5 5" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M20 6.5v6" stroke="var(--color-primary)" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="20" cy="16.5" r="1.4" fill="var(--color-primary)"/>
+      </svg>
+      <span>
+        <div class="logo-text">Use-Error Explorer</div>
+        <div class="logo-sub">Human Factors &amp; Usability · BE695</div>
+      </span>
+    </a>
+    <button class="menu-btn" id="menu-btn" onclick="toggleMobileSidebar()" aria-label="Open device menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-badge">IEC 62366-1 · FDA HF 2016</span>
+    <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+    <a href="../" class="back-btn" style="margin-left:8px;">&#8592; Learning Hub</a>
+  </header>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Worked Devices</div>
+        <div id="device-list"></div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-note">
+        <strong>The distinction students miss:</strong><br>
+        In a <em>use error</em>, the device performs exactly as designed — the user's action (or inaction) starts the chain to harm. In a <em>component failure</em>, the user does everything right and the hardware/software fails. The second belongs in your FMEA. Both feed the same ISO 14971 risk management file.
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-note" style="color:var(--color-text-faint)">
+        Grounded in IEC 62366-1 (usability engineering process) and FDA's 2016 guidance <i>Applying Human Factors and Usability Engineering to Medical Devices</i>. Severity scale modeled on common ISO 14971 practice — ISO 14971 does not prescribe a specific scale.
+      </div>
+    </aside>
+
+    <!-- PANEL -->
+    <main class="panel" id="main-panel">
+      <div class="empty-state" id="empty-state">
+        <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="24" cy="18" r="7" stroke-dasharray="4 3"/>
+          <path d="M10 50c2-10 7-15 14-15s12 5 14 15"/>
+          <path d="M46 12v14M46 34v.5" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="46" cy="23" r="14" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="empty-title">Select a Worked Device</div>
+        <div class="empty-sub">Choose a device from the sidebar and walk its task analysis: sort use errors from device failures, rate the severity of harm, and pick risk controls that respect the hierarchy.</div>
+      </div>
+
+      <div id="content" style="display:none;flex-direction:column;gap:var(--space-6)">
+
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="content-title">—</div>
+            <div class="page-subtitle" id="content-sub">—</div>
+          </div>
+          <button class="load-btn" onclick="resetDevice()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M20.49 15A9 9 0 1 1 22 9"/></svg>
+            Reset Progress
+          </button>
+        </div>
+
+        <div class="kpi-strip">
+          <div class="kpi-card"><div class="kpi-label">Tasks Analyzed</div><div class="kpi-value" id="kpi-tasks">—</div><div class="kpi-sub">Of the task analysis</div></div>
+          <div class="kpi-card danger"><div class="kpi-label">Critical Tasks</div><div class="kpi-value" id="kpi-crit">—</div><div class="kpi-sub">Serious harm possible (FDA)</div></div>
+          <div class="kpi-card ok"><div class="kpi-label">Strong Controls</div><div class="kpi-value" id="kpi-strong">—</div><div class="kpi-sub">Design or safeguard (tier ①②)</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">HF Score</div><div class="kpi-value" id="kpi-score">—</div><div class="kpi-sub" id="kpi-score-sub">points</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Risk-Control Hierarchy</div>
+              <div class="card-hint">In order — ISO 14971 / IEC 62366-1</div>
+            </div>
+            <div class="hier-row hier-1"><div class="hier-rank">①</div><div><div class="hier-name">Inherent safety by design</div><div class="hier-desc">Remove the hazard or make the error impossible / inconsequential</div></div><div class="hier-eff">Most effective</div></div>
+            <div class="hier-row hier-2"><div class="hier-rank">②</div><div><div class="hier-name">Protective measures &amp; safeguards</div><div class="hier-desc">Interlocks, guards, alarms — catch the error before harm</div></div><div class="hier-eff">Middle</div></div>
+            <div class="hier-row hier-3"><div class="hier-rank">③</div><div><div class="hier-name">Information for safety</div><div class="hier-desc">Labels, IFU, training — relies on attention &amp; memory</div></div><div class="hier-eff">Least effective</div></div>
+            <div class="hier-foot">Both ISO 14971 and IEC 62366-1 require risk-control options to be considered <b>in this order</b>. FDA's 2016 HF guidance is blunt: design changes are the most effective way to reduce use-related risk; labeling and training are the least. A labeling-only control for a critical task invites scrutiny.</div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Use-Related vs Component-Failure Risk</div>
+              <div class="card-hint">This app vs your FMEA</div>
+            </div>
+            <table class="compare">
+              <thead><tr><th></th><th>Use-related (here)</th><th>Component failure (FMEA)</th></tr></thead>
+              <tbody>
+                <tr><td>Starts with</td><td>User action or inaction — device works as designed</td><td>Part, software, or process fails — user did everything right</td></tr>
+                <tr><td>Found by</td><td>Task analysis, formative studies, known use-error data</td><td>Design/process FMEA, fault trees, reliability data</td></tr>
+                <tr><td>Probability</td><td>Rarely quantifiable — prioritize by <b>severity</b> of harm</td><td>Often estimable from component failure rates</td></tr>
+                <tr><td>Controlled by</td><td>UI design, safeguards, then labeling</td><td>Redundancy, derating, robust design, process control</td></tr>
+              </tbody>
+            </table>
+            <div class="compare-foot">Same device, two different analyses — and both land in the same ISO 14971 risk management file. When a field event report arrives, deciding <i>which</i> chain it started is exactly the manufacturer's job.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="flex-wrap:wrap">
+            <div>
+              <div class="card-title">Task Analysis</div>
+              <div class="card-hint" id="task-hint">Work each task in sequence — click to open</div>
+            </div>
+            <div class="flow-strip">
+              <span class="flow-step"><b>1</b> Sort findings</span><span class="flow-arrow">→</span>
+              <span class="flow-step"><b>2</b> Rate severity</span><span class="flow-arrow">→</span>
+              <span class="flow-step"><b>3</b> Select control</span>
+            </div>
+          </div>
+          <div id="task-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Use-Related Risk Analysis (URRA)</div>
+              <div class="card-hint">Builds as you complete tasks — click a row to review</div>
+            </div>
+          </div>
+          <div class="urra-table-wrap">
+            <table class="urra">
+              <thead><tr><th>Task</th><th>Use Error</th><th>Type</th><th>Sev</th><th>Critical Task</th><th>Risk Control Chosen</th><th>Tier</th></tr></thead>
+              <tbody id="urra-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="task-drawer" aria-label="Task detail">
+  <div class="drawer-header">
+    <div style="flex:1;padding-right:var(--space-4)">
+      <div class="drawer-kicker" id="drawer-kicker">—</div>
+      <div class="drawer-title" id="drawer-title">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="drawer-content"></div>
+</aside>
+
+<script>
+// ==================== REFERENCE DATA ====================
+const SEVERITY_SCALE = [
+  { v:1, name:'Negligible',   desc:'Inconvenience or temporary discomfort' },
+  { v:2, name:'Minor',        desc:'Temporary injury not requiring professional medical intervention' },
+  { v:3, name:'Serious',      desc:'Injury or impairment requiring professional medical intervention' },
+  { v:4, name:'Critical',     desc:'Permanent impairment or life-threatening injury' },
+  { v:5, name:'Catastrophic', desc:'Death of patient or user' },
+];
+
+const TIERS = {
+  1: { label:'① Inherent safety by design', cls:'tier-1' },
+  2: { label:'② Protective measure / safeguard', cls:'tier-2' },
+  3: { label:'③ Information for safety', cls:'tier-3' },
+};
+
+const KINDS = {
+  use:      { label:'Use error',      chip:'Use error' },
+  device:   { label:'Device failure', chip:'Device failure → FMEA' },
+  abnormal: { label:'Abnormal use',   chip:'Abnormal use' },
+};
+
+const PTS = { spotPer:5, sevExact:10, sevClose:5, best:15, ok:8, weak:3 };
+
+// ==================== DEVICE CATALOG ====================
+const DEVICES = [
+{
+  name: 'Epinephrine Auto-Injector',
+  context: 'Lay users · high-stress emergency',
+  useSpec: 'Users: patients and untrained lay caregivers, often panicked. Environment: home, school, restaurant — no clinical support. Single use, seconds matter.',
+  tasks: [
+    {
+      name: 'Orient the device',
+      short: 'Grip with the needle end toward the thigh',
+      pca: {
+        p: 'Distinguish the needle end from the safety-release end by shape and color',
+        c: 'Recall which end delivers the needle',
+        a: 'Form a fist grip with the needle end down, thumb clear of both ends',
+      },
+      spot: [
+        { text: 'In panic, a caregiver grips the device upside down and fires it into their own thumb.', kind:'use',
+          explain: '<b>Use error.</b> The user intended correct use, but the action departed from it — and the device performed exactly as designed. This is the classic reversed-grip auto-injector error.' },
+        { text: 'The internal drive spring has corroded and the needle never deploys despite correct activation.', kind:'device',
+          explain: '<b>Device failure.</b> The user did everything right; the hardware failed to meet spec. This row belongs in your design FMEA, not the use-related risk analysis.' },
+        { text: 'A curious teenager dismantles the device "to see how it works," defeating the needle mechanism.', kind:'abnormal',
+          explain: '<b>Abnormal use.</b> An intentional act contrary to the labeling. IEC 62366-1 places it outside the usability-engineering process — though it may still deserve a look under ISO 14971.' },
+      ],
+      useError: { type:'Mistake', desc:'Reversed grip — device fired into rescuer’s thumb',
+        hazSit:'Patient in anaphylaxis receives no epinephrine; rescuer receives a digital epinephrine injection',
+        harm:'Untreated anaphylaxis progressing toward airway compromise; digital ischemia in the rescuer' },
+      expertSeverity: 4,
+      sevRationale: 'The dominant harm is the <b>missed dose</b>: untreated anaphylaxis is potentially life-threatening (4). The rescuer’s thumb injection usually resolves. Rate the worst credible harm from the hazardous situation — not the most common one.',
+      mitigations: [
+        { text:'Print “NEEDLE END — POINT TOWARD OUTER THIGH” in orange on the tip; reinforce grip technique in pharmacist counseling and the IFU.', tier:3, quality:'weak',
+          feedback:'Information for safety is the <b>weakest tier</b>. Under emergency stress, lay users often do not read or recall labeling. Acceptable as a supplement — hard to defend as the sole control for a critical task.' },
+        { text:'Base-activation design: the device fires only when the needle end is pressed against the body, and the two ends are grossly different in shape so a reversed fist grip feels wrong.', tier:1, quality:'best',
+          feedback:'<b>Inherent safety by design</b> — top of the hierarchy. The design makes the error physically difficult or inconsequential instead of asking a panicked user to remember anything.' },
+        { text:'Add a pivoting needle-end guard that only opens under thigh pressure, plus a tactile ring on the safety end.', tier:2, quality:'ok',
+          feedback:'A solid <b>protective measure</b> — it interrupts the error sequence before harm. But the hazard (a device that can fire into a thumb) still exists behind the safeguard; a design that can’t fire reversed is stronger.' },
+      ],
+    },
+    {
+      name: 'Remove the safety release',
+      short: 'Pull the safety cap to arm the device',
+      pca: {
+        p: 'See and feel the safety release on the device body',
+        c: 'Recall that the device cannot fire until the release is removed',
+        a: 'Pull the release straight off before placing the device',
+      },
+      spot: [
+        { text: 'Under stress, the user skips the safety release, presses the still-capped device to the thigh, and walks away believing the dose was given.', kind:'use',
+          explain: '<b>Use error</b> — an omission (lapse). Note the UI’s role: the device gave no feedback that nothing happened, so the error went undetected.' },
+        { text: 'Molding flash from manufacturing fuses the safety release to the housing so it cannot be removed by hand.', kind:'device',
+          explain: '<b>Device failure</b> (manufacturing defect). Correct user action is defeated by a nonconforming part — that’s process-FMEA territory.' },
+      ],
+      useError: { type:'Lapse', desc:'Safety release never removed; activation assumed successful',
+        hazSit:'Patient believed to be treated but received no drug',
+        harm:'Untreated anaphylaxis; delay before anyone re-attempts treatment' },
+      expertSeverity: 4,
+      sevRationale: 'A <b>silent no-dose event</b> delays rescue treatment while everyone believes it was given; progression to a life-threatening state is credible (4). Notice that severity — not the probability of the lapse — is what drives criticality here.',
+      mitigations: [
+        { text:'Re-sequence by design: the safety release is integral to the carrier cap, so opening the case automatically arms the device — the “armed but capped” state cannot exist.', tier:1, quality:'best',
+          feedback:'A <b>forcing function</b> — inherent safety by design. The step that could be omitted no longer exists as a separate step, so the lapse is designed out.' },
+        { text:'Number the steps 1-2-3 on the label with a pictogram of removing the safety release; cover it in training.', tier:3, quality:'weak',
+          feedback:'<b>Information for safety.</b> Step numbering helps, but a lapse is a memory failure under stress — precisely the condition in which labels are skipped. Weak as a sole control.' },
+        { text:'Dose-delivery feedback: a loud click plus a window that changes color only after the full dose is actually delivered, so a failed activation is caught immediately.', tier:2, quality:'ok',
+          feedback:'A good <b>protective measure</b>: it doesn’t prevent the lapse, but it makes the no-dose state detectable so the user can recover before harm. Pair it with a design fix and you have layered controls.' },
+      ],
+    },
+    {
+      name: 'Inject and hold',
+      short: 'Press firmly against the outer thigh; hold for the full time',
+      pca: {
+        p: 'Hear/feel the activation click; sense elapsed time',
+        c: 'Recall the required hold duration',
+        a: 'Maintain firm pressure for the full injection time',
+      },
+      spot: [
+        { text: 'The user hears the click, assumes injection is instantaneous, and pulls the device away after about one second.', kind:'use',
+          explain: '<b>Use error</b> — a mistake rooted in a wrong mental model (“the click means it’s done”). Formative testing exists to surface exactly these expectations.' },
+        { text: 'A blocked orifice ejects only part of the dose even though the user holds correctly for the full time.', kind:'device',
+          explain: '<b>Device failure.</b> Same clinical outcome as the use error (partial dose) — but a different initiating chain, different analysis, different controls. FMEA.' },
+        { text: 'A clinician deliberately fires the single-patient device twice, splitting one adult dose across two children.', kind:'abnormal',
+          explain: '<b>Abnormal use</b> — an intentional deviation from labeled use by a trained professional. Outside the UE process, but worth flagging to risk management.' },
+      ],
+      useError: { type:'Mistake', desc:'Device withdrawn before dose fully delivered',
+        hazSit:'Partial epinephrine dose delivered during anaphylaxis',
+        harm:'Sub-therapeutic dose; reaction may progress while the rescuer believes treatment succeeded' },
+      expertSeverity: 4,
+      sevRationale: 'A partial dose can fail to halt anaphylaxis while providing false reassurance — life-threatening progression is credible (4). Manufacturers have responded by shortening required hold times (10 s → 3 s → ~2 s across device generations).',
+      mitigations: [
+        { text:'IFU and carrier-tube label: “Hold firmly for 3 seconds” with a counting cue.', tier:3, quality:'weak',
+          feedback:'<b>Information for safety.</b> Counting instructions compete with a medical emergency for the user’s attention. Least effective tier — supplement only.' },
+        { text:'End-of-dose signal: a distinct second click or tone that tells the user when withdrawal is safe.', tier:2, quality:'ok',
+          feedback:'A <b>protective measure</b> — it converts “remember to hold” into “respond to a signal,” catching the error before it truncates the dose. Good; still leaves the fast-withdrawal hazard in place.' },
+        { text:'Redesign the drive so the full dose is delivered in under one second — faster than a user can plausibly withdraw the device.', tier:1, quality:'best',
+          feedback:'<b>Inherent safety by design</b>: the error (early withdrawal) becomes inconsequential because the dose outruns it. This mirrors the real evolution of auto-injector hold times.' },
+      ],
+    },
+    {
+      name: 'Handle the used device',
+      short: 'Secure the spent injector while attending to the patient',
+      pca: {
+        p: 'Notice which end of the spent device carries the needle',
+        c: 'Recall that the needle may be exposed after firing',
+        a: 'Grasp the body — not the tip — and re-sheath it in the carrier tube',
+      },
+      spot: [
+        { text: 'While calling 911, the caregiver grabs the spent device by the needle end and sustains a needlestick.', kind:'use',
+          explain: '<b>Use error</b> — a slip: attention is captured by the emergency, and the hand does the wrong thing. High-workload moments breed slips.' },
+        { text: 'The post-use needle shield’s spring fractures and fails to deploy over the needle.', kind:'device',
+          explain: '<b>Device failure.</b> A protective component not performing to spec — FMEA. (And note the layering: this failure removes a safeguard that a use error then exploits.)' },
+      ],
+      useError: { type:'Slip', desc:'Caregiver grasps exposed needle end of spent device',
+        hazSit:'Caregiver’s hand contacts a used exposed needle',
+        harm:'Superficial needlestick to a family caregiver; minimal residual drug' },
+      expertSeverity: 2,
+      sevRationale: 'Typically a temporary, minor injury to a known-household contact (2). This is a judgment call: in a clinical or multi-user setting, bloodborne-pathogen exposure could justify a 3 — severity depends on the use specification you wrote. <b>Because serious harm is not the credible outcome here, this is NOT a critical task</b> — but it still gets documented and controlled.',
+      mitigations: [
+        { text:'Automatic needle retraction: the needle withdraws fully into the housing at end of dose and is never re-exposed.', tier:1, quality:'best',
+          feedback:'<b>Inherent safety by design</b> — the hazard (an exposed sharp) is eliminated outright. Nothing for the user to get wrong.' },
+        { text:'Passive locking needle shield that extends over the needle as the device is withdrawn.', tier:2, quality:'ok',
+          feedback:'A <b>protective measure</b> — a barrier between the user and a hazard that still exists. Effective, widely used, but one spring away from failing (see the FMEA finding above).' },
+        { text:'Label on the barrel — “Needle end, do not touch” — and disposal instructions in the IFU.', tier:3, quality:'weak',
+          feedback:'<b>Information for safety.</b> The user whose attention is on the patient is exactly the user who won’t read the barrel. Weakest tier.' },
+      ],
+    },
+  ],
+},
+{
+  name: 'Home Infusion Pump',
+  context: 'Home nurses &amp; trained caregivers',
+  useSpec: 'Users: visiting nurses and trained family caregivers. Environment: the home — dim bedrooms, interruptions, fatigue, no second checker. High-alert medications on board.',
+  tasks: [
+    {
+      name: 'Program the infusion rate',
+      short: 'Key in the ordered rate and confirm',
+      pca: {
+        p: 'Read the drug order and the pump display',
+        c: 'Convert the order to a pump rate; verify the entry',
+        a: 'Key digits and decimal point; press confirm',
+      },
+      spot: [
+        { text: 'A caregiver keys 4-4 instead of 4-.-4 — the decimal press never registers in their glance-and-type flow — and confirms a 44 mL/h rate.', kind:'use',
+          explain: '<b>Use error</b> — a keying slip producing a ten-fold overdose. This is the canonical infusion-pump use error in the human-factors literature.' },
+        { text: 'A worn keypad dome switch intermittently registers double digits even when pressed once.', kind:'device',
+          explain: '<b>Device failure</b> — same wrong-rate outcome, but initiated by hardware. Distinguishing these two chains in a field-event investigation is precisely the manufacturer’s job.' },
+        { text: 'A home nurse routinely bypasses the drug library “to save time,” against policy and the IFU.', kind:'abnormal',
+          explain: '<b>Abnormal use</b> — an intentional violation, outside the UE process. But treat frequent workarounds as free usability data: they usually mean the intended workflow is too burdensome.' },
+      ],
+      useError: { type:'Slip', desc:'Ten-fold overdose programmed (44 instead of 4.4 mL/h)',
+        hazSit:'High-alert medication infused at ten times the intended rate',
+        harm:'Overdose — respiratory depression, hypoglycemia, or death depending on the drug' },
+      expertSeverity: 5,
+      sevRationale: 'A ten-fold IV overdose of a high-alert medication is credibly fatal (5). Ten-fold programming errors have killed patients and are a fixture of infusion-pump recall and HF history. You cannot argue this down with “but it’s rare” — use-error probability is rarely quantifiable, so severity leads.',
+      mitigations: [
+        { text:'Dose-error-reduction software with hard limits: the pump refuses any rate outside the drug’s safe range — the overdose cannot be programmed.', tier:1, quality:'best',
+          feedback:'<b>Inherent safety by design</b> (a forcing function in software). The erroneous entry is rejected at the source; no vigilance required.' },
+        { text:'Soft limits: out-of-range entries trigger a high-salience warning showing the dose in clinical units, and require a deliberate override.', tier:2, quality:'ok',
+          feedback:'A <b>protective measure</b>. Better than nothing — but override-able warnings decay with alarm fatigue, and the fatal entry is still acceptable to the pump. Hard limits dominate soft limits for this hazard.' },
+        { text:'Require a second-person double check by policy and place a “CHECK DECIMAL POINT” label beside the keypad.', tier:3, quality:'weak',
+          feedback:'<b>Information for safety</b> plus a procedural control the manufacturer doesn’t even own. In a home with one caregiver at 2 a.m., there is no second person. Weakest option for a severity-5 hazard.' },
+      ],
+    },
+    {
+      name: 'Load the administration set',
+      short: 'Clamp, seat the tubing, close the door',
+      pca: {
+        p: 'See the clamp position and the tubing path',
+        c: 'Recall the clamp-before-unload rule',
+        a: 'Close the manual clamp, seat the set, shut the door',
+      },
+      spot: [
+        { text: 'Changing a bag, the caregiver pulls the set out of the pump with the manual clamp still open; drug free-flows into the patient by gravity.', kind:'use',
+          explain: '<b>Use error</b> — an omitted step (lapse) with an unmetered bolus as the consequence. Free-flow events are a landmark chapter of infusion-pump safety history.' },
+        { text: 'The peristaltic mechanism seizes mid-infusion and delivery stops silently.', kind:'device',
+          explain: '<b>Device failure</b> — mechanical, with correct use throughout. FMEA, with its own severity chain (missed therapy).' },
+      ],
+      useError: { type:'Lapse', desc:'Set removed with clamp open → uncontrolled gravity free-flow',
+        hazSit:'Unmetered bolus of infusate delivered by gravity',
+        harm:'Free-flow bolus of a high-alert drug — historically associated with deaths' },
+      expertSeverity: 5,
+      sevRationale: 'Gravity free-flow of a concentrated medication is an unmetered IV bolus; deaths from exactly this lapse are why modern pumps and sets are expected to carry free-flow protection (5 for a high-alert infusate — grade against your device’s intended drugs).',
+      mitigations: [
+        { text:'Warning label inside the pump door: “CLOSE CLAMP BEFORE REMOVING SET.”', tier:3, quality:'weak',
+          feedback:'<b>Information for safety.</b> A label at the point of error is better than a line in the IFU — but it still asks a tired caregiver to notice and comply. Weak against a severity-5 hazard.' },
+        { text:'Administration set with an automatic anti-free-flow valve that closes whenever the set leaves the pump — the lapse becomes harmless.', tier:1, quality:'best',
+          feedback:'<b>Inherent safety by design.</b> The user can still forget the clamp; it just no longer matters. This is what “make the error inconsequential” looks like in hardware.' },
+        { text:'Door interlock: opening the door drives a mechanical clamp onto the tubing and alarms until the manual clamp is confirmed closed.', tier:2, quality:'ok',
+          feedback:'A strong <b>protective measure</b> — it catches the lapse at the moment it happens. Still one mechanism (and one alarm response) away from harm, which is why set-based free-flow protection became the expectation.' },
+      ],
+    },
+    {
+      name: 'Respond to an occlusion alarm',
+      short: 'Find the cause, clear it, restart the infusion',
+      pca: {
+        p: 'Hear the alarm; read the alarm cause on the display',
+        c: 'Diagnose where the occlusion is; decide the response',
+        a: 'Trace the line, clear the occlusion, restart',
+      },
+      spot: [
+        { text: 'Woken at 3 a.m., a caregiver silences the occlusion alarm and goes back to bed without checking the line.', kind:'use',
+          explain: '<b>Use error</b> — a rule-based mistake: “alarms are usually nuisance, so silence it.” Alarm fatigue is a use-related hazard the UI itself creates.' },
+        { text: 'A drifting pressure sensor raises occlusion alarms when the line is actually patent.', kind:'device',
+          explain: '<b>Device failure</b> — and a use-related risk multiplier: every false alarm trains users to distrust the next real one. FMEA finding with HF consequences.' },
+        { text: 'The patient tapes over the pump’s speaker so the alarms won’t wake the household.', kind:'abnormal',
+          explain: '<b>Abnormal use</b> — an intentional defeat of a safety feature. Outside the UE process; also a signal that the alarm scheme is intolerable in a home at night, which IS usability data.' },
+      ],
+      useError: { type:'Mistake', desc:'Alarm silenced without resolving the occlusion',
+        hazSit:'Therapy interrupted; line pressure builds — possible post-occlusion bolus on release',
+        harm:'Missed critical therapy and/or a transient overdose bolus' },
+      expertSeverity: 3,
+      sevRationale: 'An interrupted infusion generally requires professional intervention to assess and restart (3). For some therapies — pressors, insulin — the same error grades higher: severity always depends on the intended clinical use you defined in the use specification.',
+      mitigations: [
+        { text:'State-based alarm logic: an occlusion alarm cannot be permanently cleared until the pump senses flow restored; silence is time-limited and re-alarms.', tier:1, quality:'best',
+          feedback:'<b>Design.</b> The unsafe state (silenced alarm, unresolved occlusion) is made unreachable. The user can still delay — but cannot dismiss the hazard out of existence.' },
+        { text:'Escalating, cause-specific alarms with on-screen troubleshooting: “Check clamp between pump and patient.”', tier:2, quality:'ok',
+          feedback:'A <b>protective measure</b> that also reduces the mistake’s root cause (uninformative alarms breed dismissal). Good — but a determined 3 a.m. silence still wins.' },
+        { text:'Cover alarm response in the caregiver onboarding checklist and a quick-reference card on the pole.', tier:3, quality:'weak',
+          feedback:'<b>Information for safety / training.</b> Training decays, and the moment of use is a dark bedroom, not a classroom. Weakest tier.' },
+      ],
+    },
+    {
+      name: 'Connect the tubing',
+      short: 'Join the right line to the right port',
+      pca: {
+        p: 'Identify which line and port belong to which route (IV vs enteral)',
+        c: 'Match the line to the intended route',
+        a: 'Make the physical connection',
+      },
+      spot: [
+        { text: 'In a dim bedroom, a caregiver connects the enteral feeding set to the IV line — the connectors mate perfectly.', kind:'use',
+          explain: '<b>Use error</b> — a slip the design invites: universally compatible connectors afford the wrong action. When the wrong action is this easy, blaming the user misses the point.' },
+        { text: 'A cracked connector hub leaks and admits air into the line.', kind:'device',
+          explain: '<b>Device failure</b> — material/component integrity, correct use throughout. FMEA.' },
+      ],
+      useError: { type:'Slip', desc:'Enteral feed connected to an IV catheter',
+        hazSit:'Non-sterile enteral formula enters the bloodstream',
+        harm:'Embolism and sepsis — frequently fatal in reported misconnection cases' },
+      expertSeverity: 5,
+      sevRationale: 'Enteral-to-IV misconnection is a sentinel-event class with high mortality (5). Decades of labels and color codes failed to stop it — which is why the response was ultimately geometric: the ISO 80369 small-bore connector series makes the wrong connection impossible to mate.',
+      mitigations: [
+        { text:'Color-code the enteral line purple and cap the ports with route labels.', tier:3, quality:'weak',
+          feedback:'Looks like a design change — <b>functions as information for safety</b>. It still relies on the user noticing and interpreting color, in dim light, possibly with color-vision deficiency. Misconnection history shows it is not sufficient.' },
+        { text:'“Trace the line from the patient before you connect” training and an IFU warning.', tier:3, quality:'weak',
+          feedback:'<b>Information for safety.</b> Line-tracing is good practice and still recommended — as a supplement. As a sole control for a severity-5 hazard, it failed for decades.' },
+        { text:'Adopt incompatible connectors per the ISO 80369 series (e.g., ENFit for enteral): the wrong connection physically cannot be made.', tier:1, quality:'best',
+          feedback:'<b>Inherent safety by design</b> — the forcing function. The hazardous connection is geometrically impossible. This is the actual regulatory-and-standards endgame for misconnections, and the cleanest example of the hierarchy’s top tier.' },
+      ],
+    },
+  ],
+},
+];
+
+// ==================== STATE ====================
+function freshTaskState(){ return { spot:{}, spotDone:false, spotPts:0, sev:null, sevDone:false, sevPts:0, mit:null, mitDone:false, mitPts:0 }; }
+let STATE = DEVICES.map(d => d.tasks.map(freshTaskState));
+let curDevice = null;   // device index
+let curTask = null;     // task index within device
+
+function ts(di, ti){ return STATE[di][ti]; }
+function isCritical(t){ return t.expertSeverity >= 3; }
+function taskDone(st){ return st.spotDone && st.sevDone && st.mitDone; }
+function taskStarted(st){ return st.spotDone || st.sevDone || st.mitDone || Object.keys(st.spot).length > 0 || st.sev !== null || st.mit !== null; }
+function taskPts(st){ return st.spotPts + st.sevPts + st.mitPts; }
+function taskMax(t){ return t.spot.length * PTS.spotPer + PTS.sevExact + PTS.best; }
+function deviceMax(d){ return d.tasks.reduce((a,t) => a + taskMax(t), 0); }
+
+// ==================== SIDEBAR ====================
+function buildSidebar(){
+  document.getElementById('device-list').innerHTML = DEVICES.map((d,i) => `
+    <div class="device-card ${i===curDevice?'active':''}" id="dc-${i}" onclick="selectDevice(${i})">
+      <div class="device-card-name">${d.name}</div>
+      <div class="device-card-code">${d.context}</div>
+      <div class="device-card-count" id="dc-count-${i}">${STATE[i].filter(taskDone).length} / ${d.tasks.length} tasks</div>
+    </div>`).join('');
+}
+
+function selectDevice(i){
+  curDevice = i;
+  buildSidebar();
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('content').style.display = 'flex';
+  const d = DEVICES[i];
+  document.getElementById('content-title').textContent = d.name + ' — Use-Related Risk Analysis';
+  document.getElementById('content-sub').textContent = d.useSpec;
+  renderContent();
+  if (window.innerWidth <= 900) closeMobileSidebar();
+}
+
+function resetDevice(){
+  if (curDevice === null) return;
+  STATE[curDevice] = DEVICES[curDevice].tasks.map(freshTaskState);
+  buildSidebar();
+  renderContent();
+}
+
+// ==================== MAIN RENDER ====================
+function renderContent(){
+  if (curDevice === null) return;
+  const d = DEVICES[curDevice];
+  const sts = STATE[curDevice];
+  const done = sts.filter(taskDone).length;
+  const crit = d.tasks.filter((t,i) => taskDone(sts[i]) && isCritical(t)).length;
+  const strong = d.tasks.filter((t,i) => taskDone(sts[i]) && t.mitigations[sts[i].mit] && t.mitigations[sts[i].mit].tier <= 2).length;
+  const pts = sts.reduce((a,s) => a + taskPts(s), 0);
+
+  document.getElementById('kpi-tasks').textContent = done + ' / ' + d.tasks.length;
+  document.getElementById('kpi-crit').textContent = crit;
+  document.getElementById('kpi-strong').textContent = done ? strong + ' / ' + done : '—';
+  document.getElementById('kpi-score').textContent = pts;
+  document.getElementById('kpi-score-sub').textContent = 'of ' + deviceMax(d) + ' possible';
+
+  // Task list
+  document.getElementById('task-list').innerHTML = d.tasks.map((t,i) => {
+    const st = sts[i];
+    let status;
+    if (taskDone(st)) status = `<span class="task-status st-done">✓ ${taskPts(st)} / ${taskMax(t)} pts</span>`;
+    else if (taskStarted(st)) status = `<span class="task-status st-progress">In progress</span>`;
+    else status = `<span class="task-status st-todo">Not started</span>`;
+    return `
+    <div class="task-row ${taskDone(st)?'done':''}" onclick="openTask(${i})">
+      <div class="task-num">${i+1}</div>
+      <div><div class="task-name">${t.name}</div><div class="task-desc">${t.short}</div></div>
+      ${status}
+    </div>`;
+  }).join('');
+
+  // URRA table
+  const rows = d.tasks.map((t,i) => ({t, i, st: sts[i]})).filter(r => taskDone(r.st));
+  const tbody = document.getElementById('urra-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="urra-empty">No completed tasks yet — your URRA rows will appear here as you work through the task analysis above.</div></td></tr>`;
+  } else {
+    tbody.innerHTML = rows.map(({t,i,st}) => {
+      const m = t.mitigations[st.mit];
+      const weak = m.quality === 'weak';
+      return `
+      <tr onclick="openTask(${i})">
+        <td>${i+1}. ${t.name}</td>
+        <td style="max-width:220px">${t.useError.desc}</td>
+        <td><span class="type-badge">${t.useError.type}</span></td>
+        <td><span class="sev-badge sev-${t.expertSeverity}">${t.expertSeverity}</span></td>
+        <td>${isCritical(t) ? '<span class="crit-yes">CRITICAL</span>' : '<span class="crit-no">—</span>'}</td>
+        <td style="max-width:260px;font-size:var(--text-xs);color:var(--color-text-muted)">${m.text}</td>
+        <td><span class="tier-badge ${TIERS[m.tier].cls}">${TIERS[m.tier].label}</span>${weak ? '<div class="weak-flag">⚠ WEAK CONTROL</div>' : ''}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ==================== DRAWER ====================
+function openTask(i){
+  curTask = i;
+  renderDrawer();
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('task-drawer').classList.add('open');
+}
+
+function closeDrawer(){
+  curTask = null;
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('task-drawer').classList.remove('open');
+  buildSidebar();
+  renderContent();
+}
+
+function renderDrawer(){
+  if (curDevice === null || curTask === null) return;
+  const d = DEVICES[curDevice];
+  const t = d.tasks[curTask];
+  const st = ts(curDevice, curTask);
+
+  document.getElementById('drawer-kicker').textContent = d.name + ' · Task ' + (curTask+1) + ' of ' + d.tasks.length;
+  document.getElementById('drawer-title').textContent = t.name;
+
+  let html = `
+  <div class="hf-section">
+    <div class="hf-section-title">Task — Perception · Cognition · Action</div>
+    <div class="hf-field"><div class="hf-value">${t.short}.</div></div>
+    <div class="pca-grid">
+      <div class="pca-cell pca-key">Perceive</div><div class="pca-cell">${t.pca.p}</div>
+      <div class="pca-cell pca-key">Decide</div><div class="pca-cell">${t.pca.c}</div>
+      <div class="pca-cell pca-key">Act</div><div class="pca-cell">${t.pca.a}</div>
+    </div>
+    <div class="hf-field" style="margin-top:var(--space-3);margin-bottom:0"><div class="hf-label" style="margin-bottom:var(--space-1)">Why break it down?</div>
+    <div style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6">FDA's 2016 HF guidance frames every task as a perception → cognition → action loop; a use error can enter at any stage. Task analysis is where use-related risk analysis begins.</div></div>
+  </div>`;
+
+  // ---------- STEP 1 ----------
+  html += `<div class="step-box">
+    <div class="step-head"><div class="step-num ${st.spotDone?'done':''}">${st.spotDone?'✓':'1'}</div><div class="step-title">Sort the formative-study findings</div></div>
+    <div class="step-prompt">Your formative usability study and complaint files surfaced the events below. Classify each: is it a <b>use error</b> (belongs in this analysis), a <b>device failure</b> (belongs in your FMEA), or <b>abnormal use</b> (intentional violation — outside the usability-engineering process)?</div>`;
+
+  t.spot.forEach((item, idx) => {
+    const picked = st.spot[idx];
+    html += `<div class="spot-item"><div class="spot-text">${item.text}</div><div class="chip-row">`;
+    for (const kind of ['use','device','abnormal']) {
+      let cls = 'chip';
+      if (!st.spotDone) { if (picked === kind) cls += ' sel'; }
+      else {
+        if (kind === item.kind) cls += ' right';
+        else if (picked === kind) cls += ' wrong';
+      }
+      html += `<button class="${cls}" ${st.spotDone?'disabled':''} onclick="classify(${idx},'${kind}')">${KINDS[kind].chip}</button>`;
+    }
+    html += `</div>`;
+    if (st.spotDone) html += `<div class="spot-explain">${picked === item.kind ? '✓' : '✗'} ${item.explain}</div>`;
+    html += `</div>`;
+  });
+
+  if (!st.spotDone) {
+    const allPicked = t.spot.every((_,idx) => st.spot[idx]);
+    html += `<button class="check-btn" ${allPicked?'':'disabled'} onclick="checkSpot()">Check classifications</button>`;
+  } else {
+    const right = t.spot.filter((item,idx) => st.spot[idx] === item.kind).length;
+    html += `<div class="feedback ${right === t.spot.length ? 'fb-good' : 'fb-mid'}"><b>${right} / ${t.spot.length} correct · +${st.spotPts} pts.</b> The use error carries forward into the next steps. The device-failure finding goes to your FMEA — same risk file, different analysis.</div>`;
+  }
+  html += `</div>`;
+
+  // ---------- STEP 2 ----------
+  if (st.spotDone) {
+    html += `<div class="step-box">
+      <div class="step-head"><div class="step-num ${st.sevDone?'done':''}">${st.sevDone?'✓':'2'}</div><div class="step-title">Rate the severity of the resulting harm</div></div>
+      <div class="hf-field"><div class="hf-label">Use error (${t.useError.type})</div><div class="hf-value">${t.useError.desc}</div></div>
+      <div class="hf-field"><div class="hf-label">Hazardous situation</div><div class="hf-value">${t.useError.hazSit}</div></div>
+      <div class="hf-field"><div class="hf-label">Potential harm</div><div class="hf-value">${t.useError.harm}</div></div>
+      <div class="step-prompt">Rate the <b>worst credible harm</b>, not the most common outcome. (Scale modeled on common ISO 14971 practice.)</div>`;
+
+    SEVERITY_SCALE.forEach(s => {
+      let cls = 'sev-opt';
+      if (!st.sevDone) { if (st.sev === s.v) cls += ' sel'; }
+      else {
+        if (s.v === t.expertSeverity) cls += ' expert';
+        else if (st.sev === s.v) cls += ' sel';
+      }
+      html += `<button class="${cls}" ${st.sevDone?'disabled':''} onclick="pickSeverity(${s.v})">
+        <span class="sev-badge sev-${s.v}">${s.v}</span>
+        <span><span class="sev-opt-name">${s.name}</span><br><span class="sev-opt-desc">${s.desc}</span></span>
+      </button>`;
+    });
+
+    if (!st.sevDone) {
+      html += `<button class="check-btn" ${st.sev?'':'disabled'} onclick="checkSeverity()">Check severity</button>`;
+    } else {
+      const diff = Math.abs(st.sev - t.expertSeverity);
+      const cls = diff === 0 ? 'fb-good' : (diff === 1 ? 'fb-mid' : 'fb-bad');
+      const head = diff === 0 ? `Matches the expert rating (${t.expertSeverity}). +${st.sevPts} pts.` : (diff === 1 ? `Close — expert rating is ${t.expertSeverity}, you said ${st.sev}. +${st.sevPts} pts.` : `Expert rating is ${t.expertSeverity}; you said ${st.sev}. +0 pts.`);
+      html += `<div class="feedback ${cls}"><b>${head}</b><br>${t.sevRationale}</div>`;
+      html += `<div class="feedback fb-info" style="margin-top:var(--space-2)">${isCritical(t)
+        ? '<b>Critical task.</b> A use error here could cause serious harm, so FDA’s 2016 guidance makes this a <b>critical task</b>: it must be exercised in your summative (validation) usability test. And note — FDA advises against leaning on probability estimates for use errors; severity is what drives this call.'
+        : '<b>Not a critical task.</b> Serious harm is not the credible outcome, so this task doesn’t meet FDA’s critical-task bar — but it stays in the URRA, and you still control what you reasonably can.'}</div>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="step-box locked"><div class="step-head"><div class="step-num">2</div><div class="step-title">Rate the severity of the resulting harm</div></div><div class="step-prompt">Complete step 1 first.</div></div>`;
+  }
+
+  // ---------- STEP 3 ----------
+  if (st.sevDone) {
+    html += `<div class="step-box">
+      <div class="step-head"><div class="step-num ${st.mitDone?'done':''}">${st.mitDone?'✓':'3'}</div><div class="step-title">Select a risk control</div></div>
+      <div class="step-prompt">Engineering proposes three options. Pick the one you would implement first, remembering the hierarchy: <b>design ① before safeguards ② before information ③</b>.</div>`;
+
+    t.mitigations.forEach((m, idx) => {
+      let cls = 'mit-opt';
+      if (!st.mitDone) { if (st.mit === idx) cls += ' sel'; }
+      else {
+        if (m.quality === 'best') cls += ' best-reveal';
+        if (st.mit === idx) cls += ' sel';
+      }
+      html += `<button class="${cls}" ${st.mitDone?'disabled':''} onclick="pickMit(${idx})">${m.text}`;
+      if (st.mitDone) {
+        html += `<span class="mit-tier-line"><span class="tier-badge ${TIERS[m.tier].cls}">${TIERS[m.tier].label}</span>${m.quality==='best'?'<span style="font-size:var(--text-xs);font-weight:700;color:var(--color-success)">STRONGEST AVAILABLE</span>':''}${m.quality==='weak'?'<span class="weak-flag">⚠ WEAK — information only</span>':''}</span>`;
+      }
+      html += `</button>`;
+    });
+
+    if (!st.mitDone) {
+      html += `<button class="check-btn" ${st.mit!==null?'':'disabled'} onclick="checkMit()">Check control</button>`;
+    } else {
+      const m = t.mitigations[st.mit];
+      const cls = m.quality === 'best' ? 'fb-good' : (m.quality === 'ok' ? 'fb-mid' : 'fb-bad');
+      html += `<div class="feedback ${cls}"><b>+${st.mitPts} pts.</b> ${m.feedback}</div>`;
+      if (m.quality === 'weak' && isCritical(t)) {
+        html += `<div class="feedback fb-bad" style="margin-top:var(--space-2)"><b>⚠ Residual risk stays high.</b> Labeling and training reduce use-error likelihood only marginally, and this is a critical task. Expect your risk-management reviewer — and FDA — to ask why a design or safeguard option was not implemented first.</div>`;
+      }
+      html += `<div class="feedback fb-info" style="margin-top:var(--space-2)"><b>Close the loop:</b> a risk control is a design change, so it re-enters verification — and for critical tasks, the control’s effectiveness must be demonstrated in a simulated-use <b>summative validation</b> study (FDA’s 2016 guidance: minimum 15 participants per distinct user group). Severity of harm typically stays the same; the control works by cutting the likelihood that the error reaches harm.</div>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="step-box locked"><div class="step-head"><div class="step-num">3</div><div class="step-title">Select a risk control</div></div><div class="step-prompt">Complete steps 1–2 first.</div></div>`;
+  }
+
+  // ---------- SUMMARY ----------
+  if (taskDone(st)) {
+    html += `<div class="hf-section">
+      <div class="hf-section-title">Task Complete — Score</div>
+      <div class="score-row"><span>Step 1 · Sorting findings</span><span class="score-pts">${st.spotPts} / ${t.spot.length * PTS.spotPer}</span></div>
+      <div class="score-row"><span>Step 2 · Severity rating</span><span class="score-pts">${st.sevPts} / ${PTS.sevExact}</span></div>
+      <div class="score-row"><span>Step 3 · Risk control</span><span class="score-pts">${st.mitPts} / ${PTS.best}</span></div>
+      <div class="score-row"><span>Task total</span><span class="score-pts">${taskPts(st)} / ${taskMax(t)}</span></div>
+      <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4);flex-wrap:wrap">
+        ${curTask < d.tasks.length - 1 ? `<button class="check-btn" onclick="openTask(${curTask+1})">Next task →</button>` : `<button class="check-btn" onclick="closeDrawer()">Review the URRA table</button>`}
+        <button class="ghost-btn" onclick="redoTask()">Redo this task</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('drawer-content').innerHTML = html;
+}
+
+// ==================== INTERACTIONS ====================
+function classify(itemIdx, kind){
+  const st = ts(curDevice, curTask);
+  if (st.spotDone) return;
+  st.spot[itemIdx] = kind;
+  renderDrawer();
+}
+
+function checkSpot(){
+  const t = DEVICES[curDevice].tasks[curTask];
+  const st = ts(curDevice, curTask);
+  if (st.spotDone || !t.spot.every((_,i) => st.spot[i])) return;
+  st.spotPts = t.spot.reduce((a, item, i) => a + (st.spot[i] === item.kind ? PTS.spotPer : 0), 0);
+  st.spotDone = true;
+  renderDrawer();
+  renderContent();
+}
+
+function pickSeverity(v){
+  const st = ts(curDevice, curTask);
+  if (st.sevDone) return;
+  st.sev = v;
+  renderDrawer();
+}
+
+function checkSeverity(){
+  const t = DEVICES[curDevice].tasks[curTask];
+  const st = ts(curDevice, curTask);
+  if (st.sevDone || st.sev === null) return;
+  const diff = Math.abs(st.sev - t.expertSeverity);
+  st.sevPts = diff === 0 ? PTS.sevExact : (diff === 1 ? PTS.sevClose : 0);
+  st.sevDone = true;
+  renderDrawer();
+  renderContent();
+}
+
+function pickMit(idx){
+  const st = ts(curDevice, curTask);
+  if (st.mitDone) return;
+  st.mit = idx;
+  renderDrawer();
+}
+
+function checkMit(){
+  const t = DEVICES[curDevice].tasks[curTask];
+  const st = ts(curDevice, curTask);
+  if (st.mitDone || st.mit === null) return;
+  st.mitPts = PTS[t.mitigations[st.mit].quality];
+  st.mitDone = true;
+  renderDrawer();
+  renderContent();
+  buildSidebar();
+}
+
+function redoTask(){
+  STATE[curDevice][curTask] = freshTaskState();
+  renderDrawer();
+  renderContent();
+  buildSidebar();
+}
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = r.getAttribute('data-theme') || 'light';
+  r.setAttribute('data-theme', d);
+  function updateIcon(){
+    t.innerHTML = d === 'dark'
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+  updateIcon();
+  t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    updateIcon();
+  });
+})();
+
+// ==================== MOBILE SIDEBAR ====================
+function toggleMobileSidebar(){
+  document.querySelector('.sidebar').classList.toggle('mobile-open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeMobileSidebar(){
+  document.querySelector('.sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ==================== INIT ====================
+buildSidebar();
+</script>
+</body>
+</html>
