@@ -1,0 +1,1242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#211E19">
+<title>Capstone Chaos</title>
+<!--
+  CAPSTONE CHAOS — a satirical resource-management game.
+  Single self-contained HTML file. No dependencies, no network.
+
+  NOTE: Every character in this game is an archetype identified by ROLE only
+  (The Chair, The Assistant Director, The Over-Engineers, ...). This repo is
+  public: real names, real teams, and any recognizable details belong ONLY in
+  a local, unpushed copy — never committed here.
+-->
+<style>
+  :root{
+    --desk:#211E19; --desk2:#2A2620; --desk3:#181510;
+    --paper:#F4F1E8; --paper2:#ECE8DA; --paper3:#E2DDCB;
+    --ink:#26231D; --ink-soft:#6E6759; --ink-faint:#948C7B;
+    --line:#D6D0BE; --line2:#C4BCA6;
+    --red:#B93A2B; --red-soft:#D8CCC4;
+    --hi:#EFC63F; --hi-ink:#8A6D14;
+    --green:#47774F; --amber:#B07C1F; --grey:#8A8578;
+    --chalk:#E9E4D4; --chalk-dim:#A79F8C;
+    --memo:'American Typewriter','Courier New',Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Courier New',monospace;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--desk);
+    color:var(--chalk);
+    font-family:var(--ui);
+    font-size:16px; line-height:1.45;
+    touch-action:manipulation;
+    -webkit-text-size-adjust:100%;
+    min-height:100vh;
+  }
+  #app{ max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;
+        padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
+
+  button{ font-family:inherit; font-size:inherit; border:none; background:none; color:inherit;
+          padding:0; cursor:pointer; text-align:left; }
+  button:focus-visible{ outline:3px solid var(--hi); outline-offset:2px; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:30;
+    background:var(--desk3);
+    border-bottom:1px solid #3A352B;
+    padding:calc(8px + env(safe-area-inset-top)) 14px 8px;
+  }
+  .topbar .wk{
+    font-family:var(--memo); font-size:13px; letter-spacing:.08em;
+    color:var(--chalk-dim); text-transform:uppercase;
+    display:flex; justify-content:space-between; align-items:baseline; gap:8px;
+  }
+  .topbar .wk b{ color:var(--chalk); font-size:15px; }
+  .meters{ display:flex; gap:14px; margin-top:6px; }
+  .meter{ flex:1; }
+  .meter .mlab{ font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+                color:var(--chalk-dim); display:flex; justify-content:space-between; }
+  .meter .mlab .mval{ font-variant-numeric:tabular-nums; color:var(--chalk); }
+  .pips{ display:flex; gap:3px; margin-top:3px; }
+  .pip{ height:8px; flex:1; background:#3A352B; border-radius:1px; }
+  .pip.on.att{ background:var(--hi); }
+  .pip.on.san{ background:#7FA886; }
+  .pip.on.pc{ background:#8FA3BC; }
+  .pip.low.on.san,.pip.low.on.pc{ background:var(--red); }
+
+  /* ---------- generic paper ---------- */
+  .scroll{ flex:1; padding:12px 12px 0; }
+  .paper{
+    background:var(--paper); color:var(--ink);
+    border-radius:2px;
+    box-shadow:0 1px 0 rgba(0,0,0,.5), 0 6px 18px rgba(0,0,0,.35);
+    padding:14px 16px;
+    margin-bottom:12px;
+    position:relative;
+  }
+  .paper .rule{ border:none; border-top:1px solid var(--line); margin:10px -16px; }
+  .memohead{ font-family:var(--memo); font-size:12px; color:var(--ink-soft);
+             text-transform:uppercase; letter-spacing:.06em; line-height:1.6; }
+  .memohead b{ color:var(--ink); }
+  .memobody{ font-family:var(--memo); font-size:14.5px; line-height:1.55; margin:10px 0 4px; }
+  .fineprint{ font-size:12px; color:var(--ink-faint); margin-top:8px; }
+
+  h1.gametitle{
+    font-family:var(--memo); font-weight:700; font-size:34px; line-height:1.1;
+    letter-spacing:.01em; margin:6px 0 2px; color:var(--ink);
+    text-wrap:balance;
+  }
+  .subtitle{ font-family:var(--memo); font-size:13px; color:var(--ink-soft);
+             text-transform:uppercase; letter-spacing:.14em; }
+
+  .btn{
+    display:block; width:100%;
+    background:var(--paper2); border:1.5px solid var(--ink);
+    border-radius:2px; padding:12px 14px; margin-top:10px;
+    font-family:var(--memo); font-size:15px; color:var(--ink);
+    min-height:48px;
+    box-shadow:2px 2px 0 rgba(38,35,29,.25);
+  }
+  .btn:active{ transform:translate(1px,1px); box-shadow:1px 1px 0 rgba(38,35,29,.25); }
+  .btn.primary{ background:var(--ink); color:var(--paper); }
+  .btn.disabled{ opacity:.45; pointer-events:none; }
+  .btn .cost{ float:right; font-family:var(--mono); font-size:12px; letter-spacing:.05em;
+              color:var(--hi-ink); font-variant-numeric:tabular-nums; }
+  .btn.primary .cost{ color:var(--hi); }
+  .btn .sub{ display:block; font-family:var(--ui); font-size:12.5px; color:var(--ink-soft);
+             margin-top:2px; line-height:1.35; }
+  .btn.primary .sub{ color:#B9B29E; }
+
+  /* ---------- roster ---------- */
+  .teamcard{
+    width:100%;
+    background:var(--paper); color:var(--ink);
+    border-radius:2px;
+    box-shadow:0 1px 0 rgba(0,0,0,.5), 0 5px 14px rgba(0,0,0,.3);
+    padding:12px 14px 10px; margin-bottom:10px;
+    position:relative;
+    display:block;
+  }
+  .teamcard:active{ transform:scale(.985); }
+  .teamcard .tabrow{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .teamcard .tname{ font-family:var(--memo); font-weight:700; font-size:16.5px; }
+  .teamcard .tproj{ font-family:var(--ui); font-size:12.5px; color:var(--ink-soft); margin-top:1px; }
+  .chip{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    padding:3px 8px; border-radius:10px; white-space:nowrap; flex-shrink:0;
+    border:1px solid currentColor;
+  }
+  .chip.green{ color:var(--green); background:#E7EEE4; }
+  .chip.amber{ color:var(--amber); background:#F3EAD2; }
+  .chip.red{ color:var(--red); background:#F2DEDA; }
+  .chip.grey{ color:var(--grey); background:var(--paper2); }
+  .teamcard .quote{ font-family:var(--memo); font-size:13px; color:var(--ink-soft);
+                    margin-top:8px; line-height:1.45; }
+  .teamcard .filestate{
+    margin-top:8px; display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .flagnote{ font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+             color:var(--red); }
+  .stamp-mini{
+    position:absolute; top:8px; right:10px;
+    font-family:var(--memo); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--red); border:1.5px solid var(--red); border-radius:2px;
+    padding:1px 5px; transform:rotate(6deg); opacity:.8;
+  }
+
+  /* ---------- stats readout ---------- */
+  .statrows{ margin-top:10px; }
+  .statrow{ display:flex; align-items:center; gap:10px; padding:4px 0;
+            font-family:var(--mono); font-size:12px; }
+  .statrow .sl{ width:96px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; font-size:10.5px; }
+  .statrow .sv{ width:56px; text-align:right; font-variant-numeric:tabular-nums; }
+  .statrow .sv.pencil{ color:var(--ink-faint); font-style:italic; }
+  .sbar{ flex:1; height:7px; background:var(--paper3); border-radius:1px; overflow:hidden; }
+  .sbar i{ display:block; height:100%; background:var(--ink); opacity:.75; }
+  .sbar.pencil i{ background:repeating-linear-gradient(90deg,var(--ink-faint) 0 4px,transparent 4px 7px); opacity:.8; }
+  .snote{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);
+          letter-spacing:.06em; text-transform:uppercase; margin-top:6px; }
+  .warn{ font-family:var(--memo); font-size:13px; color:var(--red); margin-top:8px; line-height:1.4; }
+
+  /* ---------- bottom sheet ---------- */
+  .sheetwrap{ position:fixed; inset:0; z-index:50; }
+  .sheetwrap .shade{ position:absolute; inset:0; background:rgba(10,8,5,.55); border:none; width:100%; height:100%; }
+  .sheet{
+    position:absolute; left:0; right:0; bottom:0;
+    max-width:480px; margin:0 auto;
+    background:var(--paper); color:var(--ink);
+    border-radius:10px 10px 0 0;
+    padding:10px 16px calc(16px + env(safe-area-inset-bottom));
+    max-height:82vh; overflow-y:auto;
+    box-shadow:0 -8px 30px rgba(0,0,0,.5);
+    animation:sheetup .22s ease-out;
+  }
+  @keyframes sheetup{ from{ transform:translateY(40px); opacity:.4; } to{ transform:none; opacity:1; } }
+  .sheet .grip{ width:44px; height:4px; border-radius:2px; background:var(--line2); margin:0 auto 10px; }
+
+  /* ---------- footer action bar ---------- */
+  .footbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:40;
+    max-width:480px; margin:0 auto;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, var(--desk3) 70%, transparent);
+  }
+  .footbar .btn{ margin-top:0; box-shadow:0 4px 14px rgba(0,0,0,.45); }
+
+  /* ---------- stamps ---------- */
+  .stamp{
+    display:inline-block;
+    font-family:var(--memo); font-weight:700; text-transform:uppercase;
+    letter-spacing:.14em; border:3px solid currentColor; border-radius:3px;
+    padding:2px 10px; transform:rotate(-7deg);
+    animation:thunk .28s cubic-bezier(.2,1.6,.4,1);
+  }
+  .stamp.pass{ color:var(--green); }
+  .stamp.fail{ color:var(--red); }
+  .stamp.big{ font-size:26px; padding:6px 18px; }
+  @keyframes thunk{ 0%{ transform:rotate(-7deg) scale(2.1); opacity:0; }
+                    70%{ transform:rotate(-7deg) scale(.95); opacity:1; }
+                    100%{ transform:rotate(-7deg) scale(1); } }
+  @media (prefers-reduced-motion:reduce){
+    .stamp{ animation:none; } .sheet{ animation:none; } *{ transition:none!important; }
+  }
+
+  .gaterow{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .gaterow:last-child{ border-bottom:none; }
+  .gaterow .ginfo{ flex:1; min-width:0; }
+  .gaterow .gname{ font-family:var(--memo); font-weight:700; font-size:14.5px; }
+  .gaterow .gcomment{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; line-height:1.4; }
+  .gaterow .gscore{ font-family:var(--mono); font-size:12px; color:var(--ink-faint);
+                    font-variant-numeric:tabular-nums; }
+  .stamp.small{ font-size:12px; padding:1px 7px; border-width:2px; flex-shrink:0; }
+
+  /* ---------- log / report ---------- */
+  .loglist{ margin:8px 0 0; padding:0; list-style:none; }
+  .loglist li{ font-family:var(--memo); font-size:13.5px; line-height:1.5; padding:7px 0;
+               border-bottom:1px dashed var(--line); }
+  .loglist li:last-child{ border-bottom:none; }
+  .loglist li .who{ font-weight:700; }
+  .loglist li.bad{ color:var(--red); }
+  .loglist li.meta{ color:var(--ink-soft); font-style:italic; }
+
+  .deltas{ font-family:var(--mono); font-size:11px; letter-spacing:.05em; color:var(--ink-soft);
+           margin-top:4px; text-transform:uppercase; }
+  .deltas .neg{ color:var(--red); } .deltas .pos{ color:var(--green); }
+
+  .apnote{ font-family:var(--mono); font-size:11px; color:var(--chalk-dim);
+           text-align:center; letter-spacing:.08em; text-transform:uppercase; margin:2px 0 8px; }
+
+  .endstats{ font-family:var(--mono); font-size:13px; margin-top:10px; }
+  .endstats div{ display:flex; justify-content:space-between; padding:3px 0;
+                 font-variant-numeric:tabular-nums; }
+  .titlecard .rules{ font-size:13.5px; line-height:1.6; margin:10px 0 0; padding-left:18px; }
+  .titlecard .rules li{ margin-bottom:6px; }
+  .titlecard .rules b{ font-family:var(--memo); }
+  .kicker{ font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+           color:var(--ink-faint); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ===ENGINE-START===
+'use strict';
+/* ------------------------------------------------------------------ *
+ *  CAPSTONE CHAOS — game engine (pure logic, no DOM)                  *
+ *  Everything between ENGINE-START/END markers runs headless so the   *
+ *  economy can be simulation-tested.                                  *
+ * ------------------------------------------------------------------ */
+
+const CFG = {
+  weeks: 12,
+  gates: { 4:'proposal', 8:'prototype', 12:'final' },
+  gateNames: { proposal:'Proposal Review', prototype:'Prototype Demo', final:'Final Presentation' },
+  thresholds: { proposal:48, prototype:58, final:68 },
+  gateWeights: {
+    proposal: { P:.45, T:.30, M:.25 },
+    prototype:{ P:.45, T:.40, M:.15 },
+    final:    { P:.60, T:.25, M:.15 },
+  },
+  basePool: 6, startSanity: 7, startPC: 7, maxMeter: 10,
+  passesToWin: 3,
+};
+
+/* ---------- seeded rng ---------- */
+function rnd(S){ let a=S.rngState|0; a=a+0x6D2B79F5|0; S.rngState=a;
+  let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }
+function ri(S,n){ return Math.floor(rnd(S)*n); }
+function pick(S,arr){ return arr[ri(S,arr.length)]; }
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+
+/* ---------- archetypes ---------- */
+const ARCHS = {
+  overengineers: {
+    label:'The Over-Engineers',
+    blurb:'Their architecture diagram has its own architecture diagram.',
+    base:{ P:30, M:70, T:82, SA:42 }, bias:6,
+    coachLabel:'Force a scope cut', coachSub:'They will grieve the microservices.',
+    supportLabel:'Morale support',
+    reported:[ 'Status report: "Refactor 90% complete. Refactor of refactor scheduled."',
+      'Status report: "We are ahead of schedule on infrastructure no one requested."' ],
+    obsGood:[ 'The Over-Engineers demoed real functionality. You checked twice.',
+      'The Over-Engineers shipped a feature smaller than its documentation. Growth.' ],
+    obsBad:[ 'The Over-Engineers rebuilt the build system again. The product remains theoretical.',
+      'The Over-Engineers added a plugin framework. There are no plugins. There is no product.' ],
+    obsMorale:[ 'The Over-Engineers are starting to sense the deadline. It is not going well.' ],
+  },
+  coasters: {
+    label:'The Coasters',
+    blurb:'Cohesive, cheerful, and producing almost nothing.',
+    base:{ P:26, M:86, T:52, SA:28 }, bias:4,
+    coachLabel:'Confront the gap', coachSub:'Puncture the vibe. Assign actual work.',
+    supportLabel:'Morale support',
+    reported:[ 'Status report: "Great team synergy this week!" No deliverables attached.',
+      'Status report: a beautifully formatted document describing work that has not occurred.' ],
+    obsGood:[ 'The Coasters, under duress, produced something. It compiles.',
+      'The Coasters hit an actual milestone. They seem as surprised as you are.' ],
+    obsBad:[ 'The Coasters spent the week choosing a logo. It is a very good logo.',
+      'The Coasters scheduled three meetings to plan a fourth meeting.' ],
+    obsMorale:[ 'The Coasters are unhappy that expectations exist. They will recover.' ],
+  },
+  imploding: {
+    label:'The Imploding Team',
+    blurb:'Two members are no longer using each other’s names.',
+    base:{ P:48, M:52, T:62, SA:62 }, bias:0,
+    coachLabel:'Technical push', coachSub:'Progress helps, but the problem is human.',
+    supportLabel:'Mediate the conflict', supportSub:'Separate offices. Shared goals. Repeat.',
+    reported:[ 'Status report: "Some team dynamics challenges." This is doing heavy lifting.',
+      'Status report: filed in two separate, conflicting versions.' ],
+    obsGood:[ 'The Imploding Team worked a full week without incident. You remain alert.',
+      'The Imploding Team merged code and grievances without losing either.' ],
+    obsBad:[ 'The Imploding Team’s standup ended early. Someone took their laptop to another floor.',
+      'The Imploding Team now communicates exclusively through commit messages.' ],
+    obsMorale:[ 'You can hear the Imploding Team through a closed door. The door is load-bearing.' ],
+  },
+  overconfident: {
+    label:'The Overconfident Team',
+    blurb:'Their self-assessment and their codebase have never met.',
+    base:{ P:44, M:78, T:34, SA:12 }, bias:8,
+    coachLabel:'Line-by-line review', coachSub:'Show them what the tests would say, if they had tests.',
+    supportLabel:'Morale support',
+    reported:[ 'Status report: "Everything is on track." All twelve words of it.',
+      'Status report: "No blockers, no risks, no concerns." No evidence, either.' ],
+    obsGood:[ 'The Overconfident Team fixed something you flagged. Quietly, but they fixed it.',
+      'The Overconfident Team wrote a test. One. Frame it.' ],
+    obsBad:[ 'The Overconfident Team’s demo works if you don’t click anything.',
+      'The Overconfident Team calls it "done." It has never been run twice in a row.' ],
+    obsMorale:[ 'The Overconfident Team is rattled and pretending not to be.' ],
+  },
+  anxious: {
+    label:'The Anxious High-Performers',
+    blurb:'Excellent work, delivered with a 2 a.m. apology.',
+    base:{ P:62, M:58, T:80, SA:80 }, bias:-18,
+    coachLabel:'Technical direction', coachSub:'They’ll implement it perfectly and assume it’s wrong.',
+    supportLabel:'Reassure them', supportSub:'Tell them it’s good. Because it is.',
+    reported:[ 'Status report: "Significant concerns about quality." The work is excellent.',
+      'Status report: 9 pages, of which 6 are risk registers about themselves.' ],
+    obsGood:[ 'The Anxious High-Performers delivered early and apologized for it.',
+      'The Anxious High-Performers’ prototype is the best in the cohort. They suspect a trap.' ],
+    obsBad:[ 'The Anxious High-Performers rewrote working code because it "felt undeserved."' ],
+    obsMorale:[ 'The Anxious High-Performers have started CCing you on their self-doubt.',
+      'One of the Anxious High-Performers asked if it’s too late to switch to an easier major. They are the best student in it.' ],
+  },
+  ghost: {
+    label:'The Ghost Team',
+    blurb:'Last seen at orientation. Enrollment confirms they exist.',
+    base:{ P:42, M:62, T:60, SA:50 }, bias:0,
+    coachLabel:'Working session', coachSub:'Physically sit with them. Bring coffee.',
+    supportLabel:'Morale support',
+    reported:[],
+    obsGood:[ 'The Ghost Team surfaced with a week of solid work, then vanished again.',
+      'You found the Ghost Team in a basement lab. They’ve been busy, apparently for weeks.' ],
+    obsBad:[ 'The Ghost Team’s repo shows one commit: "wip". It is three weeks old.',
+      'The Ghost Team’s last email opens with "Sorry for the delay" and does not specify which.' ],
+    obsMorale:[ 'The Ghost Team seems fine, insofar as they can be observed at all.' ],
+  },
+  sponsorwhipped: {
+    label:'The Sponsor-Whipped',
+    blurb:'Their industry sponsor redesigns the project on every call.',
+    base:{ P:52, M:62, T:66, SA:55 }, bias:0,
+    coachLabel:'Refocus the scope', coachSub:'Write down what "done" means. Laminate it.',
+    supportLabel:'Morale support',
+    reported:[ 'Status report: "Adjusting to updated sponsor requirements." Third consecutive week.',
+      'Status report: includes a change log for the requirements, which is longer than the requirements.' ],
+    obsGood:[ 'The Sponsor-Whipped shipped to the frozen spec. The sponsor hasn’t noticed yet.',
+      'The Sponsor-Whipped made real progress while the sponsor was at a conference.' ],
+    obsBad:[ 'The Sponsor-Whipped rebuilt their UI for the sponsor’s new "vision." There will be another vision.',
+      'The Sponsor-Whipped’s sponsor discovered a competitor and would like everything to be different now.' ],
+    obsMorale:[ 'The Sponsor-Whipped have stopped arguing with the sponsor. This is not acceptance; it’s despair.' ],
+  },
+};
+
+const PROJECTS = [
+  'Low-Cost Infant Warmer', 'Autonomous Sample Courier', 'Wearable Hydration Monitor',
+  'Smart Surgical Retractor', 'Cold-Chain Integrity Logger', 'Rehab Feedback Glove',
+  'Portable Dialysis Monitor', 'AI-Enabled Triage Dashboard', 'Modular Suture Trainer',
+  'Sterile Field Sentinel',
+];
+
+/* ---------- team + state construction ---------- */
+function makeTeam(S, key, i, projName){
+  const a = ARCHS[key];
+  const stats = {};
+  for (const k of ['P','M','T','SA']) stats[k] = clamp(a.base[k] + ri(S,13)-6, 5, 95);
+  const t = {
+    key, table:i+1, project:projName,
+    stats, insight:0, lastTouched:0, snap:null,
+    flags:{ conflict:0, capacity:1 },
+    gates:{},
+  };
+  if (key==='imploding') t.flags.conflict = 1;
+  if (key==='ghost') t.flags.ghostMod = rnd(S)<0.5 ? 1 : -1; // secretly solid vs secretly lost
+  if (t.flags.ghostMod===1){ t.stats.P=clamp(t.stats.P+10,5,95); t.stats.T=clamp(t.stats.T+8,5,95); }
+  if (t.flags.ghostMod===-1){ t.stats.P=clamp(t.stats.P-10,5,95); t.stats.T=clamp(t.stats.T-10,5,95); }
+  return t;
+}
+
+function newGame(seed){
+  const S = {
+    seed, rngState: seed|0,
+    week:0, phase:'boot',
+    pool:CFG.basePool, attention:0,
+    sanity:CFG.startSanity, pc:CFG.startPC,
+    teams:[], inbox:[], report:null, gate:null, ending:null,
+    flags:{ committeeLeft:0, adminPushbacks:0, adRecur:false, ferpaBlow:false,
+            adCount:0, adminCount:0, binderCount:0 },
+    sched:{}, uid:1,
+  };
+  const keys = Object.keys(ARCHS);
+  // shuffle
+  for (let i=keys.length-1;i>0;i--){ const j=ri(S,i+1); const tmp=keys[i]; keys[i]=keys[j]; keys[j]=tmp; }
+  const chosen = keys.slice(0,5);
+  const projs = PROJECTS.slice();
+  for (let i=projs.length-1;i>0;i--){ const j=ri(S,i+1); const tmp=projs[i]; projs[i]=projs[j]; projs[j]=tmp; }
+  S.teams = chosen.map((k,i)=>makeTeam(S,k,i,projs[i]));
+  S.sched = {
+    stipend: 5+ri(S,3),        // 5-7
+    ferpa: 4+ri(S,5),          // 4-8
+    committee: 2+ri(S,2),      // 2-3
+    mentor: 6+ri(S,4),         // 6-9
+    drop: 5+ri(S,4),           // 5-8
+    deadweight: 6+ri(S,4),     // 6-9
+    conflictSeed: 5+ri(S,3),   // 5-7
+    pivot: 8,
+    chair: [3,7],
+  };
+  startWeek(S);
+  return S;
+}
+
+/* ---------- snapshots & display ---------- */
+function snap(S,t){ t.snap = { P:t.stats.P, M:t.stats.M, T:t.stats.T, week:S.week }; }
+function composite(t,w){ return w.P*t.stats.P + w.T*t.stats.T + w.M*t.stats.M; }
+
+function reportedQuality(t){
+  const a = ARCHS[t.key];
+  const actual = composite(t,{P:.5,T:.3,M:.2});
+  const vibes = 0.7*t.stats.M + 30;
+  const sa = t.stats.SA/100;
+  return sa*actual + (1-sa)*vibes + a.bias;
+}
+
+function teamView(S,ti){
+  const t = S.teams[ti], a = ARCHS[t.key];
+  const v = { label:a.label, project:t.project, blurb:a.blurb, insight:t.insight,
+              table:t.table, notes:[], warns:[], known:null, snapWeek:t.snap?t.snap.week:0 };
+  if (t.key==='ghost' && t.insight===0){
+    v.chip = { cls:'grey', label:'no report filed' };
+    v.quote = 'No status report. No email. The tuition payments are the only sign of life.';
+  } else {
+    const q = reportedQuality(t);
+    v.chip = q>=62 ? {cls:'green',label:'on track'} : q>=45 ? {cls:'amber',label:'some concerns'} : {cls:'red',label:'struggling'};
+    v.quote = a.reported.length ? a.reported[(S.week + ti) % a.reported.length]
+            : 'A status report was located after some effort.';
+  }
+  if (t.insight>=1 && t.snap){
+    const stale = S.week - t.snap.week;
+    v.stale = stale;
+    v.known = { P:t.snap.P, M:t.snap.M, T:(t.insight>=2 ? t.snap.T : null), exact:t.insight>=3 };
+  }
+  if (t.flags.probation) v.notes.push('ON PROBATION');
+  if (t.flags.memberLost) v.notes.push('DOWN A MEMBER');
+  if (t.flags.imploded) v.notes.push('FRACTURED');
+  if (t.flags.burnout) v.notes.push('BURNED OUT');
+  if (t.insight>=2 && t.stats.SA<30) v.warns.push('Their self-reporting is unreliable. Trust nothing on the dashboard.');
+  if (t.insight>=3 && t.flags.conflict>0) v.warns.push('You sense real tension in this team. It is not resolving on its own.');
+  if (t.insight>=3 && t.key==='ghost') v.warns.push(t.flags.ghostMod===1 ?
+      'Verdict: secretly fine. They just hate email.' : 'Verdict: quietly lost. The silence was load-bearing.');
+  return v;
+}
+
+/* ---------- inbox cards ---------- */
+function card(S, def){ def.uid = S.uid++; return def; }
+function teamName(S,ti){ return ARCHS[S.teams[ti].key].label; }
+
+function buildInbox(S){
+  const w = S.week, box = [];
+  const F = S.flags, sched = S.sched;
+
+  // --- scheduled / conditional team events ---
+  if (w===sched.conflictSeed){
+    const elig = S.teams.map((t,i)=>({t,i}))
+      .filter(x=>x.t.key!=='imploding' && x.t.flags.conflict===0 && !x.t.flags.imploded)
+      .sort((a,b)=>b.t.stats.M - a.t.stats.M);
+    if (elig.length){
+      const ti = elig[0].i, t = S.teams[ti];
+      t.flags.conflict = 2; t.stats.M = clamp(t.stats.M-16,5,100);
+      // deliberately silent: no card. The dashboard will keep smiling.
+    }
+  }
+  if (w===sched.drop){
+    const alive = S.teams.map((t,i)=>i).filter(i=>!S.teams[i].flags.memberLost);
+    const ti = alive.length ? alive[ri(S,alive.length)] : 0;
+    box.push(card(S,{ key:'drop', teamIdx:ti,
+      from:'The Registrar', re:'Withdrawal notice',
+      body:'A student on '+teamName(S,ti)+' has dropped the course, citing "personal reasons" and, informally, the team. The workload does not drop with them.',
+      opts:[
+        { label:'Rebalance the workload yourself', note:'An evening of diagrams and diplomacy.', ap:1,
+          fx:[['tflag','memberLost',true],['tcap',0.8],['tstat','M',-4]] },
+        { label:'Let the team sort it out', note:'Character-building, allegedly.', ap:0,
+          fx:[['tflag','memberLost',true],['tcap',0.8],['tstat','M',-10],['tstat','P',-6]] },
+      ]}));
+  }
+  if (w===sched.mentor){
+    const ti = ri(S,5);
+    box.push(card(S,{ key:'mentor', teamIdx:ti,
+      from:'Industry Mentor (via auto-reply)', re:'Stepping back',
+      body:'The industry mentor for '+teamName(S,ti)+' has been "reorged into an exciting new opportunity" and is gone. The team’s technical guidance now defaults to you.',
+      opts:[
+        { label:'Step in as technical mentor', note:'You remember how to engineer. Probably.', ap:2, fx:[] },
+        { label:'Let them self-direct', note:'What could go wrong that hasn’t already.', ap:0, fx:[['tstat','T',-10]] },
+      ]}));
+  }
+  if (w===sched.deadweight){
+    const pref = S.teams.map((t,i)=>i).filter(i=>['overconfident','coasters','ghost'].includes(S.teams[i].key));
+    const ti = pref.length ? pref[ri(S,pref.length)] : ri(S,5);
+    box.push(card(S,{ key:'deadweight', teamIdx:ti,
+      from:'A student, in confidence', re:'Office hours, closed door',
+      body:'The "star" of '+teamName(S,ti)+' has been quietly re-committing one teammate’s work as their own — and doing little else. Reported progress was overstated. The teammate knows. Everyone knows.',
+      opts:[
+        { label:'Quietly restructure the roles', note:'No ceremony, new responsibilities, watch the diff.', ap:1,
+          fx:[['tstat','P',-10],['tstat','M',+4],['insight',1]] },
+        { label:'Let peer evals surface it', note:'The forms exist for a reason. A slow, bloody reason.', ap:0,
+          fx:[['tstat','P',-10],['tstat','M',-12],['conflict',1],['insight',1]] },
+      ]}));
+  }
+  if (w===sched.pivot){
+    const pref = S.teams.map((t,i)=>i).filter(i=>['sponsorwhipped','overengineers'].includes(S.teams[i].key));
+    const ti = pref.length ? pref[ri(S,pref.length)] : ri(S,5);
+    box.push(card(S,{ key:'pivot', teamIdx:ti,
+      from:teamName(S,ti), re:'Exciting new direction!!',
+      body:teamName(S,ti)+' would like to pivot the entire project. In week '+w+'. Of twelve. They have a slide. The slide has momentum.',
+      opts:[
+        { label:'Approve the pivot', note:'Their eyes light up. Their timeline does not.', ap:0,
+          fx:[['tstat','P',-15],['tstat','M',+12],['tstat','T',+5]] },
+        { label:'Negotiate a reframe', note:'Same project, new adjectives. Everyone wins, slightly.', ap:1,
+          fx:[['tstat','P',-4],['tstat','M',+6]] },
+        { label:'Refuse', note:'Someone has to say it. It’s you. It’s always you.', ap:0,
+          fx:[['tstat','M',-14]] },
+      ]}));
+  }
+  // conditional: over-engineers extension request (they never descoped)
+  const oe = S.teams.findIndex(t=>t.key==='overengineers');
+  if (w===9 && oe>=0 && !S.teams[oe].flags.descoped){
+    box.push(card(S,{ key:'extension', teamIdx:oe,
+      from:'The Over-Engineers', re:'Timeline adjustment proposal (v3, final_FINAL)',
+      body:'The Over-Engineers request a three-week extension to a twelve-week course. The attached Gantt chart is, admittedly, beautiful.',
+      opts:[
+        { label:'Force the scope cut now', note:'Ship the kernel of the thing. Mourn the rest.', ap:2,
+          fx:[['tflag','descoped',true],['tstat','P',+8],['tstat','M',-6]] },
+        { label:'Grant it "informally"', note:'There is no extension. There is only the final gate.', ap:0,
+          fx:[['tstat','M',+6],['sanity',-1]] },
+        { label:'Refuse flatly', note:'The Gantt chart deserved better.', ap:0,
+          fx:[['tstat','M',-12]] },
+      ]}));
+  }
+  // conditional: coasters peer-eval bomb
+  const co = S.teams.findIndex(t=>t.key==='coasters');
+  if (w===10 && co>=0 && !S.teams[co].flags.confronted){
+    box.push(card(S,{ key:'peereval', teamIdx:co,
+      from:'Peer evaluation system (automated)', re:'Anomaly report',
+      body:'The Coasters’ peer evaluations have arrived: five students, each privately confident the other four were doing the work. Total work performed: a logo.',
+      opts:[
+        { label:'Emergency intervention', note:'Cancel your weekend. Define deliverables hourly.', ap:2,
+          fx:[['tflag','confronted',true],['tstat','P',+12],['insight',2]] },
+        { label:'Let the gate do the teaching', note:'Pedagogy by consequence.', ap:0, fx:[['insight',2]] },
+      ]}));
+  }
+  // conditional: overconfident dispute after a failed gate
+  const oc = S.teams.findIndex(t=>t.key==='overconfident');
+  if (oc>=0 && S.teams[oc].flags.disputePending){
+    S.teams[oc].flags.disputePending = false;
+    box.push(card(S,{ key:'dispute', teamIdx:oc,
+      from:'The Overconfident Team', re:'Formal concern regarding our review',
+      body:'The Overconfident Team is disputing their gate result. Their email uses the word "unfair" four times and the word "evidence" zero times.',
+      opts:[
+        { label:'Hold the line', note:'Walk them through the rubric. Slowly. With citations.', ap:1,
+          fx:[['tstat','SA',+25],['tstat','M',-6]] },
+        { label:'Split the difference', note:'A soothing paragraph. Nothing changes.', ap:0,
+          fx:[['tstat','M',+4],['tstat','SA',+5]] },
+      ]}));
+  }
+  // conditional: anxious 2am spiral
+  const ax = S.teams.findIndex(t=>t.key==='anxious');
+  if (ax>=0 && !S.teams[ax].flags.spiraled && S.teams[ax].stats.M<42 && w>=4){
+    S.teams[ax].flags.spiraled = true;
+    box.push(card(S,{ key:'spiral', teamIdx:ax,
+      from:'The Anxious High-Performers', re:'(no subject) — sent 2:14 AM',
+      body:'A 900-word email from the Anxious High-Performers questioning whether their project — currently the strongest in the cohort — "deserves to exist." There are footnotes.',
+      opts:[
+        { label:'Reply tonight', note:'Three sentences. Specific praise. It matters more than it should.', ap:1,
+          fx:[['tstat','M',+12]] },
+        { label:'Reply Monday', note:'Boundaries are healthy. Their weekend is not.', ap:0,
+          fx:[['tstat','M',-8]] },
+      ]}));
+  }
+  // sponsor churn (sponsorwhipped, every 3rd week)
+  const sw = S.teams.findIndex(t=>t.key==='sponsorwhipped');
+  if (sw>=0 && (w===3||w===6||w===9||w===11)){
+    box.push(card(S,{ key:'sponsor', teamIdx:sw,
+      from:'Industry Sponsor', re:'Quick pivot on the requirements :)',
+      body:'The sponsor has "refined the vision" for the Sponsor-Whipped again. The refinement contradicts the previous two refinements, which contradicted each other.',
+      opts:[
+        { label:'Run interference', note:'Absorb the call yourself. Translate "no" into partnership language.', ap:1, fx:[] },
+        { label:'Let it hit the team', note:'They knew the sponsor was a snake when they picked them.', ap:0,
+          fx:[['tstat','P',-8],['tstat','M',-6],['tstat','T',-4]] },
+      ]}));
+  }
+  // raised voices — any team with hidden conflict, once it gets bad
+  S.teams.forEach((t,ti)=>{
+    if (t.flags.conflict>0 && !t.flags.voicesShown && t.stats.M<38 && !t.flags.imploded){
+      t.flags.voicesShown = true;
+      box.push(card(S,{ key:'voices', teamIdx:ti,
+        from:'The Administrator (forwarding a noise complaint)', re:'Lab decorum',
+        body:'Raised voices from '+teamName(S,ti)+'’s bench, again. The complaint is about volume. The problem is not about volume.',
+        opts:[
+          { label:'Mediate now', note:'Clear your afternoon. Bring the good coffee.', ap:2,
+            fx:[['tstat','M',+12],['conflict',-1],['insight',1]] },
+          { label:'Give them space', note:'Space is where implosions happen.', ap:0,
+            fx:[['conflict',1]] },
+        ]}));
+    }
+  });
+
+  // --- politics ---
+  if (w===sched.stipend){
+    box.push(card(S,{ key:'stipend',
+      from:'The Budget Office', re:'FY adjustment — action not required (action required)',
+      body:'Stipend cuts have eliminated your co-instructor line, effective immediately. The email thanks you for your flexibility, which was not consulted.',
+      opts:[
+        { label:'Fight it with the dean’s office', note:'Spend favors. Keep the co-instructor.', ap:0,
+          fx:[['pc',-2]] },
+        { label:'Absorb it', note:'Your weekly attention pool drops by 1. Permanently.', ap:0,
+          fx:[['pool',-1],['sanity',-1]] },
+      ]}));
+  }
+  if (w===sched.ferpa){
+    box.push(card(S,{ key:'ferpa',
+      from:'The Assistant Director', re:'FWD: FWD: URGENT — possible records disclosure??',
+      body:'A spreadsheet with student grades may or may not have been emailed to a project sponsor. FERPA has entered the chat. The Assistant Director has cc’d four people and owned nothing.',
+      opts:[
+        { label:'Handle it by the book', note:'Audit the thread. Write the memo. Lose the evening.', ap:2,
+          fx:[['sanity',-1]] },
+        { label:'Forward to general counsel and hope', note:'Hope is not a compliance strategy, but it is free.', ap:0,
+          fx:[['special','ferpaGamble']] },
+      ]}));
+  }
+  if (w===sched.committee){
+    box.push(card(S,{ key:'committee',
+      from:'The Chair', re:'Small ask — curriculum committee',
+      body:'The Chair — your one reliable ally — wants you on the curriculum committee. It meets weekly, produces nothing, and is politically excellent.',
+      opts:[
+        { label:'Accept', note:'-1 attention for the next two weeks. +2 political capital.', ap:0,
+          fx:[['pc',+2],['flag','committeeLeft',2]] },
+        { label:'Decline politely', note:'The Chair understands. The Chair remembers.', ap:0,
+          fx:[['pc',-1]] },
+      ]}));
+  }
+  if (sched.chair.includes(w)){
+    box.push(card(S,{ key:'chair',
+      from:'The Chair', re:'Need one tiny slide deck by Friday',
+      body:'The Chair needs "just one slide deck" for a dean’s briefing — due the same week as everything else in the universe. It is, to be fair, a deck only you can make.',
+      opts:[
+        { label:'Build the deck tonight', note:'It will be excellent. The Chair will owe you.', ap:2,
+          fx:[['pc',+2]] },
+        { label:'Send bullet points instead', note:'80% of the value, 40% of the effort, 0% of the credit.', ap:1, fx:[] },
+        { label:'Beg off', note:'Your one ally, at their one moment of need.', ap:0,
+          fx:[['pc',-2]] },
+      ]}));
+  }
+  if (F.adRecur){
+    F.adRecur = false;
+    box.push(card(S,{ key:'adr',
+      from:'The Assistant Director', re:'RE: RE: Following up (read receipt requested)',
+      body:'The "quick decision" you ignored has returned, now with a read receipt, a longer cc line, and a deadline in bold. Leadership is watching the thread.',
+      opts:[
+        { label:'Decide it now', note:'It was always going to be you.', ap:2, fx:[] },
+        { label:'Keep ignoring it', note:'Bold, at this point. Genuinely bold.', ap:0, fx:[['pc',-2]] },
+      ]}));
+  }
+  // recurring random politics (none in week 1; lighter on gate weeks)
+  if (w>1){
+    const isGate = (w in CFG.gates);
+    const roll = rnd(S);
+    if (roll < (isGate ? 0.4 : 0.7)){
+      const kinds = ['ad','ad','binder'];
+      if (F.adminPushbacks < 2) kinds.push('admin','admin');
+      const kind = pick(S,kinds);
+      if (kind==='ad'){ F.adCount++;
+        box.push(card(S,{ key:'ad',
+          from:'The Assistant Director', re:'Quick decision needed (cc: Leadership)',
+          body:'The Assistant Director forwards a "quick decision" that is, on inspection, entirely hers to make. Leadership is cc’d, so she stays visible; you stay accountable.',
+          opts:[
+            { label:'Handle it', note:'Own it, decide it, move on. Again.', ap:1, fx:[] },
+            { label:'Let it fester', note:'The thread will grow. Threads like this always grow.', ap:0,
+              fx:[['pc',-1],['flag','adRecur',true]] },
+          ]}));
+      } else if (kind==='admin'){ F.adminCount++;
+        box.push(card(S,{ key:'admin',
+          from:'The Administrator', re:'Not sure this is mine?',
+          body:'The Administrator has bounced a routine room-booking form back up to you, "since it touches curriculum." It does not touch curriculum. It touches a room.',
+          opts:[
+            { label:'Just do it yourself', note:'Ninety seconds of work, one small death inside.', ap:1, fx:[] },
+            { label:'Walk it back to their desk', note:'A boundary! It will be reported as an incident.', ap:0,
+              fx:[['pc',-1],['flag','adminPushbacks','++']] },
+          ]}));
+      } else { F.binderCount++;
+        box.push(card(S,{ key:'binder',
+          from:'Accreditation Office', re:'Evidence binder — section 4.3.2(c)',
+          body:'Accreditation requests updated "evidence of continuous improvement," due in a format last supported by Windows XP.',
+          opts:[
+            { label:'Compile it properly', note:'Someone will read this. Statistically, no one will read this.', ap:1, fx:[] },
+            { label:'Change the dates on last year’s', note:'A time-honored academic tradition.', ap:0,
+              fx:[['special','binderGamble']] },
+          ]}));
+      }
+    }
+  }
+  return box;
+}
+
+/* ---------- effects ---------- */
+function applyFx(S, cardDef, op){
+  const t = cardDef.teamIdx!=null ? S.teams[cardDef.teamIdx] : null;
+  const [k,a,b] = op;
+  if (k==='pc') S.pc = clamp(S.pc+a, 0, CFG.maxMeter);
+  else if (k==='sanity') S.sanity = clamp(S.sanity+a, 0, CFG.maxMeter);
+  else if (k==='pool') S.pool = Math.max(3, S.pool+a);
+  else if (k==='flag'){ if (b==='++') S.flags[a]=(S.flags[a]||0)+1; else S.flags[a]=b; }
+  else if (k==='tstat' && t) t.stats[a] = clamp(t.stats[a]+b, 5, 100);
+  else if (k==='tflag' && t) t.flags[a] = b;
+  else if (k==='tcap' && t) t.flags.capacity = Math.min(t.flags.capacity, a);
+  else if (k==='conflict' && t) t.flags.conflict = Math.max(0, t.flags.conflict+a);
+  else if (k==='insight' && t){ t.insight = clamp(t.insight+a,0,3); snap(S,t); t.lastTouched=S.week; }
+  else if (k==='special'){
+    if (a==='ferpaGamble'){ if (rnd(S)<0.5){ S.flags.ferpaBlow=true; S.pc=clamp(S.pc-1,0,CFG.maxMeter); } }
+    if (a==='binderGamble'){ if (rnd(S)<0.25){ S.pc=clamp(S.pc-2,0,CFG.maxMeter); } }
+  }
+}
+
+function resolveCard(S, uid, optIdx){
+  const i = S.inbox.findIndex(c=>c.uid===uid);
+  if (i<0) return false;
+  const c = S.inbox[i], o = c.opts[optIdx];
+  if (!o || o.ap > S.attention) return false;
+  S.attention -= o.ap;
+  for (const op of o.fx) applyFx(S,c,op);
+  c.resolved = { opt:optIdx };
+  S.inbox.splice(i,1);
+  checkDeath(S, true);
+  if (!S.ending && S.inbox.length===0) S.phase='allocate';
+  return true;
+}
+
+/* ---------- team actions ---------- */
+const ACTIONS = { check:{ap:1}, coach:{ap:2}, support:{ap:2} };
+
+function act(S, ti, kind){
+  const cost = ACTIONS[kind].ap;
+  if (S.phase!=='allocate' || cost>S.attention) return false;
+  const t = S.teams[ti];
+  S.attention -= cost;
+  t.lastTouched = S.week;
+  if (kind==='check'){
+    t.insight = clamp(t.insight+1,0,3);
+    t.stats.M = clamp(t.stats.M+3,5,100);
+  }
+  if (kind==='coach'){
+    t.insight = clamp(t.insight+1,0,3);
+    if (t.key==='overengineers' && !t.flags.descoped){ t.flags.descoped=true; t.stats.P=clamp(t.stats.P+6,5,100); }
+    if (t.key==='coasters' && !t.flags.confronted){ t.flags.confronted=true; t.stats.M=clamp(t.stats.M-8,5,100); t.stats.SA=clamp(t.stats.SA+15,0,100); }
+    if (t.key==='overconfident'){ t.stats.SA=clamp(t.stats.SA+8,0,100); }
+    // a team can only absorb so much of you in one week
+    const gain = t.coachedThisWeek ? 4 : 7;
+    t.coachedThisWeek = true;
+    if (t.stats.T <= t.stats.P) t.stats.T=clamp(t.stats.T+gain,5,100);
+    else t.stats.P=clamp(t.stats.P+gain,5,100);
+  }
+  if (kind==='support'){
+    t.insight = clamp(t.insight+1,0,3);
+    t.stats.M = clamp(t.stats.M+12,5,100);
+    t.flags.conflict = Math.max(0, t.flags.conflict-1);
+    t.supported = true;
+    if (t.flags.burnout && t.stats.M>45){ t.flags.burnout=false; t.flags.capacity=Math.max(t.flags.capacity,0.8); t.recovered=true; }
+    if (t.flags.imploded && t.stats.M>45){ t.flags.imploded=false; t.flags.capacity=Math.max(t.flags.capacity,0.8); t.recovered=true; }
+  }
+  snap(S,t);
+  return true;
+}
+
+/* ---------- weekly drift & resolution ---------- */
+function drift(S, t, lines){
+  const a = ARCHS[t.key], st = t.stats, F = t.flags;
+  const cap = F.capacity;
+  const week = S.week;
+  let dP=0, dM=0, dT=0;
+
+  if (t.key==='overengineers'){
+    dT += F.descoped?1:2;
+    dP += F.descoped?4 : (week<6?2:0);
+    if (!F.descoped && week>=6) dM -= 3;
+  }
+  if (t.key==='coasters'){
+    dP += F.confronted?4:1;
+    if (!F.confronted && st.M<84) dM += 2;
+    if (F.confronted) st.SA = clamp(st.SA+4,0,100);
+  }
+  if (t.key==='imploding'){ dM -= 3; dP += st.M>40?3 : st.M>25?1:0; }
+  if (t.key==='overconfident'){ dP += F.shocked?2:3; dM -= 1; }
+  if (t.key==='anxious'){ dM -= t.supported?0:6; dP += st.M>35?5:1; dT += 1; }
+  if (t.key==='ghost'){ dP += F.ghostMod===1?3:1; dT += 1; dM -= 1; }
+  if (t.key==='sponsorwhipped'){ dP += 3; dM -= 1; }
+
+  // hidden conflict drain (any team)
+  if (F.conflict>0 && !t.supported) dM -= 5*F.conflict;
+  if (F.probation) dM -= 2;
+  if (F.burnout){ dP = Math.min(dP,1); dM = Math.min(dM,0); }
+
+  st.P = clamp(st.P + dP*cap, 5, 100);
+  st.T = clamp(st.T + dT, 5, 100);
+  st.M = clamp(st.M + dM, 5, 100);
+
+  // implosion / burnout thresholds
+  if (!F.imploded && (t.key==='imploding' || F.conflict>0) && st.M<22){
+    F.imploded = true; F.capacity = Math.min(cap,0.6);
+    st.P = clamp(st.P-15,5,100); st.M = 18;
+    S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
+    if (t.insight===0) S.pc = clamp(S.pc-1,0,CFG.maxMeter);
+    lines.push({ cls:'bad', txt:'<b>'+a.label+'</b> fractured this week. You learned about it from a forwarded email with the subject line "FYI".' });
+    t.insight = Math.max(t.insight,2); snap(S,t); t.lastTouched=S.week;
+  } else if (t.key==='anxious' && !F.burnout && st.M<20){
+    F.burnout = true; F.capacity = Math.min(cap,0.5);
+    st.P = clamp(st.P-20,5,100); st.T = clamp(st.T-12,5,100); st.M = 26;
+    S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
+    lines.push({ cls:'bad', txt:'<b>The Anxious High-Performers</b> hit the wall. Their strongest member is on medical leave; the repo has gone quiet.' });
+    t.insight = Math.max(t.insight,2); snap(S,t); t.lastTouched=S.week;
+  } else {
+    // one observation line per team
+    let poolSrc;
+    if (t.insight>=1){
+      if (st.M<35 && a.obsMorale.length) poolSrc = a.obsMorale;
+      else poolSrc = (st.P>55 ? a.obsGood : a.obsBad);
+    } else {
+      poolSrc = a.reported.length ? a.reported : a.obsBad;
+    }
+    lines.push({ cls:'', txt: poolSrc[ri(S,poolSrc.length)] });
+  }
+  t.supported = false; t.coachedThisWeek = false;
+
+  // insight decay: knowledge goes stale
+  const gap = S.week - t.lastTouched;
+  if (t.insight>0 && gap>0 && gap%2===0) t.insight--;
+}
+
+function runGate(S, kind){
+  const w = CFG.gateWeights[kind], thr = CFG.thresholds[kind];
+  const rows = []; let fails = 0, anyBlind = false;
+  S.teams.forEach((t,ti)=>{
+    const blindBefore = t.insight===0;
+    const sc = Math.round(composite(t,w));
+    const pass = sc >= thr;
+    const row = { ti, label:ARCHS[t.key].label, sc, pass, margin:sc-thr, blind:false };
+    if (pass){
+      t.stats.M = clamp(t.stats.M+6,5,100);
+      if (t.flags.probation){ t.flags.probation=false; row.note='off probation'; }
+    } else {
+      fails++;
+      t.stats.M = clamp(t.stats.M-8,5,100);
+      if (blindBefore){ anyBlind = true; row.blind=true; }
+      if (kind!=='final') t.flags.probation = true;
+      if (t.key==='overconfident' && !t.flags.shocked){
+        t.flags.shocked = true; t.flags.disputePending = true;
+        t.stats.SA = clamp(t.stats.SA+30,0,100);
+      }
+    }
+    // review panels see the truth — the fog lifts
+    t.insight = Math.max(t.insight,2); snap(S,t); t.lastTouched = S.week;
+    t.gates[kind] = pass;
+    row.comment = gateComment(S,kind,row);
+    rows.push(row);
+  });
+  // political fallout is capped: the dean only has so much appetite per review
+  S.pc = clamp(S.pc - Math.min(fails,3) - (anyBlind?1:0), 0, CFG.maxMeter);
+  if (fails===0){ S.sanity = clamp(S.sanity+1,0,CFG.maxMeter); S.pc = clamp(S.pc+1,0,CFG.maxMeter); }
+  if (fails>=2) S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
+  return { kind, name:CFG.gateNames[kind], thr, rows, fails };
+}
+
+function gateComment(S, kind, row){
+  if (row.pass && row.margin>=15) return pick(S,[
+    'Reviewers used the word "exemplary." One asked if the team is available for hire.',
+    'The panel had no questions, which has never happened before.',
+    'A reviewer took a photo of the poster "for internal inspiration."' ]);
+  if (row.pass) return pick(S,[
+    'Passed. The panel’s enthusiasm was described, generously, as polite.',
+    'Passed, with the reviewer tone of people choosing their battles.',
+    'Cleared the bar. The bar heard about it.' ]);
+  if (row.blind) return 'Failed — and the complaint reached the dean before it reached you. You had no file on this team.';
+  if (row.margin>=-6) return pick(S,[
+    'Missed by a hair. The panel’s notes say "so close" in three handwritings.',
+    'Just under the bar. A reviewer mouthed "sorry" on the way out.' ]);
+  return pick(S,[
+    'The panel’s written feedback opens with "We have concerns," then numbers them.',
+    'A reviewer asked, gently, what the team had been doing since January.' ]);
+}
+
+function checkDeath(S, immediate){
+  if (S.ending) return;
+  if (S.sanity<=0) S.ending = makeEnding(S,'burnout');
+  else if (S.pc<=0) S.ending = makeEnding(S,'reassigned');
+  if (S.ending && immediate) S.phase='over';
+}
+
+function makeEnding(S, key){
+  const passes = S.teams.filter(t=>t.gates.final).length;
+  const clean = !S.teams.some(t=>t.flags.imploded||t.flags.burnout);
+  const score = passes*25 + S.sanity*3 + S.pc*3 + (clean?10:0);
+  const E = {
+    burnout: { title:'Burnout Leave', stamp:'fail', win:false,
+      text:'Week '+S.week+'. You stopped mid-sentence in a meeting about a room booking and could not remember why any of it mattered. HR was kind. The auto-reply is on. The teams will be told you are "recharging."' },
+    reassigned: { title:'Quietly Reassigned', stamp:'fail', win:false,
+      text:'There was no dramatic meeting. There was a calendar invite titled "Program Leadership — Path Forward," and by Friday the Assistant Director was signing your emails. She cc’d you, so you stay visible.' },
+    reputation: { title:'Program Under Review', stamp:'fail', win:false,
+      text:'Only '+passes+' team'+(passes===1?'':'s')+' cleared the final gate. The dean has commissioned a "programmatic review," which is a committee, which is a verdict. Your name is in the appendix.' },
+    survive: { title:'You Survived the Semester', stamp:'pass', win:true,
+      text:passes+' teams landed well. Nobody sued, nobody unionized against you specifically, and the dean pronounced the showcase "solid." In this business, that is a parade.' },
+    commend: { title:'Dean’s Commendation', stamp:'pass', win:true,
+      text:passes+' of 5 teams delivered at quality. The dean called the program "a model," and the Assistant Director has begun describing it as a shared achievement. Let her. You know.' },
+    legend: { title:'A Semester for the Ages', stamp:'pass', win:true,
+      text:'All five teams cleared the final gate. Sponsors are calling. The Chair is telling people it was their idea to hire you. Enjoy this for exactly one week: next semester’s roster just posted.' },
+  }[key];
+  return { key, title:E.title, text:E.text, stamp:E.stamp, win:E.win, passes, weeks:S.week, score };
+}
+
+function endWeek(S){
+  if (S.phase!=='allocate') return false;
+  const lines = [];
+  const leftover = S.attention;
+  if (leftover>=2 && S.sanity<CFG.maxMeter){
+    S.sanity++; lines.push({ cls:'meta', txt:'You left before dark and ate a meal at a table. Unprecedented. (+1 sanity)' });
+  }
+  // heavy inbox weeks grind you down
+  if (S.weekLoad>=2){
+    S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
+    lines.push({ cls:'meta', txt:'The week was mostly other people’s emergencies. (-1 sanity)' });
+  }
+  for (const t of S.teams) drift(S,t,lines);
+  S.report = { week:S.week, lines };
+  const gateKind = CFG.gates[S.week];
+  S.gate = gateKind ? runGate(S,gateKind) : null;
+  // a death here still lets the player see the week that killed them
+  checkDeath(S, false);
+  S.phase='report';
+  return true;
+}
+
+function advance(S){
+  if (S.phase==='report' && S.gate){ S.phase='gate'; return; }
+  if (S.ending){ S.phase='over'; return; }
+  if (S.week>=CFG.weeks){
+    const passes = S.teams.filter(t=>t.gates.final).length;
+    S.ending = makeEnding(S, passes>=5?'legend' : passes>=4?'commend' : passes>=CFG.passesToWin?'survive' : 'reputation');
+    S.phase='over'; return;
+  }
+  startWeek(S);
+}
+
+function startWeek(S){
+  S.week++;
+  S.report=null; S.gate=null;
+  let att = S.pool;
+  if (S.flags.committeeLeft>0){ S.flags.committeeLeft--; att--; }
+  if (S.flags.ferpaBlow){ S.flags.ferpaBlow=false; att-=3; S.ferpaWeek=true; } else S.ferpaWeek=false;
+  if (S.sanity<=2) att--;
+  S.attention = Math.max(2,att);
+  S.inbox = buildInbox(S);
+  S.weekLoad = S.inbox.length;
+  S.phase = S.inbox.length ? 'inbox' : 'allocate';
+}
+
+const ENGINE = { CFG, ARCHS, ACTIONS, newGame, resolveCard, act, endWeek, advance, teamView, composite, reportedQuality };
+if (typeof module!=='undefined' && module.exports) module.exports = ENGINE;
+// ===ENGINE-END===
+</script>
+
+<script>
+/* ------------------------------------------------------------------ *
+ *  UI layer — touch-first, iPhone portrait                            *
+ * ------------------------------------------------------------------ */
+(function(){
+'use strict';
+const E = ENGINE;
+const app = document.getElementById('app');
+const SAVE_KEY = 'capstone-chaos-v1';
+let S = null;
+let sheetTeam = null;   // team index for open bottom sheet
+let confirmEnd = false;
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function save(){
+  try{ if (S && S.phase!=='over') localStorage.setItem(SAVE_KEY, JSON.stringify(S));
+       else localStorage.removeItem(SAVE_KEY); }catch(e){}
+}
+function loadSave(){
+  try{ const j = localStorage.getItem(SAVE_KEY); return j ? JSON.parse(j) : null; }catch(e){ return null; }
+}
+
+/* ---------- shared chrome ---------- */
+function pips(val, max, cls, lowAt){
+  let out = '<div class="pips">';
+  for (let i=0;i<max;i++)
+    out += '<span class="pip '+cls+(i<val?' on':'')+(val<=lowAt?' low':'')+'"></span>';
+  return out+'</div>';
+}
+function topbar(){
+  const gk = E.CFG.gates[S.week];
+  const gateNote = gk ? E.CFG.gateNames[gk].toUpperCase()+' FRIDAY'
+    : (E.CFG.gates[S.week+1] ? E.CFG.gateNames[E.CFG.gates[S.week+1]]+' next week' : 'Semester of record');
+  return '<div class="topbar"><div class="wk"><span><b>Week '+S.week+'</b> / '+E.CFG.weeks+'</span><span>'+esc(gateNote)+'</span></div>'
+    +'<div class="meters">'
+    +'<div class="meter"><div class="mlab"><span>Attention</span><span class="mval">'+S.attention+'</span></div>'+pips(S.attention, Math.max(S.pool,S.attention), 'att', -1)+'</div>'
+    +'<div class="meter"><div class="mlab"><span>Sanity</span><span class="mval">'+S.sanity+'</span></div>'+pips(S.sanity, 10, 'san', 2)+'</div>'
+    +'<div class="meter"><div class="mlab"><span>Capital</span><span class="mval">'+S.pc+'</span></div>'+pips(S.pc, 10, 'pc', 2)+'</div>'
+    +'</div></div>';
+}
+
+/* ---------- screens ---------- */
+function renderTitle(){
+  const hasSave = !!loadSave();
+  app.innerHTML = '<div class="scroll"><div class="paper titlecard" style="margin-top:20px">'
+    +'<div class="kicker">Office of the Director · Engineering Capstone</div>'
+    +'<h1 class="gametitle">Capstone Chaos</h1>'
+    +'<div class="subtitle">One semester. Five teams. Six units of attention.</div>'
+    +'<hr class="rule">'
+    +'<div class="memobody">You direct the graduate capstone. Five student teams, twelve weeks, three review gates. Your attention is the only real currency on this campus, and everyone knows it but you.</div>'
+    +'<ul class="rules">'
+    +'<li><b>Spend Attention</b> each week: check in (see the truth), coach (fix the work), support (fix the people).</li>'
+    +'<li><b>The dashboard lies.</b> Teams report what they believe. Some teams believe remarkable things.</li>'
+    +'<li><b>Politics intrude.</b> Handling them costs attention; dodging them costs political capital. Both run out.</li>'
+    +'<li><b>Gates judge everyone</b> — weeks 4, 8, and 12. Land 3+ teams at the final gate, and keep yourself above zero.</li>'
+    +'</ul>'
+    +'<button class="btn primary" data-act="new">Start the semester</button>'
+    +(hasSave?'<button class="btn" data-act="resume">Resume saved semester</button>':'')
+    +'<div class="fineprint">All characters are archetypes by role. Any resemblance to your department is a coincidence you should sit with.</div>'
+    +'</div></div>';
+}
+
+function inboxCard(c){
+  let opts = '';
+  c.opts.forEach((o,i)=>{
+    const cant = o.ap > S.attention;
+    opts += '<button class="btn'+(cant?' disabled':'')+(o.ap>0&&!cant?' primary':'')+'" data-card="'+c.uid+'" data-opt="'+i+'">'
+      + esc(o.label) + (o.ap>0?'<span class="cost">'+o.ap+' ATT</span>':'')
+      + '<span class="sub">'+esc(o.note)+'</span></button>';
+  });
+  return '<div class="paper"><div class="memohead">From: <b>'+esc(c.from)+'</b><br>Re: <b>'+esc(c.re)+'</b></div>'
+    +'<div class="memobody">'+esc(c.body)+'</div>'+opts+'</div>';
+}
+
+function renderInbox(){
+  const c = S.inbox[0];
+  app.innerHTML = topbar()
+    +'<div class="scroll"><div class="apnote">Inbox · '+S.inbox.length+' item'+(S.inbox.length>1?'s':'')+' before you can get to actual work</div>'
+    +(S.ferpaWeek?'<div class="paper"><div class="memobody" style="color:var(--red)">The FERPA gamble failed. Compliance meetings have devoured most of this week’s attention.</div></div>':'')
+    +inboxCard(c)+'</div>';
+}
+
+function bandLabel(v){ return v<35?'LOW':v<60?'MID':'HIGH'; }
+function statRow(label, v, exact, insight){
+  if (v==null) return '';
+  const shown = insight>=2 ? (exact? v : Math.round(v/5)*5) : bandLabel(v);
+  const pencil = insight<3 ? ' pencil' : '';
+  return '<div class="statrow"><span class="sl">'+label+'</span>'
+    +'<span class="sbar'+pencil+'"><i style="width:'+Math.round(v)+'%"></i></span>'
+    +'<span class="sv'+pencil+'">'+shown+'</span></div>';
+}
+
+function teamCard(ti){
+  const v = E.teamView(S,ti);
+  const fileLbl = ['file: empty','file: thin','file: working','file: complete'][v.insight];
+  const staleNote = v.known ? (v.stale>0 ? ' · as of wk '+v.snapWeek : ' · current') : '';
+  let notes = v.notes.length ? '<span class="stamp-mini">'+esc(v.notes[0])+'</span>' : '';
+  return '<button class="teamcard" data-team="'+ti+'">'+notes
+    +'<div class="tabrow"><div><div class="tname">'+esc(v.label)+'</div>'
+    +'<div class="tproj">Table '+v.table+' · '+esc(v.project)+'</div></div>'
+    +'<span class="chip '+v.chip.cls+'">'+esc(v.chip.label)+'</span></div>'
+    +'<div class="quote">'+esc(v.quote)+'</div>'
+    +'<div class="filestate"><span>'+fileLbl+staleNote+'</span><span>tap to open ›</span></div>'
+    +'</button>';
+}
+
+function renderAllocate(){
+  let cards = '';
+  for (let i=0;i<5;i++) cards += teamCard(i);
+  const endLbl = S.attention>=2
+    ? 'End the week <span class="sub">'+S.attention+' attention unspent — going home early restores 1 sanity</span>'
+    : 'End the week' + (S.attention===1?' <span class="sub">1 attention will be lost</span>':'');
+  app.innerHTML = topbar()
+    +'<div class="scroll"><div class="apnote">Tap a team folder to inspect &amp; spend attention</div>'+cards+'</div>'
+    +'<div class="footbar"><button class="btn primary" data-act="endweek">'+endLbl+'</button></div>'
+    + (sheetTeam!=null ? sheetHTML(sheetTeam) : '');
+}
+
+function sheetHTML(ti){
+  const t = S.teams[ti];
+  const v = E.teamView(S,ti);
+  const a = E.ARCHS[t.key];
+  let stats = '';
+  if (v.known){
+    stats = '<div class="statrows">'
+      + statRow('Progress', v.known.P, v.known.exact, v.insight)
+      + statRow('Morale', v.known.M, v.known.exact, v.insight)
+      + statRow('Technical', v.known.T, v.known.exact, v.insight)
+      + '</div><div class="snote">'+(v.insight>=3?'Verified in person':'Your notes')+' · week '+v.snapWeek
+      + (v.stale>=2?' · GETTING STALE':'')+'</div>';
+  } else {
+    stats = '<div class="snote" style="margin-top:10px">No real information. Their self-report is all you have, and you know what that’s worth.</div>';
+  }
+  let warns = v.warns.map(w=>'<div class="warn">⚠ '+esc(w)+'</div>').join('');
+  const btn = (kind,label,sub)=>{
+    const cost = E.ACTIONS[kind].ap;
+    const cant = cost>S.attention;
+    return '<button class="btn'+(cant?' disabled':'')+'" data-team-act="'+kind+'" data-team="'+ti+'">'
+      +esc(label)+'<span class="cost">'+cost+' ATT</span>'
+      +(sub?'<span class="sub">'+esc(sub)+'</span>':'')+'</button>';
+  };
+  return '<div class="sheetwrap"><button class="shade" data-act="closesheet" aria-label="Close"></button>'
+    +'<div class="sheet"><div class="grip"></div>'
+    +'<div class="tabrow" style="display:flex;justify-content:space-between;align-items:center">'
+    +'<div><div class="tname" style="font-family:var(--memo);font-weight:700;font-size:18px">'+esc(v.label)+'</div>'
+    +'<div class="tproj" style="font-size:12.5px;color:var(--ink-soft)">'+esc(a.blurb)+'</div></div>'
+    +'<span class="chip '+v.chip.cls+'">'+esc(v.chip.label)+'</span></div>'
+    + stats + warns
+    + (v.notes.length?'<div class="warn">⚠ '+v.notes.join(' · ')+'</div>':'')
+    +'<hr class="rule">'
+    + btn('check','Check in','See where they really are. Cheap, and it goes stale.')
+    + btn('coach', a.coachLabel, a.coachSub||'Push the work forward.')
+    + btn('support', a.supportLabel, a.supportSub||'Shore up morale before it becomes your problem.')
+    +'<button class="btn" data-act="closesheet">Back to the roster</button>'
+    +'</div></div>';
+}
+
+function renderReport(){
+  let lis = S.report.lines.map(l=>'<li class="'+l.cls+'">'+l.txt+'</li>').join('');
+  app.innerHTML = topbar()
+    +'<div class="scroll"><div class="paper">'
+    +'<div class="memohead">Director’s field notes · <b>Week '+S.report.week+'</b></div>'
+    +'<ul class="loglist">'+lis+'</ul>'
+    +'<button class="btn primary" data-act="advance">'+(S.gate?'Proceed to '+esc(S.gate.name):(S.ending?'Face the consequences':'Begin week '+(S.week+1)))+'</button>'
+    +'</div></div>';
+}
+
+function renderGate(){
+  const g = S.gate;
+  let rows = g.rows.map(r=>
+    '<div class="gaterow"><div class="ginfo"><div class="gname">'+esc(r.label)+'</div>'
+    +'<div class="gscore">score '+r.sc+' / bar '+g.thr+'</div>'
+    +'<div class="gcomment">'+esc(r.comment)+'</div></div>'
+    +'<span class="stamp small '+(r.pass?'pass':'fail')+'">'+(r.pass?'Pass':'Fail')+'</span></div>').join('');
+  const isFinal = g.kind==='final';
+  app.innerHTML = topbar()
+    +'<div class="scroll"><div class="paper">'
+    +'<div class="memohead">Review panel results · <b>'+esc(g.name)+'</b></div>'
+    +'<div class="fineprint" style="margin-top:4px">The panel sees everything. Your files on all five teams are now current.</div>'
+    +'<hr class="rule">'+rows
+    +'<button class="btn primary" data-act="advance">'+((isFinal||S.ending)?'Face the reckoning':'Begin week '+(S.week+1))+'</button>'
+    +'</div></div>';
+}
+
+function renderOver(){
+  const e = S.ending;
+  let teamRows = S.teams.map(t=>{
+    const passed = !!t.gates.final;
+    const reached = 'final' in t.gates;
+    const verdict = reached ? (passed?'LANDED':'FAILED') : 'NO VERDICT';
+    const col = reached ? (passed?'var(--green)':'var(--red)') : 'var(--ink-faint)';
+    return '<div>'+esc(E.ARCHS[t.key].label)+'<span style="color:'+col+'">'+verdict+'</span></div>';
+  }).join('');
+  app.innerHTML = '<div class="scroll"><div class="paper" style="margin-top:20px">'
+    +'<div class="kicker">Personnel file · end of semester record</div>'
+    +'<div style="text-align:center;margin:18px 0 6px"><span class="stamp big '+e.stamp+'">'+esc(e.title)+'</span></div>'
+    +'<div class="memobody">'+esc(e.text)+'</div>'
+    +'<hr class="rule">'
+    +'<div class="endstats">'+teamRows
+    +'<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:8px">Weeks survived<span>'+e.weeks+' / 12</span></div>'
+    +'<div>Teams through the final gate<span>'+e.passes+' / 5</span></div>'
+    +'<div>Sanity remaining<span>'+S.sanity+'</span></div>'
+    +'<div>Political capital remaining<span>'+S.pc+'</span></div>'
+    +'<div><b>Semester score</b><span><b>'+e.score+'</b></span></div>'
+    +'</div>'
+    +'<button class="btn primary" data-act="new">New semester (new teams)</button>'
+    +'<div class="fineprint">The teams are randomized each run. So are the crises. The Assistant Director is eternal.</div>'
+    +'</div></div>';
+}
+
+function render(){
+  if (!S){ renderTitle(); return; }
+  save();
+  switch(S.phase){
+    case 'inbox': renderInbox(); break;
+    case 'allocate': renderAllocate(); break;
+    case 'report': renderReport(); break;
+    case 'gate': renderGate(); break;
+    case 'over': renderOver(); break;
+    default: renderTitle();
+  }
+  window.scrollTo(0,0);
+}
+
+/* ---------- events (delegated) ---------- */
+app.addEventListener('click', ev=>{
+  const b = ev.target.closest('button');
+  if (!b) return;
+  const act = b.dataset.act;
+  if (act==='new'){ sheetTeam=null; S = E.newGame((Math.random()*0x7fffffff)|0); render(); return; }
+  if (act==='resume'){ const s = loadSave(); if (s){ S = s; sheetTeam=null; render(); } return; }
+  if (act==='endweek'){ sheetTeam=null; E.endWeek(S); render(); return; }
+  if (act==='advance'){ E.advance(S); render(); return; }
+  if (act==='closesheet'){ sheetTeam=null; render(); return; }
+  if (b.dataset.card){ E.resolveCard(S, +b.dataset.card, +b.dataset.opt); render(); return; }
+  if (b.dataset.teamAct){ E.act(S, +b.dataset.team, b.dataset.teamAct);
+    sheetTeam = +b.dataset.team; // keep sheet open so the player sees the updated file
+    render(); return; }
+  if (b.dataset.team!=null){ sheetTeam = +b.dataset.team; render(); return; }
+});
+
+render();
+})();
+</script>
+</body>
+</html>
