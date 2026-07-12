@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recall &amp; Postmarket Sim — BE695</title>
+<style>
+/* ==================== DESIGN TOKENS ==================== */
+:root, [data-theme="light"] {
+  --color-bg: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-offset: #f1f5f9;
+  --color-surface-dynamic: #e2e8f0;
+  --color-divider: #e2e8f0;
+  --color-border: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+  --color-text-inverse: #f8fafc;
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-highlight: #f0fdfa;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-orange: #ea580c;
+  --color-gold: #ca8a04;
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 260 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 260 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 260 / 0.12);
+  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;
+  --space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0b1220;
+  --color-surface: #101a2c;
+  --color-surface-2: #16223a;
+  --color-surface-offset: #0e1728;
+  --color-surface-dynamic: #22304a;
+  --color-divider: #1c2a44;
+  --color-border: #2d3d5c;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-text-faint: #64748b;
+  --color-text-inverse: #0b1220;
+  --color-primary: #2dd4bf;
+  --color-primary-hover: #5eead4;
+  --color-primary-highlight: #113c38;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-success: #4ade80;
+  --color-orange: #fb923c;
+  --color-gold: #facc15;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.5);
+}
+
+/* ==================== BASE ==================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+img,canvas,svg{display:block;max-width:100%;height:auto}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition)}
+
+/* ==================== LAYOUT ==================== */
+.app-shell{display:grid;grid-template-rows:56px 1fr;min-height:100dvh}
+.topbar{display:flex;align-items:center;gap:var(--space-3);padding:0 var(--space-6);background:var(--color-surface);border-bottom:1px solid var(--color-border);position:sticky;top:0;z-index:50}
+.topbar-logo{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:var(--color-text)}
+.topbar-logo svg{flex-shrink:0}
+.logo-text{font-size:var(--text-sm);font-weight:600;letter-spacing:-0.01em;line-height:1.3}
+.logo-sub{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:400;line-height:1.3}
+.topbar-spacer{flex:1}
+.topbar-badge{font-size:var(--text-xs);padding:var(--space-1) var(--space-3);background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-full);font-weight:600;white-space:nowrap}
+.theme-toggle{padding:var(--space-2);border-radius:var(--radius-md);color:var(--color-text-muted)}
+.theme-toggle:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap;font-family:var(--font-body)}
+.back-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+
+.main-content{display:grid;grid-template-columns:290px 1fr;overflow:hidden;height:calc(100dvh - 56px)}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar{background:var(--color-surface);border-right:1px solid var(--color-border);overflow-y:auto;display:flex;flex-direction:column;gap:0}
+.sidebar-section{padding:var(--space-4) var(--space-4) var(--space-2)}
+.sidebar-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-faint);margin-bottom:var(--space-3)}
+.sidebar-divider{height:1px;background:var(--color-divider);margin:var(--space-2) var(--space-4)}
+.sidebar-note{padding:var(--space-2) var(--space-4) var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6}
+.sidebar-note strong{color:var(--color-text);font-weight:600}
+.sidebar-note em{color:var(--color-primary);font-style:normal;font-weight:600}
+
+.device-brief{padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);border:1.5px solid var(--color-primary);background:var(--color-primary-highlight);margin-bottom:var(--space-2)}
+.device-brief-name{font-size:var(--text-sm);font-weight:700;color:var(--color-primary)}
+.device-brief-line{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px;font-family:var(--font-mono)}
+
+.phase-step{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);border-radius:var(--radius-lg);margin-bottom:var(--space-1);border:1.5px solid transparent}
+.phase-step.active{background:var(--color-primary-highlight);border-color:var(--color-primary)}
+.phase-step.done{opacity:0.75}
+.phase-dot{width:22px;height:22px;border-radius:var(--radius-full);background:var(--color-surface-dynamic);color:var(--color-text-muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-mono);font-size:10px;flex-shrink:0}
+.phase-step.done .phase-dot{background:var(--color-success);color:var(--color-text-inverse)}
+.phase-step.active .phase-dot{background:var(--color-primary);color:var(--color-text-inverse)}
+.phase-name{font-size:var(--text-xs);font-weight:600}
+.phase-sub{font-size:10px;color:var(--color-text-faint);font-family:var(--font-mono)}
+
+.reg-ref{padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-2);margin-bottom:var(--space-2);font-size:var(--text-xs);line-height:1.55;color:var(--color-text-muted)}
+.reg-ref b{color:var(--color-primary);font-family:var(--font-mono);font-weight:600}
+
+/* ==================== MAIN PANEL ==================== */
+.panel{overflow-y:auto;padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-6)}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap}
+.page-title{font-size:var(--text-xl);font-weight:700;letter-spacing:-0.02em;line-height:1.1;color:var(--color-text)}
+.page-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-1);max-width:70ch}
+.load-btn{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;cursor:pointer;white-space:nowrap;min-height:44px}
+.load-btn:hover{background:var(--color-primary-hover)}
+
+/* KPI strip */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4)}
+.kpi-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-4) var(--space-5);box-shadow:var(--shadow-sm)}
+.kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+.kpi-value{font-size:var(--text-xl);font-weight:700;line-height:1.1;margin-top:var(--space-1);font-family:var(--font-mono)}
+.kpi-sub{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-1)}
+.kpi-card.danger .kpi-value{color:var(--color-error)}
+.kpi-card.warn .kpi-value{color:var(--color-orange)}
+.kpi-card.ok .kpi-value{color:var(--color-success)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);gap:var(--space-3)}
+.card-title{font-size:var(--text-sm);font-weight:700;color:var(--color-text);text-transform:uppercase;letter-spacing:0.06em}
+.card-hint{font-size:var(--text-xs);color:var(--color-text-muted)}
+
+/* Loop strip */
+.flow-strip{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+.flow-step{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+.flow-step b{color:var(--color-primary);font-family:var(--font-mono)}
+.flow-step.now{border-color:var(--color-primary);color:var(--color-primary)}
+.flow-arrow{color:var(--color-text-faint);font-size:var(--text-xs)}
+
+/* Report rows */
+.report-row{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);margin-bottom:var(--space-3);cursor:pointer;transition:all var(--transition);background:var(--color-surface-2);min-height:64px}
+.report-row:hover{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.report-row:last-of-type{margin-bottom:0}
+.rep-id{width:56px;flex-shrink:0;font-family:var(--font-mono);font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted)}
+.rep-day{font-size:10px;color:var(--color-text-faint);font-family:var(--font-mono)}
+.rep-title{font-size:var(--text-sm);font-weight:600}
+.rep-src{font-size:var(--text-xs);color:var(--color-text-muted)}
+.rep-status{margin-left:auto;font-size:var(--text-xs);font-weight:600;white-space:nowrap;padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);flex-shrink:0}
+.st-todo{background:var(--color-surface-dynamic);color:var(--color-text-muted)}
+.st-progress{background:oklch(from var(--color-gold) l c h / 0.15);color:var(--color-gold)}
+.st-done{background:oklch(from var(--color-success) l c h / 0.15);color:var(--color-success);font-family:var(--font-mono)}
+.tag-badge{font-size:10px;padding:1px var(--space-2);border-radius:var(--radius-full);font-weight:700;letter-spacing:0.04em;white-space:nowrap}
+.tag-signal{background:oklch(from var(--color-error) l c h / 0.15);color:var(--color-error)}
+.tag-noise{background:var(--color-surface-dynamic);color:var(--color-text-muted)}
+.tag-lot{background:oklch(from var(--color-gold) l c h / 0.18);color:var(--color-gold);font-family:var(--font-mono)}
+
+/* Signal board / logs */
+.log-item{display:flex;align-items:baseline;gap:var(--space-3);padding:var(--space-2) 0;border-bottom:1px dashed var(--color-divider);font-size:var(--text-xs)}
+.log-item:last-child{border-bottom:none}
+.log-id{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);flex-shrink:0}
+.log-text{color:var(--color-text-muted);line-height:1.5}
+.log-due{margin-left:auto;font-family:var(--font-mono);color:var(--color-text-faint);white-space:nowrap;flex-shrink:0}
+.board-empty{padding:var(--space-5);text-align:center;color:var(--color-text-faint);font-size:var(--text-xs);line-height:1.6}
+
+/* Steps & options */
+.step-box{border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4);background:var(--color-surface-2)}
+.step-box.locked{opacity:0.5}
+.step-head{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2)}
+.step-num{width:26px;height:26px;border-radius:var(--radius-full);background:var(--color-primary);color:var(--color-text-inverse);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--text-xs);font-family:var(--font-mono);flex-shrink:0}
+.step-num.done{background:var(--color-success)}
+.step-title{font-size:var(--text-sm);font-weight:700}
+.step-prompt{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);line-height:1.6}
+
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-2);background:var(--color-surface);font-size:var(--text-sm);line-height:1.5;min-height:52px}
+.opt:hover{border-color:var(--color-primary)}
+.opt.sel{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.opt:disabled{cursor:default}
+.opt.best-reveal{border-color:var(--color-success);box-shadow:0 0 0 1px var(--color-success)}
+.opt-tag{display:block;font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+
+.chip-row{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.chip{font-size:var(--text-xs);font-weight:600;padding:var(--space-2) var(--space-3);border-radius:var(--radius-full);border:1.5px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;min-height:36px}
+.chip:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.chip.sel{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse)}
+.chip:disabled{cursor:default;opacity:0.85}
+.chip.right{background:oklch(from var(--color-success) l c h / 0.15);border-color:var(--color-success);color:var(--color-success)}
+.chip.wrong{background:oklch(from var(--color-error) l c h / 0.15);border-color:var(--color-error);color:var(--color-error)}
+
+.classify-item{border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-3);background:var(--color-surface)}
+.classify-text{font-size:var(--text-sm);line-height:1.5;margin-bottom:var(--space-2)}
+.classify-explain{font-size:var(--text-xs);line-height:1.6;color:var(--color-text-muted);border-top:1px dashed var(--color-border);margin-top:var(--space-2);padding-top:var(--space-2)}
+.classify-explain b{color:var(--color-text)}
+
+.feedback{border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-xs);line-height:1.6;margin-top:var(--space-3)}
+.feedback b{font-weight:700}
+.fb-good{background:oklch(from var(--color-success) l c h / 0.12);border:1px solid oklch(from var(--color-success) l c h / 0.4);color:var(--color-text)}
+.fb-mid{background:oklch(from var(--color-gold) l c h / 0.12);border:1px solid oklch(from var(--color-gold) l c h / 0.4);color:var(--color-text)}
+.fb-bad{background:oklch(from var(--color-error) l c h / 0.12);border:1px solid oklch(from var(--color-error) l c h / 0.4);color:var(--color-text)}
+.fb-info{background:var(--color-primary-highlight);border:1px solid oklch(from var(--color-primary) l c h / 0.4);color:var(--color-text)}
+
+.check-btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;margin-top:var(--space-2);min-height:44px}
+.check-btn:hover{background:var(--color-primary-hover)}
+.check-btn:disabled{opacity:0.45;cursor:not-allowed}
+.ghost-btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:transparent;border:1px solid var(--color-border);color:var(--color-text-muted);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;min-height:44px}
+.ghost-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.danger-btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);background:transparent;border:1.5px solid var(--color-error);color:var(--color-error);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:700;min-height:44px}
+.danger-btn:hover{background:oklch(from var(--color-error) l c h / 0.1)}
+
+/* Field-status ticker */
+.ticker{border-left:3px solid var(--color-warning);background:oklch(from var(--color-warning) l c h / 0.08);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);font-size:var(--text-xs);line-height:1.7;margin-bottom:var(--space-2)}
+.ticker b{color:var(--color-warning)}
+.ticker.grim{border-left-color:var(--color-error)}
+.ticker.grim b{color:var(--color-error)}
+.ticker.calm{border-left-color:var(--color-success)}
+.ticker.calm b{color:var(--color-success)}
+
+/* Debrief */
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:var(--space-2) 0;border-bottom:1px dashed var(--color-divider);font-size:var(--text-sm);gap:var(--space-3)}
+.score-row:last-child{border-bottom:none;font-weight:700}
+.score-pts{font-family:var(--font-mono);font-weight:700;white-space:nowrap}
+.debrief-grade{font-size:var(--text-xl);font-weight:800;font-family:var(--font-mono)}
+.viol-item{display:flex;gap:var(--space-2);align-items:baseline;padding:var(--space-2) 0;border-bottom:1px dashed var(--color-divider);font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5}
+.viol-item:last-child{border-bottom:none}
+.viol-flag{color:var(--color-error);font-weight:700;flex-shrink:0}
+.tl-row{display:flex;gap:var(--space-3);padding:var(--space-2) 0;border-bottom:1px dashed var(--color-divider);font-size:var(--text-xs);line-height:1.5}
+.tl-row:last-child{border-bottom:none}
+.tl-day{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);width:64px;flex-shrink:0}
+.tl-what{color:var(--color-text-muted)}
+
+/* Drawer */
+.drawer-overlay{position:fixed;inset:0;background:oklch(0 0 0 / 0.4);z-index:100;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:560px;max-width:100%;background:var(--color-surface);border-left:1px solid var(--color-border);z-index:101;transform:translateX(100%);transition:transform 300ms cubic-bezier(0.16,1,0.3,1);overflow-y:auto;padding:var(--space-6)}
+.drawer.open{transform:translateX(0)}
+.drawer-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-5)}
+.drawer-close{padding:var(--space-2);border-radius:var(--radius-md);color:var(--color-text-muted);min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.drawer-close:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.drawer-title{font-size:var(--text-lg);font-weight:700;line-height:1.2;flex:1;padding-right:var(--space-4)}
+.drawer-kicker{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-primary);margin-bottom:2px}
+
+.rp-section{margin-bottom:var(--space-6)}
+.rp-section-title{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-primary);margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+.rp-section-title::after{content:'';flex:1;height:1px;background:var(--color-primary-highlight)}
+.rp-field{margin-bottom:var(--space-3)}
+.rp-label{font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--space-1)}
+.rp-value{font-size:var(--text-sm);color:var(--color-text);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);line-height:1.55}
+
+/* Empty / briefing state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:var(--space-12) var(--space-8);gap:var(--space-4)}
+.empty-icon{width:64px;height:64px;color:var(--color-text-faint)}
+.empty-title{font-size:var(--text-lg);font-weight:700;color:var(--color-text)}
+.empty-sub{font-size:var(--text-sm);color:var(--color-text-muted);max-width:52ch;line-height:1.7}
+
+/* ==================== RESPONSIVE ==================== */
+@media(max-width:900px){
+  .main-content{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+  .drawer{width:100%;max-width:100%}
+  .topbar{padding:0 var(--space-4)}
+  .panel{padding:var(--space-4)}
+  .topbar-badge{display:none}
+  .logo-sub{display:none}
+  .logo-text{white-space:nowrap}
+  .back-btn{padding:6px 8px}
+  .topbar{gap:var(--space-2)}
+  .report-row{flex-wrap:wrap}
+  .rep-status{margin-left:0}
+}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200}
+.sidebar-overlay.open{display:block}
+@media(max-width:900px){
+  .sidebar{display:flex!important;position:fixed;left:0;top:0;bottom:0;width:290px;z-index:201;transform:translateX(-100%);transition:transform 280ms cubic-bezier(0.16,1,0.3,1)}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .menu-btn{display:inline-flex!important}
+}
+.menu-btn{display:none;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--radius-md);border:1px solid var(--color-border);color:var(--color-text-muted);background:none;cursor:pointer;flex-shrink:0}
+.menu-btn:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+@media(max-width:480px){
+  .topbar-logo span{display:none}
+  .kpi-strip{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+<div class="app-shell">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <a class="topbar-logo" href="#">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Recall &amp; Postmarket Sim logo">
+        <rect width="28" height="28" rx="7" fill="var(--color-primary)" opacity="0.15"/>
+        <path d="M14 5l9 16H5l9-16z" stroke="var(--color-primary)" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M14 11.5v4.5" stroke="var(--color-primary)" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="14" cy="18.6" r="1.3" fill="var(--color-primary)"/>
+      </svg>
+      <span>
+        <div class="logo-text">Recall &amp; Postmarket Sim</div>
+        <div class="logo-sub">MDR · Recalls · CAPA · BE695</div>
+      </span>
+    </a>
+    <button class="menu-btn" id="menu-btn" onclick="toggleMobileSidebar()" aria-label="Open scenario menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-badge">21 CFR 803 · 806 · 7 · 820.100</span>
+    <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+    <a href="../" class="back-btn" style="margin-left:8px;">&#8592; Learning Hub</a>
+  </header>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Your Device (Fictional)</div>
+        <div class="device-brief">
+          <div class="device-brief-name">VeriGluc Home</div>
+          <div class="device-brief-line">OTC blood glucose meter</div>
+          <div class="device-brief-line">510(k) K243117 · Class II</div>
+          <div class="device-brief-line">48,200 units in the field</div>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Run Progress</div>
+        <div id="phase-list"></div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Regulatory Quick Reference</div>
+        <div class="reg-ref"><b>21 CFR 803</b> — Medical Device Reporting. Deaths &amp; serious injuries: 30 calendar days. Malfunctions likely to cause/contribute to death or serious injury if they recur: 30 days. Events needing remedial action against an unreasonable risk of substantial public-health harm: <b>5 work days</b> (803.53).</div>
+        <div class="reg-ref"><b>21 CFR 7</b> — Recalls (voluntary). You initiate and run a health hazard evaluation (7.41); <b>FDA assigns the class</b>. Class I: reasonable probability of serious adverse health consequences or death. II: temporary/reversible, or remote probability of serious. III: not likely to cause adverse health consequences.</div>
+        <div class="reg-ref"><b>21 CFR 806</b> — Report corrections &amp; removals made to reduce a risk to health within <b>10 working days</b> of initiating. Non-reportable ones still get records (806.20).</div>
+        <div class="reg-ref"><b>21 CFR 820.100</b> — CAPA: analyze quality data, investigate root cause, act to correct <i>and</i> prevent recurrence, verify effectiveness. Complaints flow in via 820.198.</div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-note" style="color:var(--color-text-faint)">
+        <strong style="color:var(--color-text-muted)">Framework trainer.</strong> This simulation compresses months of postmarket work into one sitting. Timelines, point values, and "field harm" estimates are pedagogical devices — not a depiction of how a real quality system, FDA review, or recall actually unfolds. The device, company, and events are fictional.
+      </div>
+    </aside>
+
+    <!-- PANEL -->
+    <main class="panel" id="main-panel">
+
+      <!-- Briefing -->
+      <div class="empty-state" id="briefing">
+        <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="10" y="8" width="28" height="48" rx="5" stroke-dasharray="4 3"/>
+          <rect x="16" y="14" width="16" height="10" rx="2"/>
+          <path d="M18 32h12M18 38h8M18 44h10"/>
+          <path d="M50 22l8 14H42l8-14z" stroke-width="2"/>
+          <path d="M50 27.5v4" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="50" cy="34" r="0.8" fill="currentColor"/>
+        </svg>
+        <div class="empty-title">You are the postmarket surveillance lead.</div>
+        <div class="empty-sub">Your company's cleared glucose meter, <b>VeriGluc Home</b>, has been on the market for 14 months. Complaints arrive over the next 90 simulated days — most are noise, a few are a real safety signal. Triage each report, make the MDR call under 21 CFR 803, decide when to escalate, run the recall decision under 21 CFR 7 &amp; 806, and close the loop with a CAPA under 820.100. Wrong triage lets harm accumulate in the field. Over-reporting burns your team and your credibility. Both are graded.</div>
+        <button class="load-btn" onclick="startRun()">Start the 90-day run →</button>
+      </div>
+
+      <!-- Simulation content -->
+      <div id="content" style="display:none;flex-direction:column;gap:var(--space-6)">
+
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="content-title">VeriGluc Home — Postmarket Watch</div>
+            <div class="page-subtitle" id="content-sub">—</div>
+          </div>
+          <button class="ghost-btn" onclick="resetRun()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M20.49 15A9 9 0 1 1 22 9"/></svg>
+            Restart Run
+          </button>
+        </div>
+
+        <div class="kpi-strip">
+          <div class="kpi-card"><div class="kpi-label">Sim Day</div><div class="kpi-value" id="kpi-day">1</div><div class="kpi-sub">of 90</div></div>
+          <div class="kpi-card danger"><div class="kpi-label">Est. Field Harm</div><div class="kpi-value" id="kpi-harm">0</div><div class="kpi-sub">device-linked events (est.)</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">Compliance Exposure</div><div class="kpi-value" id="kpi-compliance">Low</div><div class="kpi-sub" id="kpi-compliance-sub">0 potential findings</div></div>
+          <div class="kpi-card ok"><div class="kpi-label">Score</div><div class="kpi-value" id="kpi-score">0</div><div class="kpi-sub" id="kpi-score-sub">points</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="flex-wrap:wrap">
+            <div>
+              <div class="card-title">The Postmarket Loop</div>
+              <div class="card-hint">Every report runs the first two steps; the run escalates through the rest</div>
+            </div>
+            <div class="flow-strip" id="loop-strip">
+              <span class="flow-step" data-loop="triage"><b>1</b> Triage</span><span class="flow-arrow">→</span>
+              <span class="flow-step" data-loop="report"><b>2</b> Report (803)</span><span class="flow-arrow">→</span>
+              <span class="flow-step" data-loop="recall"><b>3</b> Recall (7/806)</span><span class="flow-arrow">→</span>
+              <span class="flow-step" data-loop="capa"><b>4</b> CAPA (820.100)</span>
+            </div>
+          </div>
+          <div id="phase-area"></div>
+        </div>
+
+        <div class="card" id="reports-card">
+          <div class="card-header" style="flex-wrap:wrap">
+            <div>
+              <div class="card-title">Incoming Reports</div>
+              <div class="card-hint" id="reports-hint">Disposition every report to advance — 820.198 says every complaint gets evaluated</div>
+            </div>
+          </div>
+          <div id="report-list"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Signal Board</div>
+                <div class="card-hint">Reports you flag as signal build the trend file</div>
+              </div>
+            </div>
+            <div id="signal-board"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">MDR Reporting Log</div>
+                <div class="card-hint">Filed reports and their clocks</div>
+              </div>
+            </div>
+            <div id="mdr-log"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="report-drawer" aria-label="Report detail">
+  <div class="drawer-header">
+    <div style="flex:1;padding-right:var(--space-4)">
+      <div class="drawer-kicker" id="drawer-kicker">—</div>
+      <div class="drawer-title" id="drawer-title">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="drawer-content"></div>
+</aside>
+<script>
+// ==================== REFERENCE DATA ====================
+// MDR decision options shown for every report (21 CFR 803)
+const MDR_OPTS = [
+  { key:'none', label:'Not MDR-reportable', tag:'Evaluate & document in the complaint file — 21 CFR 820.198' },
+  { key:'mal30', label:'Malfunction MDR — 30 calendar days', tag:'Would be likely to cause/contribute to death or serious injury if it recurred — 803.50' },
+  { key:'inj30', label:'Serious injury MDR — 30 calendar days', tag:'Life-threatening, permanent damage, or needed intervention to prevent it — 803.3 / 803.50' },
+  { key:'death30', label:'Death MDR — 30 calendar days', tag:'Information reasonably suggests the device may have caused or contributed — 803.50' },
+  { key:'five', label:'5-work-day report', tag:'Event necessitates remedial action to prevent unreasonable risk of substantial public-health harm — 803.53' },
+];
+
+const TRIAGE_PTS = 5;
+
+// Reports. truthSignal = belongs on the trend/signal board.
+// mdr map: option key -> { pts, cls(good/mid/bad), fb }. best = full-credit key.
+// missedViol = compliance finding recorded if student picks "none" on a reportable event.
+const REPORTS = [
+{
+  id:'R-101', wave:0, day:3, src:'Retail pharmacy — returned goods', lot:null,
+  title:'"E-4 error with every strip"',
+  text:'A pharmacy returns a meter: the customer "gets E-4 with every strip and gave up." No injury claimed.',
+  followup:'Your complaint unit tests the returned meter: it reads control solutions within spec. The E-4 error reproduces only when a strip is inserted upside down — exactly what the IFU says E-4 means.',
+  truthSignal:false,
+  triageWhy:'<b>Noise.</b> The device performed to specification; this is a use problem, not a device problem, and it does not match any pattern. It still gets a complaint record and evaluation under 820.198 — "noise" never means "ignore."',
+  best:'none',
+  mdr:{
+    none:{pts:10, cls:'good', fb:'Correct. The device performed as designed and no one was hurt. Document the evaluation in the complaint file (820.198). If upside-down strips become a <i>pattern</i>, that is use-related risk data for human factors — a different loop.'},
+    mal30:{pts:3, cls:'mid', burden:true, fb:'Over-filed. E-4 on an upside-down strip is the device working correctly, not a malfunction. Unnecessary MDRs are not free: each one costs investigation time and dilutes the signal FDA (and your own trending) can see.'},
+    inj30:{pts:0, cls:'bad', burden:true, fb:'No injury was reported or suggested. This filing misstates the event.'},
+    death30:{pts:0, cls:'bad', burden:true, fb:'No death is involved. This filing misstates the event.'},
+    five:{pts:0, cls:'bad', burden:true, fb:'A 5-work-day report is for events that necessitate remedial action against an unreasonable risk of substantial public-health harm. A misused strip is nowhere near that bar.'},
+  },
+},
+{
+  id:'R-102', wave:0, day:8, src:'Home user — phone complaint', lot:'4469',
+  title:'Case cracked after a fall',
+  text:'A user reports the meter housing cracked when it fell off a kitchen counter. She is worried it is "broken inside."',
+  followup:'The returned unit passes all performance testing; the crack is cosmetic and consistent with impact. No harm occurred.',
+  truthSignal:false,
+  triageWhy:'<b>Noise.</b> Damage from a drop, with the device still performing to spec, is not a failure pattern. Complaint record, evaluation, done.',
+  best:'none',
+  mdr:{
+    none:{pts:10, cls:'good', fb:'Correct. No malfunction (the device meets spec; the damage came from impact) and no harm. 820.198 record and close.'},
+    mal30:{pts:3, cls:'mid', burden:true, fb:'A cracked case from a counter-height drop is not a device malfunction — the device did not fail to meet its specifications or perform as intended. Over-filing burns hours and blurs your own trend data.'},
+    inj30:{pts:0, cls:'bad', burden:true, fb:'No injury occurred or was threatened here.'},
+    death30:{pts:0, cls:'bad', burden:true, fb:'No death is involved.'},
+    five:{pts:0, cls:'bad', burden:true, fb:'Nothing here suggests remedial action against a public-health risk.'},
+  },
+},
+{
+  id:'R-103', wave:0, day:12, src:'ER physician — MedWatch copy', lot:'4471',
+  title:'Teen admitted in DKA; meter read 96 mg/dL',
+  text:'A 17-year-old with type 1 diabetes was admitted in diabetic ketoacidosis. An hour before admission, her VeriGluc Home (Lot 4471) read 96 mg/dL; the ER lab measured 517 mg/dL. The family kept the meter.',
+  followup:'The family agrees to return the meter for investigation. Hospital records confirm the admission and the lab value. DKA required ICU admission and an insulin infusion; the patient recovered.',
+  truthSignal:true,
+  triageWhy:'<b>Signal.</b> A specific, verifiable failure mode — a falsely low reading masking severe hyperglycemia — with a lot number and a retained device. This is exactly what your trend file exists to catch. One event is not yet a trend, but it is a flagged thread.',
+  best:'inj30',
+  mdr:{
+    none:{pts:0, cls:'bad', viol:'Reportable serious injury (R-103, DKA/ICU admission) never filed — 803.50 requires a report within 30 calendar days of becoming aware.', fb:'<b>This is a reportable serious injury.</b> DKA requiring ICU care is life-threatening and needed medical intervention (803.3). Information "reasonably suggests" the device may have caused or contributed — you do not need proof to owe a report. Skipping it is a straightforward 803 violation an investigator will find in your complaint file.'},
+    mal30:{pts:4, cls:'mid', fb:'Under-called. A malfunction report says "no death or serious injury occurred." Here a serious injury <i>did</i> occur: DKA with ICU admission is life-threatening harm the device plausibly contributed to. File it as a serious injury, 30 calendar days.'},
+    inj30:{pts:10, cls:'good', fb:'Correct. ICU-level DKA meets the 803.3 serious-injury definition (life-threatening; required intervention), and a falsely low reading plausibly contributed by masking hyperglycemia. Clock: 30 calendar days from the day your firm became aware. Note what you did <i>not</i> need: proof of causation. "Reasonably suggests" is the trigger.'},
+    death30:{pts:2, cls:'bad', fb:'The patient survived. Filing the wrong event type misstates the record — this is a serious injury report.'},
+    five:{pts:5, cls:'mid', fb:'Defensible instinct, early trigger. The 5-work-day clock (803.53) applies when you determine the event <i>necessitates remedial action</i> against an unreasonable risk of substantial public-health harm. At one event, before any investigation, most firms cannot yet make that determination — a 30-day serious injury report plus an urgent internal investigation is the textbook move. Document whichever determination you make.'},
+  },
+},
+{
+  id:'R-104', wave:1, day:18, src:'Distributor — complaint batch', lot:null,
+  title:'Six complaints: battery door latch is stiff',
+  text:'A distributor forwards six customer complaints that the battery door latch is hard to open. No readings affected, no harm alleged.',
+  followup:'Engineering confirms a tooling change made the latch stiffer but within design tolerance. Annoying, not unsafe.',
+  truthSignal:false,
+  triageWhy:'<b>Noise</b> — a real quality grumble, but no plausible path to patient harm and no connection to the reading-accuracy thread. Feed it to routine quality trending, not the safety signal file.',
+  best:'none',
+  mdr:{
+    none:{pts:10, cls:'good', fb:'Correct. No malfunction affecting performance, no harm, no reasonable path to harm. Complaint records, trend in routine quality data (820.100(a) does want you analyzing this stream too — just not as a safety signal).'},
+    mal30:{pts:3, cls:'mid', burden:true, fb:'A stiff latch within tolerance is not a reportable malfunction — recurrence would not plausibly cause or contribute to death or serious injury.'},
+    inj30:{pts:0, cls:'bad', burden:true, fb:'No injury alleged.'},
+    death30:{pts:0, cls:'bad', burden:true, fb:'No death involved.'},
+    five:{pts:0, cls:'bad', burden:true, fb:'Far below the 803.53 bar.'},
+  },
+},
+{
+  id:'R-105', wave:1, day:22, src:'Diabetes educator — clinic call', lot:'4471',
+  title:'Meter read 88; clinic analyzer read 402',
+  text:'At a routine visit, a patient’s VeriGluc Home (Lot 4471) read 88 mg/dL while the clinic’s lab analyzer read 402 mg/dL minutes apart. The educator caught it; the patient was counseled and adjusted. No treatment delay, no harm.',
+  followup:'The clinic ships the meter back. Preliminary bench check: it reads control solutions correctly at low and mid range. High-range testing is queued.',
+  truthSignal:true,
+  triageWhy:'<b>Signal.</b> Same failure mode as R-103 — falsely low at high glucose — and the <i>same lot</i>. Two lot-matched events is when a thread becomes a trend. Your signal board should now be asking: what does Lot 4471 have in common?',
+  best:'mal30',
+  mdr:{
+    none:{pts:0, cls:'bad', viol:'Reportable malfunction (R-105, falsely low reading) never filed — a malfunction likely to cause/contribute to serious injury if it recurs is reportable under 803.50.', fb:'<b>This is a reportable malfunction.</b> No one was hurt <i>this time</i> — but the same failure mode already put a teenager in the ICU (R-103). A malfunction is reportable when recurrence would be <i>likely to cause or contribute to</i> death or serious injury. That test is met. Not filing is an 803 violation.'},
+    mal30:{pts:10, cls:'good', fb:'Correct. Harm did not occur, so it is not an injury report — but the malfunction would be likely to contribute to serious injury if it recurred (it already did once). Malfunction MDR, 30 calendar days. This is the call students miss most: <b>no-harm events can still be reportable.</b>'},
+    inj30:{pts:3, cls:'mid', fb:'No injury occurred — the educator caught it. When harm did not happen, the question is the malfunction test: would recurrence be likely to cause or contribute to death or serious injury? File it as a malfunction.'},
+    death30:{pts:0, cls:'bad', fb:'No death involved.'},
+    five:{pts:5, cls:'mid', fb:'Aggressive. If you have already determined remedial action is necessary, a 5-day report is coherent — but at two events with the investigation still open, most firms file the 30-day malfunction report and accelerate the investigation. Either way, write the determination down.'},
+  },
+},
+{
+  id:'R-106', wave:1, day:27, src:'Sales rep — social media screenshot', lot:null,
+  title:'"This meter almost killed my mom" — no details',
+  text:'A sales rep forwards a screenshot of a social post: "my mom’s glucose meter almost killed her." No model, no lot, no date, no way to tell if it is even your product.',
+  followup:'Your complaint unit sends two follow-up requests through the platform and the rep. No response. The poster’s public photos show a competitor’s meter on the nightstand — but that proves nothing about the event.',
+  truthSignal:false,
+  triageWhy:'<b>Noise — for now.</b> You must make a good-faith attempt to get the facts (you did, twice, and documented it). With no device identification and no reachable reporter, there is nothing to trend. If details ever surface, it gets re-opened.',
+  best:'none',
+  mdr:{
+    none:{pts:10, cls:'good', fb:'Correct — <i>because you tried</i>. The duty is to evaluate and to make reasonable, documented efforts to obtain the facts. After diligent follow-up fails and you cannot even place your device at the scene, the complaint file holds the record. Filing an MDR with no device, no event, and no reporter would document speculation, not information.'},
+    mal30:{pts:3, cls:'mid', burden:true, fb:'What malfunction? You could not establish the device, the event, or the mode. File the follow-up attempts in the complaint record instead.'},
+    inj30:{pts:5, cls:'mid', burden:true, fb:'Conservative and not crazy — FDA accepts reports with incomplete information, and some firms file protectively. But the expected baseline is: diligent, documented follow-up first; report when information reasonably suggests <i>your</i> device caused or contributed. Here it does not, yet.'},
+    death30:{pts:0, cls:'bad', burden:true, fb:'No death — "almost" is in the post itself.'},
+    five:{pts:0, cls:'bad', burden:true, fb:'No basis for a remedial-action determination from an unverifiable post.'},
+  },
+},
+{
+  id:'R-107', wave:2, day:33, src:'County coroner via field rep', lot:'4472',
+  title:'Death: hyperosmolar coma; logged readings all "normal"',
+  text:'A 71-year-old with type 2 diabetes was found deceased at home; cause: hyperosmolar hyperglycemic state. Her VeriGluc Home (Lot 4472) was at the bedside. Its memory shows readings of 90–120 mg/dL through the final week.',
+  followup:'The coroner releases the meter. The logged readings are inconsistent with the postmortem findings. Lot 4472 was built in the same production window as Lot 4471.',
+  truthSignal:true,
+  triageWhy:'<b>Signal — and the trend is now undeniable.</b> Third lot-linked event, same silent failure mode, and now a death. Two adjacent lots from one production window points at a common cause: a component lot, a process change, or a firmware release.',
+  best:'five',
+  mdr:{
+    none:{pts:0, cls:'bad', viol:'Reportable death (R-107) never filed — failure to report a death the device may have caused or contributed to is among the most serious 803 violations.', fb:'<b>This is a reportable death.</b> Logged "normal" readings against a fatal hyperglycemic state reasonably suggest the device contributed by masking the emergency. Not filing a death report is the kind of violation that turns an inspection into a Warning Letter.'},
+    mal30:{pts:1, cls:'bad', fb:'A patient died. This cannot be filed as a malfunction-only report.'},
+    inj30:{pts:2, cls:'bad', fb:'The patient died — this is a death report, not a serious injury report.'},
+    death30:{pts:7, cls:'mid', fb:'Right event type — but look at your own signal board. Three lot-linked events, a silent failure mode in lay users’ hands, and now a death: the determination that this "necessitates remedial action to prevent an unreasonable risk of substantial harm" (803.53) is squarely on the table, and that determination starts a <b>5-work-day</b> clock. If you conclude it does not, document why — an investigator will ask.'},
+    five:{pts:10, cls:'good', fb:'Correct. With a death on top of a lot-linked trend of silent falsely-low readings in home users, a reasonable firm concludes remedial action is necessary to prevent substantial public-health harm — and that conclusion triggers the 5-work-day report under 803.53(a), not the routine 30-day clock. The clock runs from the day anyone in the company made (or should have made) that determination.'},
+  },
+},
+{
+  id:'R-108', wave:2, day:38, src:'Home user — web form', lot:'4471',
+  title:'Read 105 while symptomatic; retest on old meter: 460',
+  text:'A user felt thirsty, flushed, and "off." His VeriGluc Home (Lot 4471) read 105 mg/dL. Suspicious, he retested on his old meter: 460 mg/dL. He corrected with insulin per his usual sliding scale at home and felt better within hours.',
+  followup:'He mails the meter in. He never sought medical care and reports no lasting effects.',
+  truthSignal:true,
+  triageWhy:'<b>Signal.</b> Fourth lot-linked event, same mode. Also a lucky one: the user’s own cross-check was the only barrier between a false reading and another emergency. Luck is not a risk control.',
+  best:'mal30',
+  mdr:{
+    none:{pts:0, cls:'bad', viol:'Reportable malfunction (R-108) never filed — same reasoning as R-105; the failure mode has already contributed to a death.', fb:'<b>Reportable malfunction.</b> No injury this time — self-corrected at home, no medical intervention — but the malfunction test is met beyond argument now: this failure mode has already contributed to an ICU admission and a death.'},
+    mal30:{pts:10, cls:'good', fb:'Correct. He self-managed without professional medical intervention, so the 803.3 serious-injury definition is not met — but recurrence being "likely to cause or contribute to death or serious injury" is settled by the record. Malfunction MDR, 30 calendar days.'},
+    inj30:{pts:4, cls:'mid', fb:'Close call, and worth arguing in class: he treated himself and never needed professional intervention, so the standard reading of 803.3 lands on malfunction, not serious injury. If his self-treatment had failed or he had been treated by a clinician, this flips.'},
+    death30:{pts:0, cls:'bad', fb:'No death in this event.'},
+    five:{pts:6, cls:'mid', fb:'Understandable after R-107 — but the 5-day clock attaches to the event that <i>drives</i> the remedial-action determination, and your remediation is (or should be) already in motion. Follow-on events of the same mode are routinely filed on the 30-day clock, often as supplements to an on-going investigation. Practice varies; document your logic.'},
+  },
+},
+{
+  id:'R-109', wave:2, day:42, src:'Hospital risk manager', lot:'4470',
+  title:'Severe hypoglycemia after insulin dose — meter blamed',
+  text:'A hospitalized patient became severely hypoglycemic after an insulin dose. The nurse who reported it blamed the ward’s VeriGluc meter (Lot 4470) for "reading high."',
+  followup:'Your investigation with the hospital: the meter read 240 mg/dL and the hospital’s lab confirmed 238 mg/dL from the same draw window. The insulin order had been transcribed at ten times the intended dose. The hospital’s own event review agrees.',
+  truthSignal:false,
+  triageWhy:'<b>Noise — for your device.</b> Serious harm occurred, but the investigation shows your meter read accurately; the cause was a transcription error in the insulin order. Not every harm near your device is your device’s harm. The investigation record is what defends this call.',
+  best:'none',
+  mdr:{
+    none:{pts:10, cls:'good', fb:'Correct — <i>because the investigation says so</i>. After a documented investigation, the information no longer reasonably suggests your device caused or contributed to the harm. Keep the full investigation in the complaint file; that record is your defense. Had the meter actually mis-read, this would have been a serious injury report.'},
+    mal30:{pts:2, cls:'bad', burden:true, fb:'Your own investigation found no malfunction — the meter agreed with the lab within a few mg/dL.'},
+    inj30:{pts:3, cls:'mid', burden:true, fb:'Harm happened, but 803 asks whether information reasonably suggests <b>your device</b> caused or contributed. Your completed investigation says it did not. Filing anyway (some firms do, protectively) is defensible but feeds a false lot-4470 thread into everyone’s trend data at the worst possible moment.'},
+    death30:{pts:0, cls:'bad', burden:true, fb:'No death, and no device involvement.'},
+    five:{pts:0, cls:'bad', burden:true, fb:'No device involvement — nothing to remediate on your side.'},
+  },
+},
+];
+
+// Wave metadata. Harm accrual is a pedagogical estimate shown to the student.
+const WAVES = [
+  { label:'Days 1–14', endDay:14, harm:1,
+    ticker:'Complaint volume is normal. One thread worth watching: a lot-numbered meter that read 96 when the lab read 517.' },
+  { label:'Days 15–30', endDay:30, harm:2,
+    ticker:'Two more weeks of field exposure. Lot 4471 has now produced two discrepant-reading events. Units keep shipping.' },
+  { label:'Days 31–45', endDay:45, harm:3,
+    ticker:'The failure mode has now been linked to a death. Every day of delay is more silent meters in more homes.' },
+];
+</script>
+<script>
+// ==================== ESCALATION / RECALL / CAPA DATA ====================
+const W2_CHOICE = {
+  prompt:'Lot 4471 has produced two discrepant-reading events, one of them an ICU admission. Your investigation is open but has no root cause yet. Manufacturing wants to know if Lots 4471+ keep shipping.',
+  opts:[
+    { key:'hold', label:'Open a formal signal investigation and place a voluntary shipping hold on Lots 4471 and later', tag:'Costs revenue and a tough meeting with sales; contains exposure while you investigate', pts:8, cls:'good',
+      fb:'<b>Proactive containment.</b> Two lot-matched events of a silent, serious failure mode justify holding distribution while the investigation runs (a stock recovery of undistributed units is not even a "recall" under 21 CFR 7.3). If the signal evaporates, you have lost some revenue and face an awkward meeting. If it is real — and it is — you have kept new units out of homes. Fewer fielded units means less harm accrual in the coming weeks.' },
+    { key:'monitor', label:'Continue routine monitoring; keep shipping while the investigation runs', tag:'No disruption; the trend file stays open', pts:3, cls:'mid',
+      fb:'<b>Defensible at n=2, but the lot commonality was already on your board.</b> Nothing in 803/806 forced a hold today — this is exactly the judgment zone where postmarket teams earn their pay. The cost shows up later: every additional shipped unit is another silent meter in a home if the signal is real.' },
+  ],
+};
+
+const RECALL_DECISIONS = [
+{
+  id:'rd1', kicker:'Day 52 — Investigation complete', title:'Choose the field action',
+  brief:'Engineering root-caused the trend: firmware v3.2, installed in Lots 4471–4473 (48,200 units, ~31,000 in consumers’ hands), mishandles readings above 400 mg/dL — an overflow guard clamps them into the normal range. Bench testing reproduces it on demand. Units with v3.1 are unaffected. Legal, regulatory, and the VP of sales are in the room. What do you do?',
+  opts:[
+    { key:'recall', label:'Initiate a voluntary recall of Lots 4471–4473: consignee notification, firmware correction for fielded units, removal of units that can’t be updated', tag:'21 CFR 7 voluntary recall — correction & removal', pts:15, cls:'good',
+      fb:'<b>Correct.</b> A device that silently masks severe hyperglycemia is defective and presents a risk to health — this is recall territory under 21 CFR 7, and acting voluntarily and fast is both the safety answer and the strategic one (FDA can order recalls under FD&C 518(e), but almost all device recalls are firm-initiated). Note the vocabulary: fixing fielded units in place is a <i>correction</i>; bringing them back is a <i>removal</i>. Both count.' },
+    { key:'silent', label:'Push firmware v3.3 to fielded meters as a routine over-the-air update — no recall terminology, no FDA report', tag:'"It’s just a software update"', pts:0, cls:'bad', viol:'Field correction to reduce a health risk executed without an 806 report — failure to report a correction/removal.', harm:1,
+      fb:'<b>This is the classic trap.</b> A software patch that fixes a defect presenting a risk to health is a <i>correction</i> under 21 CFR 806 no matter what you call it — reportable within 10 working days of initiation. FDA connects your MDR cluster to the quiet update at the next inspection; the finding is now about concealment, not just the defect. Also: OTA updates reach only meters that sync — thousands of users stay exposed with no warning.' },
+    { key:'wait', label:'Stop shipment of the affected lots and keep monitoring 30 more days — "we only have four confirmed events"', tag:'Buy time for more data', pts:3, cls:'bad', harm:4, viol:'Recall delayed after root cause was known — documented awareness of a serious defect with no field action is an inspection finding waiting to happen.',
+      fb:'<b>You already have the data.</b> Root cause is confirmed and reproducible, the harm is serious, and the failure is silent — waiting adds field exposure, not knowledge. Stopping shipment only protects people who don’t own a meter yet. And your own files now document that you knew. FDA’s district office calls about the MDR cluster before your 30 days are up.' },
+    { key:'letter', label:'Send a "Dear Customer" safety letter: advise users to confirm any reading that doesn’t match symptoms — no device fix', tag:'Information only, defect stays in the field', pts:6, cls:'mid',
+      fb:'<b>Half an answer.</b> A safety notification to reduce a health risk is itself a correction — 806-reportable and, in FDA’s eyes, a recall action — so you have taken on recall obligations while leaving the defect in every meter. As risk control it is "information for safety," the weakest tier, aimed at exactly the users the failure mode deceives. Useful as an <i>interim</i> measure while the real correction rolls out; indefensible as the whole plan.' },
+  ],
+},
+{
+  id:'rd2', kicker:'Health Hazard Evaluation → FDA', title:'Anticipate the recall classification',
+  brief:'You initiate the recall and submit your health hazard evaluation (21 CFR 7.41): one death, one ICU admission, two near-misses; a silent failure mode; lay users with no independent way to detect it; ~31,000 affected units in homes. FDA — not you — will assign the classification. Which class do you anticipate, and plan your strategy around?',
+  opts:[
+    { key:'c1', label:'Class I — reasonable probability of serious adverse health consequences or death', tag:'21 CFR 7.3(m)(1)', pts:15, cls:'good',
+      fb:'<b>Correct.</b> The 7.41 factors all point one way: serious harm has already occurred (a death), the exposed population is large and unsupervised, the failure is silent (users have no way to detect it), and the consequence of a missed hyperglycemic crisis is death. Falsely low glucose readings have driven real Class I recalls. Plan for the Class I toolkit: user-level notification, public warning, aggressive effectiveness checks.' },
+    { key:'c2', label:'Class II — temporary or medically reversible consequences; serious harm remote', tag:'21 CFR 7.3(m)(2)', pts:5, cls:'mid',
+      fb:'Class II fits when serious harm is <i>remote</i> or effects are temporary/reversible. Here serious harm is not remote — it has already happened, twice, in a small reported sample of a silent failure mode. Under-anticipating the class means under-building the recall strategy FDA will expect.' },
+    { key:'c3', label:'Class III — use is not likely to cause adverse health consequences', tag:'21 CFR 7.3(m)(3)', pts:0, cls:'bad',
+      fb:'A death is already in the file. Class III is for defects that are essentially harmless to health — mislabeled shelf-life on a benign accessory, that kind of thing.' },
+  ],
+},
+{
+  id:'rd3', kicker:'21 CFR 7.42 — Recall strategy', title:'Set the depth and the communication plan',
+  brief:'Recall strategy is yours to propose: how deep into the distribution chain, whether to warn the public, and how you’ll verify consignees actually acted (effectiveness checks).',
+  opts:[
+    { key:'user', label:'User/consumer level: direct notification through distributors, pharmacies, and registrations, plus a public press release and 100% effectiveness checks', tag:'Deepest level — reaches the homes where the meters are', pts:15, cls:'good',
+      fb:'<b>Correct.</b> The hazard lives on nightstands, not in warehouses — the recall depth must reach the user level or it reaches almost none of the risk. For an anticipated Class I with a silent failure mode, a public warning is standard (many users are unregistered and unreachable directly), and effectiveness checks at the highest level (contact every consignee) are expected. Expensive, slow, and the only version that works.' },
+    { key:'retail', label:'Retail level: pharmacies and DME suppliers pull remaining stock from shelves', tag:'Stops new sales', pts:4, cls:'mid',
+      fb:'This stops <i>future</i> exposure and abandons the ~31,000 meters already in homes — which is where the deaths will come from. Retail depth suits defects that only matter before sale. Not this one.' },
+    { key:'whsl', label:'Wholesale level: distributors return unshipped inventory; no public communication', tag:'Quietest, cheapest option', pts:0, cls:'bad',
+      fb:'This is barely more than the shipping hold you (may) have already done. It touches none of the fielded risk and communicates nothing to the people holding a defective meter. For a silent, potentially fatal failure mode, this strategy is indefensible in front of FDA — or a jury.' },
+  ],
+},
+{
+  id:'rd4', kicker:'21 CFR 806 — Telling FDA', title:'Report the correction & removal',
+  brief:'The recall is initiated: notifications drafted, firmware v3.3 validated and rolling out, returns logistics live. One more clock is running. What does Part 806 require?',
+  opts:[
+    { key:'ten', label:'Submit the 806 report to FDA within 10 working days of initiating the correction/removal', tag:'806.10 — includes the why, the health risk, the strategy, and the numbers', pts:15, cls:'good',
+      fb:'<b>Correct.</b> A correction or removal initiated to reduce a risk to health must be reported within <b>10 working days</b> of initiation (806.10). In practice you are also on the phone with your district recall coordinator, who will shepherd the classification and monitor status reports. Corrections that do NOT rise to a health risk (the stiff battery latch, say) skip the report but still require records under 806.20.' },
+    { key:'covered', label:'No 806 report needed — FDA already knows everything from the MDRs you filed', tag:'"They have the file"', pts:4, cls:'mid', viol:'806 report not filed on the assumption MDRs covered it — the exemption only applies when the 803 submission already contains the correction/removal information.',
+      fb:'<b>Tempting, and there is a real exemption buried here</b> — actions already reported to FDA under Part 803 need not be re-reported under 806. But it applies when the MDR submission itself contains the correction/removal information. Your MDRs were filed weeks before the recall existed; they describe events, not the action. File the 806 report.' },
+    { key:'thirty', label:'Report it within 30 calendar days, batched with the month’s MDR supplements', tag:'One combined package', pts:2, cls:'bad', viol:'806 report filed late — 10-working-day deadline missed.',
+      fb:'Wrong clock. 803’s 30-day rhythm does not govern recall reporting — 806.10 gives you <b>10 working days</b> from initiating the correction or removal. Late 806 reports are an easy, visible inspection finding.' },
+  ],
+},
+];
+
+const CAPA_DECISIONS = [
+{
+  id:'c1', kicker:'Day 65 — 21 CFR 820.100', title:'State the root cause',
+  brief:'The recall is running. Now the CAPA has to name the root cause. The investigation record: v3.2 added a fixed-point overflow guard for a new strip type; the guard clamps any glucose value above 400 mg/dL into the normal display range. The change was classified "minor" under the software change-control SOP, so regression testing covered only 40–250 mg/dL. Verification on the original release (v3.0) had tested the full claimed range of 20–600.',
+  opts:[
+    { key:'process', label:'Change control classified the v3.2 algorithm change as "minor," so regression testing never covered the full claimed measuring range — the defect shipped untested', tag:'Process-level cause', pts:15, cls:'good',
+      fb:'<b>This is the root cause.</b> Keep asking "why" past the bug: the defect existed because the process allowed an algorithm change to release without full-range regression. Fix only the bug and the <i>next</i> algorithm change ships the same way. A root cause you can act on is almost always a process statement, not a code statement.' },
+    { key:'bug', label:'Firmware v3.2 contains a defective overflow guard that clamps readings above 400 mg/dL', tag:'The defect itself', pts:8, cls:'mid',
+      fb:'<b>True — and one "why" short.</b> That is the proximate cause: it explains the failure, not the escape. Why did a reading-path change reach the field with no test above 250? Root-cause it at the process level (change control / regression scope) or your corrective action will only ever fix this one bug.' },
+    { key:'strips', label:'A bad lot of test strips drifted the chemistry at high glucose', tag:'Supplier cause', pts:0, cls:'bad',
+      fb:'Contradicted by the record: events span multiple strip lots, the bench reproduces the failure with control solutions, and only v3.2 meters fail. The evidence was in the investigation file — a CAPA that names the wrong cause “fixes” nothing and closes the file on a live defect.' },
+    { key:'users', label:'Users failed to confirm implausible readings against symptoms, as the IFU advises', tag:'Blame the user', pts:0, cls:'bad',
+      fb:'The meter displayed 96 when the truth was 517 — there is no "implausible reading" for the user to catch; the failure mode is silent by nature. "User error" as a root cause for a device defect is the reflex that regulators (and plaintiff’s counsel) see through first.' },
+  ],
+},
+{
+  id:'c2', kicker:'Correction vs corrective vs preventive', title:'Classify the actions in the CAPA plan', type:'classify',
+  brief:'The CAPA plan lists three actions. Tag each one. (ISO 13485/9000 vocabulary, which FDA’s QMSR now incorporates: a <b>correction</b> fixes the detected nonconformity itself; a <b>corrective action</b> eliminates its cause so it cannot recur; a <b>preventive action</b> eliminates the cause of a nonconformity that has not happened yet.)',
+  items:[
+    { text:'Recall Lots 4471–4473 and update every fielded meter to firmware v3.3 (or replace it).', key:'corr',
+      explain:'<b>Correction.</b> It fixes the nonconforming product that already exists — in the field, unit by unit. It does nothing to stop the next defect from shipping. (The recall itself is a correction/removal in 806 vocabulary, too.)' },
+    { text:'Revise the software change-control SOP: any change touching the measurement path requires regression testing across the full claimed range (20–600 mg/dL) before release, with an automated full-range suite added to every build.', key:'ca',
+      explain:'<b>Corrective action.</b> It attacks the cause of this nonconformity — the "minor change" loophole — so the same escape cannot recur on this product.' },
+    { text:'Audit the release records of the company’s two other meter platforms for the same "minor change" testing gap, and apply the revised SOP to them before any defect appears there.', key:'pa',
+      explain:'<b>Preventive action</b> (as this app classifies it): those platforms have no detected nonconformity yet — you are eliminating a <i>potential</i> cause. Fair warning: some quality professionals would log extending a found systemic fix as part of the corrective action; the label matters less than doing it.' },
+  ],
+  chips:[ {key:'corr', label:'Correction'}, {key:'ca', label:'Corrective action'}, {key:'pa', label:'Preventive action'} ],
+  ptsPer:5,
+},
+{
+  id:'c3', kicker:'820.100(a) — closing the loop', title:'When does this CAPA close?',
+  brief:'Six weeks later: firmware v3.3 is deployed to 71% of fielded units, the revised SOP is live, and the automated full-range suite runs on every build. The quality manager wants the CAPA off the aging report. When do you close it?',
+  opts:[
+    { key:'verify', label:'Close only when effectiveness is verified: full-range regression passing on every build, falsely-low-reading complaints at zero over a defined monitoring window, and recall effectiveness checks meeting the strategy’s targets', tag:'Evidence, then closure', pts:15, cls:'good',
+      fb:'<b>Correct.</b> CAPA requires <i>verifying or validating</i> that the action is effective and does not itself cause new problems — implementation is not effectiveness. Define the criteria up front (what metric, what window, what threshold), then close on evidence. An auditor’s favorite question is "show me how you knew it worked."' },
+    { key:'mailed', label:'Close when the recall notifications are mailed and the SOP revision is signed', tag:'Actions complete = done', pts:0, cls:'bad',
+      fb:'That is implementation, not effectiveness. A mailed letter proves you sent mail; it does not prove exposed users acted, complaints stopped, or the process gap is actually closed. CAPAs closed without effectiveness verification are among the most-cited quality system findings.' },
+    { key:'unittest', label:'Close when firmware v3.3 passes its unit tests', tag:'The bug is fixed', pts:5, cls:'mid',
+      fb:'That verifies the <i>correction</i> works at the code level — it says nothing about the fielded population still running v3.2, nor whether the process fix prevents the next escape. Effectiveness is measured where the risk was: in the field and in the release process.' },
+  ],
+},
+];
+
+// ==================== STATE ====================
+function freshState(){
+  return {
+    started:false,
+    phase:'wave',          // wave | waveSummary | recall | capa | debrief
+    wave:0,                // 0..2 during surveillance
+    day:1,
+    reports: REPORTS.map(() => ({ triage:null, triageDone:false, triagePts:0, mdrPick:null, mdrDone:false, mdrPts:0 })),
+    w2:{ pick:null, done:false, pts:0 },
+    holdTaken:false,
+    recall: RECALL_DECISIONS.map(() => ({ pick:null, done:false, pts:0 })),
+    capa: CAPA_DECISIONS.map(d => d.type==='classify'
+      ? { picks:{}, done:false, pts:0 }
+      : { pick:null, done:false, pts:0 }),
+    harm:0,
+    burden:0,              // unnecessary filings/actions
+    violations:[],         // simulated inspection findings
+    mdrLog:[],             // {id, label, due, day}
+    actionLog:[],          // debrief timeline: {day, what}
+  };
+}
+let S = freshState();
+let curReport = null;
+
+const MAX_SCORE = (() => {
+  let m = REPORTS.length * TRIAGE_PTS;
+  REPORTS.forEach(r => { m += Math.max(...Object.values(r.mdr).map(o => o.pts)); });
+  m += Math.max(...W2_CHOICE.opts.map(o => o.pts));
+  RECALL_DECISIONS.forEach(d => { m += Math.max(...d.opts.map(o => o.pts)); });
+  CAPA_DECISIONS.forEach(d => { m += d.type==='classify' ? d.items.length * d.ptsPer : Math.max(...d.opts.map(o => o.pts)); });
+  return m;
+})();
+
+function totalScore(){
+  let s = 0;
+  S.reports.forEach(r => { s += r.triagePts + r.mdrPts; });
+  s += S.w2.pts;
+  S.recall.forEach(r => { s += r.pts; });
+  S.capa.forEach(c => { s += c.pts; });
+  return s;
+}
+
+function waveReports(w){ return REPORTS.map((r,i)=>({r,i})).filter(x => x.r.wave === w); }
+function repDone(st){ return st.triageDone && st.mdrDone; }
+function waveDone(w){ return waveReports(w).every(({i}) => repDone(S.reports[i])); }
+function logAction(day, what){ S.actionLog.push({day, what}); }
+</script>
+<script>
+// ==================== RENDER: SIDEBAR / KPI / LOOP ====================
+const PHASES = [
+  { key:'w0', name:'Surveillance — Wave 1', sub:'Days 1–14' },
+  { key:'w1', name:'Surveillance — Wave 2', sub:'Days 15–30' },
+  { key:'w2', name:'Surveillance — Wave 3', sub:'Days 31–45' },
+  { key:'recall', name:'Recall Decisions', sub:'21 CFR 7 · 806' },
+  { key:'capa', name:'CAPA', sub:'21 CFR 820.100' },
+  { key:'debrief', name:'Debrief', sub:'Day 90' },
+];
+
+function currentPhaseKey(){
+  if (S.phase === 'wave' || S.phase === 'waveSummary') return 'w' + S.wave;
+  return S.phase;
+}
+
+function renderSidebar(){
+  const cur = currentPhaseKey();
+  const order = PHASES.map(p => p.key);
+  const curIdx = order.indexOf(cur);
+  document.getElementById('phase-list').innerHTML = PHASES.map((p,i) => `
+    <div class="phase-step ${i < curIdx ? 'done' : ''} ${i === curIdx && S.started ? 'active' : ''}">
+      <div class="phase-dot">${i < curIdx ? '✓' : i+1}</div>
+      <div><div class="phase-name">${p.name}</div><div class="phase-sub">${p.sub}</div></div>
+    </div>`).join('');
+}
+
+function complianceLevel(){
+  const n = S.violations.length;
+  return n === 0 ? ['Low','ok'] : n <= 2 ? ['Moderate','warn'] : ['High','danger'];
+}
+
+function renderKPIs(){
+  document.getElementById('kpi-day').textContent = S.day;
+  document.getElementById('kpi-harm').textContent = S.harm;
+  const [lvl] = complianceLevel();
+  const kc = document.getElementById('kpi-compliance');
+  kc.textContent = lvl;
+  kc.style.color = lvl==='Low' ? 'var(--color-success)' : lvl==='Moderate' ? 'var(--color-orange)' : 'var(--color-error)';
+  document.getElementById('kpi-compliance-sub').textContent = S.violations.length + ' potential finding' + (S.violations.length===1?'':'s') + (S.burden ? ' · ' + S.burden + ' over-filed' : '');
+  document.getElementById('kpi-score').textContent = totalScore();
+  document.getElementById('kpi-score-sub').textContent = 'of ' + MAX_SCORE + ' possible';
+  const subs = { wave:'Surveillance · ' + WAVES[S.wave].label, waveSummary:'Field status review · Day ' + S.day,
+    recall:'Recall decisions · investigation complete', capa:'CAPA · recall running', debrief:'Run complete — debrief' };
+  document.getElementById('content-sub').textContent = subs[S.phase];
+  const loopMap = { wave:'triage', waveSummary:'triage', recall:'recall', capa:'capa', debrief:null };
+  document.querySelectorAll('#loop-strip .flow-step').forEach(el => {
+    el.classList.toggle('now', el.dataset.loop === loopMap[S.phase] || (S.phase==='wave' && el.dataset.loop==='report'));
+  });
+}
+
+// ==================== RENDER: REPORTS / BOARDS ====================
+function renderReports(){
+  const upTo = (S.phase === 'wave' || S.phase === 'waveSummary') ? S.wave : 2;
+  let html = '';
+  for (let w = upTo; w >= 0; w--) {
+    const reps = waveReports(w);
+    html += `<div class="card-hint" style="margin:${w<upTo?'var(--space-4)':'0'} 0 var(--space-3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Wave ${w+1} · ${WAVES[w].label}</div>`;
+    html += reps.map(({r,i}) => {
+      const st = S.reports[i];
+      let status;
+      if (repDone(st)) status = `<span class="rep-status st-done">✓ ${st.triagePts + st.mdrPts} pts</span>`;
+      else if (st.triageDone || st.triage !== null) status = `<span class="rep-status st-progress">In progress</span>`;
+      else status = `<span class="rep-status st-todo">Needs disposition</span>`;
+      const lot = r.lot ? `<span class="tag-badge tag-lot">Lot ${r.lot}</span>` : '';
+      const tri = repDone(st) ? `<span class="tag-badge ${r.truthSignal?'tag-signal':'tag-noise'}">${r.truthSignal?'SIGNAL':'noise'}</span>` : '';
+      return `
+      <div class="report-row" onclick="openReport(${i})">
+        <div class="rep-id">${r.id}<div class="rep-day">Day ${r.day}</div></div>
+        <div style="min-width:0"><div class="rep-title">${r.title}</div><div class="rep-src">${r.src} ${lot} ${tri}</div></div>
+        ${status}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('report-list').innerHTML = html;
+  document.getElementById('reports-hint').textContent = (S.phase === 'wave')
+    ? 'Disposition every report to advance — 820.198 says every complaint gets evaluated'
+    : 'Surveillance record — click any report to review your calls';
+}
+
+function renderSignalBoard(){
+  const flagged = REPORTS.map((r,i)=>({r,st:S.reports[i]})).filter(x => x.st.triageDone && x.st.triage === 'signal');
+  const el = document.getElementById('signal-board');
+  if (!flagged.length){
+    el.innerHTML = `<div class="board-empty">No signals flagged yet.<br>Triage incoming reports to build the trend file.</div>`;
+    return;
+  }
+  let html = flagged.map(({r}) => `
+    <div class="log-item"><span class="log-id">${r.id}</span>
+    <span class="log-text">${r.title}${r.truthSignal ? '' : ' <b style="color:var(--color-gold)">← investigation found no device link</b>'}</span>
+    <span class="log-due">${r.lot ? 'Lot ' + r.lot : 'no lot'}</span></div>`).join('');
+  const lots = flagged.filter(x=>x.r.truthSignal && x.r.lot).map(x=>x.r.lot);
+  if (new Set(lots).size >= 1 && lots.length >= 2){
+    html += `<div class="feedback fb-info" style="margin-top:var(--space-3)"><b>Trend read:</b> ${lots.length} flagged events cluster on adjacent lots (${[...new Set(lots)].join(', ')}) — one production window. Same silent failure mode: falsely low display at high glucose.</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderMdrLog(){
+  const el = document.getElementById('mdr-log');
+  if (!S.mdrLog.length){
+    el.innerHTML = `<div class="board-empty">No MDRs filed yet.<br>Reportable events you file will appear here with their clocks.</div>`;
+    return;
+  }
+  el.innerHTML = S.mdrLog.map(m => `
+    <div class="log-item"><span class="log-id">${m.id}</span>
+    <span class="log-text">${m.label}</span>
+    <span class="log-due">due Day ${m.due}</span></div>`).join('');
+}
+
+// ==================== RENDER: PHASE AREA ====================
+function renderPhaseArea(){
+  const el = document.getElementById('phase-area');
+  if (S.phase === 'wave') el.innerHTML = renderWavePhase();
+  else if (S.phase === 'waveSummary') el.innerHTML = renderWaveSummary();
+  else if (S.phase === 'recall') el.innerHTML = renderDecisionSeries('recall', RECALL_DECISIONS, S.recall, 'Recall complete — proceed to CAPA', 'toCapa()');
+  else if (S.phase === 'capa') el.innerHTML = renderDecisionSeries('capa', CAPA_DECISIONS, S.capa, 'Close the loop — run the debrief', 'toDebrief()');
+  else if (S.phase === 'debrief') el.innerHTML = renderDebrief();
+}
+
+function renderWavePhase(){
+  const done = waveDone(S.wave);
+  const n = waveReports(S.wave).length;
+  const nDone = waveReports(S.wave).filter(({i}) => repDone(S.reports[i])).length;
+  return `
+    <div class="ticker ${S.wave===2?'grim':''}"><b>Wave ${S.wave+1} · ${WAVES[S.wave].label}.</b> ${WAVES[S.wave].ticker}</div>
+    <div class="step-prompt" style="margin:var(--space-3) 0 0">${nDone} of ${n} reports dispositioned this wave. Each needs a triage call <i>and</i> an MDR decision — open them below.</div>
+    ${done ? `<button class="check-btn" onclick="endWave()">Advance — end of ${WAVES[S.wave].label} →</button>` : ''}`;
+}
+
+function renderWaveSummary(){
+  // end-of-wave interstitial. Wave index S.wave just ended.
+  const w = S.wave;
+  let html = '';
+  if (w === 0){
+    html += `<div class="ticker"><b>Day 14 field status.</b> Estimated device-linked harm to date: <b>${S.harm} event</b> (the R-103 DKA admission). Lot 4471 is flagged once on your board. Production and shipping continue.</div>
+      <button class="check-btn" onclick="nextWave()">Continue surveillance → Days 15–30</button>`;
+  } else if (w === 1){
+    const c = S.w2;
+    html += `<div class="ticker"><b>Day 30 field status.</b> Estimated device-linked harm to date: <b>${S.harm} events</b>. ${W2_CHOICE.prompt}</div>`;
+    html += renderOptList(W2_CHOICE.opts, c.pick, c.done, 'pickW2', 'checkW2');
+    if (c.done){
+      html += `<button class="check-btn" onclick="nextWave()">Continue surveillance → Days 31–45</button>`;
+    }
+  } else {
+    html += `<div class="ticker grim"><b>Day 45 field status.</b> Estimated device-linked harm to date: <b>${S.harm} events</b>, including one death.${S.holdTaken ? ' Your Day-30 shipping hold kept roughly a wave of new units out of homes — the accrual would be worse without it.' : ' Units shipped through Day 45 — the hold you didn’t place at Day 30 kept the exposed population growing.'}
+      ${mostSignalsMissed() ? ' Your signal board is thin because most real signals were triaged as noise — in this sim the medical reviewer catches the death report and forces the escalation; in a real system, nobody guarantees that save.' : ''}
+      Your medical reviewer, the death report, and the lot-cluster on the board leave no room for "monitor": this escalates now.</div>
+      <button class="check-btn" onclick="toRecall()">Escalate — open the health hazard evaluation →</button>`;
+  }
+  return html;
+}
+
+function mostSignalsMissed(){
+  const sig = REPORTS.map((r,i)=>({r,st:S.reports[i]})).filter(x=>x.r.truthSignal);
+  return sig.filter(x => x.st.triage !== 'signal').length >= 3;
+}
+
+function renderOptList(opts, pick, done, pickFn, checkFn){
+  let html = opts.map((o,idx) => {
+    let cls = 'opt';
+    if (!done){ if (pick === o.key) cls += ' sel'; }
+    else { if (o.cls === 'good') cls += ' best-reveal'; if (pick === o.key) cls += ' sel'; }
+    return `<button class="${cls}" ${done?'disabled':''} onclick="${pickFn}('${o.key}')">${o.label}<span class="opt-tag">${o.tag}</span></button>`;
+  }).join('');
+  if (!done) html += `<button class="check-btn" ${pick?'':'disabled'} onclick="${checkFn}()">Commit decision</button>`;
+  return html;
+}
+</script>
+<script>
+// ==================== RENDER: RECALL / CAPA DECISION SERIES ====================
+function renderDecisionSeries(kind, DEFS, sts, doneLabel, doneFn){
+  let html = '';
+  for (let i = 0; i < DEFS.length; i++){
+    const d = DEFS[i], st = sts[i];
+    const locked = i > 0 && !sts[i-1].done;
+    if (locked){
+      html += `<div class="step-box locked"><div class="step-head"><div class="step-num">${i+1}</div><div class="step-title">${d.title}</div></div><div class="step-prompt">Complete the previous decision first.</div></div>`;
+      continue;
+    }
+    html += `<div class="step-box"><div class="step-head"><div class="step-num ${st.done?'done':''}">${st.done?'✓':i+1}</div><div><div class="step-title">${d.title}</div><div class="phase-sub">${d.kicker}</div></div></div>
+      <div class="step-prompt">${d.brief}</div>`;
+    if (d.type === 'classify'){
+      html += d.items.map((item, idx) => {
+        const picked = st.picks[idx];
+        let row = `<div class="classify-item"><div class="classify-text">${item.text}</div><div class="chip-row">`;
+        for (const ch of d.chips){
+          let cls = 'chip';
+          if (!st.done){ if (picked === ch.key) cls += ' sel'; }
+          else { if (ch.key === item.key) cls += ' right'; else if (picked === ch.key) cls += ' wrong'; }
+          row += `<button class="${cls}" ${st.done?'disabled':''} onclick="pickClassify(${i},${idx},'${ch.key}')">${ch.label}</button>`;
+        }
+        row += `</div>`;
+        if (st.done) row += `<div class="classify-explain">${picked === item.key ? '✓' : '✗'} ${item.explain}</div>`;
+        row += `</div>`;
+        return row;
+      }).join('');
+      if (!st.done){
+        const all = d.items.every((_,idx) => st.picks[idx]);
+        html += `<button class="check-btn" ${all?'':'disabled'} onclick="checkClassify(${i})">Commit classifications</button>`;
+      } else {
+        const right = d.items.filter((item,idx) => st.picks[idx] === item.key).length;
+        html += `<div class="feedback ${right===d.items.length?'fb-good':'fb-mid'}"><b>${right} / ${d.items.length} correct · +${st.pts} pts.</b> The vocabulary is the point: an inspector reading your CAPA should find all three layers — fix the product, fix the cause, sweep for the cause elsewhere.</div>`;
+      }
+    } else {
+      html += renderOptList(d.opts, st.pick, st.done, `pickDecisionProxy_${kind}_${i}`, `checkDecisionProxy_${kind}_${i}`);
+    }
+    html += `</div>`;
+  }
+  if (sts.every(s => s.done)){
+    html += `<button class="check-btn" onclick="${doneFn}">${doneLabel} →</button>`;
+  }
+  return html;
+}
+
+// Proxies so renderOptList's simple string handlers work for each decision index
+function makeProxies(kind, DEFS){
+  DEFS.forEach((d, i) => {
+    if (d.type === 'classify') return;
+    window[`pickDecisionProxy_${kind}_${i}`] = (key) => pickDecision(kind, i, key);
+    window[`checkDecisionProxy_${kind}_${i}`] = () => checkDecision(kind, i);
+  });
+}
+
+function decisionSets(kind){
+  return kind === 'recall' ? { defs:RECALL_DECISIONS, sts:S.recall } : { defs:CAPA_DECISIONS, sts:S.capa };
+}
+
+function pickDecision(kind, i, key){
+  const { sts } = decisionSets(kind);
+  if (sts[i].done) return;
+  sts[i].pick = key;
+  renderAll();
+}
+
+function checkDecision(kind, i){
+  const { defs, sts } = decisionSets(kind);
+  const st = sts[i], d = defs[i];
+  if (st.done || !st.pick) return;
+  const opt = d.opts.find(o => o.key === st.pick);
+  st.pts = opt.pts; st.done = true;
+  if (opt.viol) S.violations.push(opt.viol);
+  if (opt.harm) S.harm += opt.harm;
+  logAction(S.day, `${d.title}: ${opt.label.substring(0, 90)}${opt.label.length>90?'…':''}`);
+  renderAll();
+}
+
+function pickClassify(i, idx, key){
+  const st = S.capa[i];
+  if (st.done) return;
+  st.picks[idx] = key;
+  renderAll();
+}
+
+function checkClassify(i){
+  const d = CAPA_DECISIONS[i], st = S.capa[i];
+  if (st.done || !d.items.every((_,idx) => st.picks[idx])) return;
+  st.pts = d.items.reduce((a,item,idx) => a + (st.picks[idx] === item.key ? d.ptsPer : 0), 0);
+  st.done = true;
+  logAction(S.day, 'CAPA actions classified (correction / corrective / preventive)');
+  renderAll();
+}
+
+// Extend renderOptList output with feedback for committed decisions
+const _origRenderOptList = renderOptList;
+renderOptList = function(opts, pick, done, pickFn, checkFn){
+  let html = _origRenderOptList(opts, pick, done, pickFn, checkFn);
+  if (done && pick){
+    const opt = opts.find(o => o.key === pick);
+    const cls = opt.cls === 'good' ? 'fb-good' : opt.cls === 'mid' ? 'fb-mid' : 'fb-bad';
+    html += `<div class="feedback ${cls}"><b>+${opt.pts} pts.</b> ${opt.fb}</div>`;
+  }
+  return html;
+};
+
+// ==================== WAVE FLOW ====================
+function startRun(){
+  S.started = true;
+  document.getElementById('briefing').style.display = 'none';
+  document.getElementById('content').style.display = 'flex';
+  logAction(1, 'Run started — surveillance opens');
+  renderAll();
+}
+
+function resetRun(){
+  S = freshState();
+  document.getElementById('briefing').style.display = 'flex';
+  document.getElementById('content').style.display = 'none';
+  renderAll();
+}
+
+function endWave(){
+  if (!waveDone(S.wave)) return;
+  const w = WAVES[S.wave];
+  S.day = w.endDay;
+  let acc = w.harm;
+  if (S.wave === 2 && S.holdTaken) acc = Math.max(0, acc - 1);
+  S.harm += acc;
+  S.phase = 'waveSummary';
+  logAction(S.day, `Wave ${S.wave+1} closed — ${waveReports(S.wave).length} reports dispositioned`);
+  renderAll();
+}
+
+function nextWave(){
+  S.wave += 1;
+  S.day = S.wave === 1 ? 15 : 31;
+  S.phase = 'wave';
+  renderAll();
+}
+
+function pickW2(key){ if (!S.w2.done){ S.w2.pick = key; renderAll(); } }
+function checkW2(){
+  if (S.w2.done || !S.w2.pick) return;
+  const opt = W2_CHOICE.opts.find(o => o.key === S.w2.pick);
+  S.w2.pts = opt.pts; S.w2.done = true;
+  if (S.w2.pick === 'hold'){ S.holdTaken = true; logAction(30, 'Voluntary shipping hold placed on Lots 4471+ · formal signal investigation opened'); }
+  else logAction(30, 'Continued routine monitoring; shipping continues');
+  renderAll();
+}
+
+function toRecall(){
+  S.phase = 'recall';
+  S.day = 52;
+  logAction(46, 'Health hazard evaluation opened (21 CFR 7.41); engineering investigation prioritized');
+  renderAll();
+}
+
+function toCapa(){
+  S.phase = 'capa';
+  S.day = 65;
+  logAction(65, 'CAPA opened under 820.100 — recall running in parallel');
+  renderAll();
+}
+
+function toDebrief(){
+  S.phase = 'debrief';
+  S.day = 90;
+  S.harm += 1; // residual events during recall execution — no field action reaches everyone instantly
+  logAction(90, 'Run complete — debrief');
+  renderAll();
+}
+</script>
+<script>
+// ==================== REPORT DRAWER ====================
+function openReport(i){
+  curReport = i;
+  renderDrawer();
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('report-drawer').classList.add('open');
+}
+
+function closeDrawer(){
+  curReport = null;
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('report-drawer').classList.remove('open');
+  renderAll();
+}
+
+function renderDrawer(){
+  if (curReport === null) return;
+  const r = REPORTS[curReport];
+  const st = S.reports[curReport];
+
+  document.getElementById('drawer-kicker').textContent = `${r.id} · Day ${r.day} · ${r.src}`;
+  document.getElementById('drawer-title').textContent = r.title;
+
+  let html = `
+  <div class="rp-section">
+    <div class="rp-section-title">Complaint as received</div>
+    <div class="rp-field"><div class="rp-value">${r.text}</div></div>
+    ${r.lot ? `<div class="rp-field"><div class="rp-label">Device</div><div class="rp-value" style="font-family:var(--font-mono)">VeriGluc Home · Lot ${r.lot}</div></div>` : ''}
+    <div class="rp-field"><div class="rp-label">Follow-up / investigation notes</div><div class="rp-value">${r.followup}</div></div>
+  </div>`;
+
+  // ---------- STEP 1: TRIAGE ----------
+  html += `<div class="step-box">
+    <div class="step-head"><div class="step-num ${st.triageDone?'done':''}">${st.triageDone?'✓':'1'}</div><div class="step-title">Triage — signal or noise?</div></div>
+    <div class="step-prompt">Does this report belong on the safety <b>signal board</b> (a potential trend toward patient harm), or is it routine complaint <b>noise</b>? Either way it gets a complaint record under 820.198 — triage decides what your trending sees.</div>
+    <div class="chip-row">`;
+  for (const [kind, label] of [['signal','Signal — flag to the trend file'],['noise','Noise — routine complaint handling']]){
+    let cls = 'chip';
+    const truthKind = r.truthSignal ? 'signal' : 'noise';
+    if (!st.triageDone){ if (st.triage === kind) cls += ' sel'; }
+    else { if (kind === truthKind) cls += ' right'; else if (st.triage === kind) cls += ' wrong'; }
+    html += `<button class="${cls}" ${st.triageDone?'disabled':''} onclick="pickTriage('${kind}')">${label}</button>`;
+  }
+  html += `</div>`;
+  if (!st.triageDone){
+    html += `<button class="check-btn" ${st.triage?'':'disabled'} onclick="checkTriage()">Commit triage</button>`;
+  } else {
+    const right = st.triage === (r.truthSignal ? 'signal' : 'noise');
+    html += `<div class="feedback ${right?'fb-good':'fb-bad'}"><b>${right?'✓':'✗'} +${st.triagePts} pts.</b> ${r.triageWhy}</div>`;
+  }
+  html += `</div>`;
+
+  // ---------- STEP 2: MDR ----------
+  if (st.triageDone){
+    html += `<div class="step-box">
+      <div class="step-head"><div class="step-num ${st.mdrDone?'done':''}">${st.mdrDone?'✓':'2'}</div><div class="step-title">MDR decision — 21 CFR 803</div></div>
+      <div class="step-prompt">Reportable? As what? On which clock? Remember: "caused or contributed" is judged on what the information <b>reasonably suggests</b> — not on proof.</div>`;
+    MDR_OPTS.forEach(o => {
+      let cls = 'opt';
+      if (!st.mdrDone){ if (st.mdrPick === o.key) cls += ' sel'; }
+      else { if (o.key === r.best) cls += ' best-reveal'; if (st.mdrPick === o.key) cls += ' sel'; }
+      html += `<button class="${cls}" ${st.mdrDone?'disabled':''} onclick="pickMdr('${o.key}')">${o.label}<span class="opt-tag">${o.tag}</span></button>`;
+    });
+    if (!st.mdrDone){
+      html += `<button class="check-btn" ${st.mdrPick?'':'disabled'} onclick="checkMdr()">Commit MDR decision</button>`;
+    } else {
+      const g = r.mdr[st.mdrPick];
+      const cls = g.cls === 'good' ? 'fb-good' : g.cls === 'mid' ? 'fb-mid' : 'fb-bad';
+      html += `<div class="feedback ${cls}"><b>+${g.pts} pts.</b> ${g.fb}</div>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="step-box locked"><div class="step-head"><div class="step-num">2</div><div class="step-title">MDR decision — 21 CFR 803</div></div><div class="step-prompt">Commit the triage call first.</div></div>`;
+  }
+
+  if (repDone(st)){
+    html += `<div class="rp-section"><div class="rp-section-title">Report dispositioned — ${st.triagePts + st.mdrPts} pts</div>
+      <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+        <button class="check-btn" onclick="closeDrawer()">Back to the queue</button>
+      </div></div>`;
+  }
+
+  document.getElementById('drawer-content').innerHTML = html;
+}
+
+function pickTriage(kind){
+  const st = S.reports[curReport];
+  if (st.triageDone) return;
+  st.triage = kind;
+  renderDrawer();
+}
+
+function checkTriage(){
+  const r = REPORTS[curReport], st = S.reports[curReport];
+  if (st.triageDone || !st.triage) return;
+  st.triagePts = st.triage === (r.truthSignal ? 'signal' : 'noise') ? TRIAGE_PTS : 0;
+  st.triageDone = true;
+  renderDrawer();
+  renderAll(false);
+}
+
+function pickMdr(key){
+  const st = S.reports[curReport];
+  if (st.mdrDone) return;
+  st.mdrPick = key;
+  renderDrawer();
+}
+
+function checkMdr(){
+  const r = REPORTS[curReport], st = S.reports[curReport];
+  if (st.mdrDone || !st.mdrPick) return;
+  const g = r.mdr[st.mdrPick];
+  st.mdrPts = g.pts;
+  st.mdrDone = true;
+  if (g.viol) S.violations.push(g.viol);
+  if (g.burden) S.burden += 1;
+  if (st.mdrPick !== 'none'){
+    const opt = MDR_OPTS.find(o => o.key === st.mdrPick);
+    const due = st.mdrPick === 'five' ? r.day + 7 : r.day + 30;
+    S.mdrLog.push({ id:r.id, label:opt.label, due });
+    logAction(r.day, `${r.id} filed: ${opt.label}`);
+  } else {
+    logAction(r.day, `${r.id} closed to complaint file (not MDR-reportable)`);
+  }
+  renderDrawer();
+  renderAll(false);
+}
+
+// ==================== DEBRIEF ====================
+function renderDebrief(){
+  const triPts = S.reports.reduce((a,r)=>a+r.triagePts,0);
+  const mdrPts = S.reports.reduce((a,r)=>a+r.mdrPts,0);
+  const mdrMax = REPORTS.reduce((a,r)=>a+Math.max(...Object.values(r.mdr).map(o=>o.pts)),0);
+  const recPts = S.recall.reduce((a,r)=>a+r.pts,0);
+  const recMax = RECALL_DECISIONS.reduce((a,d)=>a+Math.max(...d.opts.map(o=>o.pts)),0);
+  const capaPts = S.capa.reduce((a,c)=>a+c.pts,0);
+  const capaMax = CAPA_DECISIONS.reduce((a,d)=>a+(d.type==='classify'?d.items.length*d.ptsPer:Math.max(...d.opts.map(o=>o.pts))),0);
+  const w2Max = Math.max(...W2_CHOICE.opts.map(o=>o.pts));
+  const total = totalScore();
+  const pct = Math.round(100*total/MAX_SCORE);
+  const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+  const [lvl] = complianceLevel();
+  const bestHarm = 6; // reference path: hold at Day 30, prompt recall at Day 52
+
+  let html = `
+  <div class="ticker calm"><b>Day 90.</b> The recall is running, the CAPA is open with effectiveness criteria, and the complaint queue is quiet again. Here is how your 90 days actually went.</div>
+
+  <div class="grid-2" style="margin-top:var(--space-4)">
+    <div>
+      <div class="rp-section-title">Score by loop stage</div>
+      <div class="score-row"><span>Triage (signal vs noise)</span><span class="score-pts">${triPts} / ${REPORTS.length*TRIAGE_PTS}</span></div>
+      <div class="score-row"><span>MDR decisions (803)</span><span class="score-pts">${mdrPts} / ${mdrMax}</span></div>
+      <div class="score-row"><span>Day-30 escalation call</span><span class="score-pts">${S.w2.pts} / ${w2Max}</span></div>
+      <div class="score-row"><span>Recall decisions (7 / 806)</span><span class="score-pts">${recPts} / ${recMax}</span></div>
+      <div class="score-row"><span>CAPA (820.100)</span><span class="score-pts">${capaPts} / ${capaMax}</span></div>
+      <div class="score-row"><span>Total</span><span class="score-pts">${total} / ${MAX_SCORE} · ${pct}% · <span class="debrief-grade">${grade}</span></span></div>
+    </div>
+    <div>
+      <div class="rp-section-title">Consequences</div>
+      <div class="score-row"><span>Estimated device-linked field harm</span><span class="score-pts" style="color:var(--color-error)">${S.harm} events</span></div>
+      <div class="score-row"><span>Reference path (hold at Day 30, prompt recall)</span><span class="score-pts">${bestHarm} events</span></div>
+      <div class="score-row"><span>Compliance exposure</span><span class="score-pts">${lvl} — ${S.violations.length} finding${S.violations.length===1?'':'s'}</span></div>
+      <div class="score-row"><span>Unnecessary filings / over-reports</span><span class="score-pts">${S.burden}</span></div>
+    </div>
+  </div>`;
+
+  if (S.violations.length){
+    html += `<div class="rp-section" style="margin-top:var(--space-5)"><div class="rp-section-title">Simulated inspection findings</div>
+      ${S.violations.map(v=>`<div class="viol-item"><span class="viol-flag">483 ▸</span><span>${v}</span></div>`).join('')}
+      <div class="card-hint" style="margin-top:var(--space-2)">In this sim these surface immediately. In reality they wait quietly in your files for the next inspection — or the next lawsuit.</div></div>`;
+  } else {
+    html += `<div class="feedback fb-good" style="margin-top:var(--space-5)"><b>Clean file.</b> No missed reports, no late clocks, no silent field actions. This is what "defensible" looks like in an inspection.</div>`;
+  }
+
+  html += `<div class="rp-section" style="margin-top:var(--space-5)"><div class="rp-section-title">Your run, day by day</div>
+    ${S.actionLog.map(a=>`<div class="tl-row"><span class="tl-day">Day ${a.day}</span><span class="tl-what">${a.what}</span></div>`).join('')}</div>`;
+
+  html += `<div class="feedback fb-info" style="margin-top:var(--space-4)"><b>The loop, one more time.</b> Triage decides what your system can see. 803 reporting decides what FDA can see — on clocks of 30 calendar days, or 5 work days once remedial action is on the table. The recall (21 CFR 7, reported under 806 within 10 working days) removes the hazard from the field; FDA assigns the class from your health hazard evaluation. And the CAPA (820.100) is what makes the whole episode <i>not happen again</i> — correction fixes the product, corrective action fixes the cause, preventive action sweeps for the cause elsewhere, and none of it closes without verified effectiveness.</div>
+
+  <div class="card-hint" style="margin-top:var(--space-4);line-height:1.7">Reminder: this is a framework trainer. Real postmarket decisions involve medical reviewers, regulatory counsel, FDA district coordinators, and far messier information — and real timelines, causality assessments, and recall logistics do not fit in a browser tab. Harm counts here are pedagogical estimates, not epidemiology.</div>
+
+  <div style="display:flex;gap:var(--space-3);margin-top:var(--space-5);flex-wrap:wrap">
+    <button class="check-btn" onclick="resetRun()">Run it again</button>
+    <a class="ghost-btn" href="../" style="text-decoration:none">Back to the Learning Hub</a>
+  </div>`;
+  return html;
+}
+
+// ==================== RENDER ALL ====================
+function renderAll(scroll){
+  renderSidebar();
+  renderKPIs();
+  renderReports();
+  renderSignalBoard();
+  renderMdrLog();
+  renderPhaseArea();
+}
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = r.getAttribute('data-theme') || 'light';
+  r.setAttribute('data-theme', d);
+  function updateIcon(){
+    t.innerHTML = d === 'dark'
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+  updateIcon();
+  t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    updateIcon();
+  });
+})();
+
+// ==================== MOBILE SIDEBAR ====================
+function toggleMobileSidebar(){
+  document.querySelector('.sidebar').classList.toggle('mobile-open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeMobileSidebar(){
+  document.querySelector('.sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ==================== INIT ====================
+makeProxies('recall', RECALL_DECISIONS);
+makeProxies('capa', CAPA_DECISIONS);
+renderSidebar();
+</script>
+</body>
+</html>
