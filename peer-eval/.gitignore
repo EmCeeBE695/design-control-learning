@@ -1,0 +1,5 @@
+# Created by `clasp create` / `clasp clone` — contains your script ID.
+# Copy .clasp.json.example to .clasp.json and fill it in locally.
+.clasp.json
+.clasprc.json
+node_modules/

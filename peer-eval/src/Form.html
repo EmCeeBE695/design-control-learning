@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BE695 Peer Evaluation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Design tokens — matched to FMEA-risk-explorer (BOM palette) */
+  :root {
+    --color-bg: #f1f5f9;
+    --color-surface: #ffffff;
+    --color-surface-2: #f8fafc;
+    --color-primary: #0d9488;
+    --color-primary-hover: #0f766e;
+    --color-primary-highlight: #f0fdfa;
+    --color-text: #0f172a;
+    --color-text-muted: #64748b;
+    --color-border: #cbd5e1;
+    --color-divider: #e2e8f0;
+    --color-error: #b91c1c;
+    --color-error-bg: #fef2f2;
+    --color-success: #15803d;
+    --color-success-bg: #f0fdf4;
+    --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-full: 9999px;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+    --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+    --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--color-bg); color: var(--color-text);
+    font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 140px; }
+
+  /* Header */
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-primary); }
+  h1 { font-size: 24px; letter-spacing: -0.02em; margin: 4px 0 8px; }
+  .identity {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 8px; padding: 6px 14px;
+    background: var(--color-primary-highlight); color: var(--color-primary-hover);
+    border: 1px solid var(--color-primary); border-radius: var(--radius-full);
+    font-size: 13px; font-weight: 600;
+  }
+  .intro { margin-top: 16px; font-size: 14px; color: var(--color-text-muted); }
+
+  /* Rating guide */
+  details.guide {
+    margin: 20px 0 8px; background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  }
+  details.guide summary {
+    padding: 14px 18px; font-weight: 600; font-size: 14px; cursor: pointer;
+    color: var(--color-primary-hover); list-style: none;
+  }
+  details.guide summary::before { content: '▸ '; }
+  details.guide[open] summary::before { content: '▾ '; }
+  .guide-body { padding: 0 18px 16px; }
+  .guide-dim { margin-bottom: 14px; }
+  .guide-dim h3 { font-size: 14px; margin-bottom: 4px; }
+  .guide-anchor { font-size: 13px; color: var(--color-text-muted); padding-left: 12px; }
+  .guide-anchor b { color: var(--color-text); font-weight: 600; }
+
+  /* Person cards */
+  .person {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    margin-top: 20px; overflow: hidden;
+  }
+  .person-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 20px; border-bottom: 1px solid var(--color-divider);
+    background: var(--color-surface-2);
+  }
+  .person-name { font-weight: 700; font-size: 16px; }
+  .self-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: var(--radius-full);
+    background: var(--color-primary); color: #fff;
+  }
+  .person-done {
+    font-size: 12px; font-weight: 600; color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .person-done.complete { color: var(--color-success); }
+
+  .dim-row { padding: 14px 20px; border-bottom: 1px solid var(--color-divider); }
+  .dim-row:last-child { border-bottom: none; }
+  .dim-label { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+
+  /* Segmented 1–5 control */
+  .scale { display: flex; gap: 6px; }
+  .scale label { flex: 1; position: relative; }
+  .scale input { position: absolute; opacity: 0; pointer-events: none; }
+  .scale span {
+    display: flex; align-items: center; justify-content: center;
+    height: 40px; border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md); font-weight: 600; font-size: 14px;
+    color: var(--color-text-muted); cursor: pointer; user-select: none;
+    background: var(--color-surface);
+    transition: all var(--transition);
+  }
+  .scale span:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .scale input:checked + span {
+    background: var(--color-primary); border-color: var(--color-primary);
+    color: #fff;
+  }
+  .scale input:focus-visible + span { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .scale-ends {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--color-text-muted); margin-top: 4px;
+  }
+
+  /* Comment */
+  .comment-card {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); padding: 18px 20px; margin-top: 20px;
+  }
+  .comment-card label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+  .comment-card .hint { font-size: 12px; color: var(--color-text-muted); margin-bottom: 10px; }
+  textarea {
+    width: 100%; min-height: 90px; padding: 10px 12px; resize: vertical;
+    border: 1.5px solid var(--color-border); border-radius: var(--radius-md);
+    font-size: 14px; background: var(--color-surface);
+  }
+  textarea:focus { outline: none; border-color: var(--color-primary); }
+
+  /* Sticky footer: progress + submit */
+  .footer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: var(--color-surface); border-top: 1px solid var(--color-border);
+    box-shadow: 0 -4px 12px rgba(15,23,42,.06);
+  }
+  .footer-inner {
+    max-width: 720px; margin: 0 auto; padding: 12px 16px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .progress { flex: 1; }
+  .progress-text { font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 4px; }
+  .progress-track { height: 6px; background: var(--color-divider); border-radius: var(--radius-full); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--color-primary); border-radius: var(--radius-full); transition: width var(--transition); }
+  .submit-btn {
+    padding: 12px 28px; border: none; border-radius: var(--radius-md);
+    background: var(--color-primary); color: #fff; font-family: inherit;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: background var(--transition), opacity var(--transition);
+  }
+  .submit-btn:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .submit-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* Status panels */
+  .panel { border-radius: var(--radius-lg); padding: 24px 28px; margin-top: 24px; box-shadow: var(--shadow-md); }
+  .panel h2 { font-size: 18px; margin-bottom: 8px; }
+  .panel p { font-size: 14px; }
+  .panel-error { background: var(--color-error-bg); border: 1px solid var(--color-error); color: var(--color-error); }
+  .panel-success { background: var(--color-success-bg); border: 1px solid var(--color-success); color: var(--color-success); }
+  .hidden { display: none !important; }
+
+  .spinner {
+    display: inline-block; width: 16px; height: 16px; vertical-align: -3px; margin-right: 8px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%; animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">BE695 · Peer Evaluation</div>
+    <h1 id="round-title">Peer &amp; Self Evaluation</h1>
+    <div class="identity" id="identity"></div>
+    <p class="intro">
+      Rate <strong>yourself first</strong>, then each of your teammates, on the five
+      dimensions below. Your individual ratings are confidential: teammates only
+      ever see <em>averages</em>, never who said what. Please be honest — this is
+      how teams get better.
+    </p>
+  </header>
+
+  <details class="guide">
+    <summary>What do the ratings mean? (rating guide)</summary>
+    <div class="guide-body" id="guide-body"></div>
+  </details>
+
+  <form id="eval-form" onsubmit="return false;">
+    <div id="people"></div>
+
+    <div class="comment-card">
+      <label for="comment">Confidential note to the instructor (optional)</label>
+      <div class="hint">Seen only by the instructor — never shared with teammates or included in any report.</div>
+      <textarea id="comment" maxlength="5000" placeholder="Anything you want the instructor to know about how your team is working…"></textarea>
+    </div>
+
+    <div id="error-panel" class="panel panel-error hidden">
+      <h2>Something went wrong</h2>
+      <p id="error-msg"></p>
+      <p style="margin-top:8px;">Your ratings are still on this page — you can try submitting again.</p>
+    </div>
+  </form>
+
+  <div id="success-panel" class="panel panel-success hidden">
+    <h2>✓ Evaluation submitted</h2>
+    <p>Thank you — your responses have been recorded. You can close this tab.</p>
+  </div>
+</div>
+
+<div class="footer" id="footer">
+  <div class="footer-inner">
+    <div class="progress">
+      <div class="progress-text" id="progress-text"></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <button class="submit-btn" id="submit-btn" disabled>Submit evaluation</button>
+  </div>
+</div>
+
+<script>
+  // Injected server-side; safeJson_ escapes <, >, U+2028/9 so this is safe inline.
+  var MODEL = <?!= modelJson ?>;
+
+  var totalRatings = MODEL.people.length * MODEL.dimensions.length;
+
+  function esc(s) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(s));
+    return div.innerHTML;
+  }
+
+  function build() {
+    document.getElementById('round-title').textContent =
+      'Peer & Self Evaluation — ' + MODEL.round;
+    document.getElementById('identity').textContent =
+      'Submitting as ' + MODEL.raterEmail + ' · ' + MODEL.team;
+
+    // Rating guide
+    var guide = '';
+    MODEL.dimensions.forEach(function (d) {
+      guide += '<div class="guide-dim"><h3>' + esc(d.label) + '</h3>' +
+        '<div class="guide-anchor"><b>5</b> — ' + esc(d.anchors[5]) + '</div>' +
+        '<div class="guide-anchor"><b>3</b> — ' + esc(d.anchors[3]) + '</div>' +
+        '<div class="guide-anchor"><b>1</b> — ' + esc(d.anchors[1]) + '</div></div>';
+    });
+    document.getElementById('guide-body').innerHTML = guide;
+
+    // Person cards
+    var html = '';
+    MODEL.people.forEach(function (p, pi) {
+      html += '<section class="person" data-person="' + pi + '">' +
+        '<div class="person-head"><div>' +
+        '<span class="person-name">' + esc(p.isSelf ? 'Yourself' : p.name) + '</span>' +
+        (p.isSelf ? ' <span class="self-badge">Self-assessment</span>' : '') +
+        '</div><span class="person-done" id="done-' + pi + '">0 / ' +
+        MODEL.dimensions.length + '</span></div>';
+      MODEL.dimensions.forEach(function (d) {
+        var name = 'r_' + pi + '_' + d.id;
+        html += '<div class="dim-row"><div class="dim-label">' + esc(d.label) + '</div>' +
+          '<div class="scale">';
+        for (var v = MODEL.scaleMin; v <= MODEL.scaleMax; v++) {
+          html += '<label><input type="radio" name="' + name + '" value="' + v + '">' +
+            '<span>' + v + '</span></label>';
+        }
+        html += '</div><div class="scale-ends"><span>Low</span><span>High</span></div></div>';
+      });
+      html += '</section>';
+    });
+    document.getElementById('people').innerHTML = html;
+
+    document.getElementById('eval-form').addEventListener('change', updateProgress);
+    document.getElementById('submit-btn').addEventListener('click', submit);
+    updateProgress();
+  }
+
+  function countChecked(pi) {
+    var n = 0;
+    MODEL.dimensions.forEach(function (d) {
+      if (document.querySelector('input[name="r_' + pi + '_' + d.id + '"]:checked')) n++;
+    });
+    return n;
+  }
+
+  function updateProgress() {
+    var done = 0;
+    MODEL.people.forEach(function (p, pi) {
+      var n = countChecked(pi);
+      done += n;
+      var el = document.getElementById('done-' + pi);
+      el.textContent = n + ' / ' + MODEL.dimensions.length;
+      el.className = 'person-done' + (n === MODEL.dimensions.length ? ' complete' : '');
+    });
+    document.getElementById('progress-text').textContent =
+      done + ' of ' + totalRatings + ' ratings completed';
+    document.getElementById('progress-fill').style.width =
+      (100 * done / totalRatings) + '%';
+    document.getElementById('submit-btn').disabled = (done !== totalRatings);
+  }
+
+  function collectPayload() {
+    var ratings = [];
+    MODEL.people.forEach(function (p, pi) {
+      var dims = {};
+      MODEL.dimensions.forEach(function (d) {
+        var checked = document.querySelector('input[name="r_' + pi + '_' + d.id + '"]:checked');
+        dims[d.id] = checked ? parseInt(checked.value, 10) : null;
+      });
+      ratings.push({ ratee: p.email, dims: dims });
+    });
+    return { ratings: ratings, comment: document.getElementById('comment').value };
+  }
+
+  function submit() {
+    var btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Submitting…';
+    document.getElementById('error-panel').classList.add('hidden');
+
+    google.script.run
+      .withSuccessHandler(function (res) {
+        if (res && res.ok) {
+          document.getElementById('eval-form').classList.add('hidden');
+          document.getElementById('footer').classList.add('hidden');
+          document.getElementById('success-panel').classList.remove('hidden');
+          window.scrollTo(0, 0);
+        } else {
+          showError(res && res.error ? res.error : 'The server rejected the submission.');
+        }
+      })
+      .withFailureHandler(function (err) {
+        showError(err && err.message ? err.message : 'Network error — please try again.');
+      })
+      .submitEvaluation(collectPayload());
+  }
+
+  function showError(msg) {
+    var btn = document.getElementById('submit-btn');
+    btn.disabled = false;
+    btn.textContent = 'Submit evaluation';
+    document.getElementById('error-msg').textContent = msg;
+    var panel = document.getElementById('error-panel');
+    panel.classList.remove('hidden');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  build();
+</script>
+</body>
+</html>
