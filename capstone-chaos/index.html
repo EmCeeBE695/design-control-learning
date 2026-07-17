@@ -258,14 +258,22 @@
  * ------------------------------------------------------------------ */
 
 const CFG = {
-  weeks: 12,
-  gates: { 4:'proposal', 8:'prototype', 12:'final' },
-  gateNames: { proposal:'Proposal Review', prototype:'Prototype Demo', final:'Final Presentation' },
-  thresholds: { proposal:48, prototype:58, final:68 },
+  weeks: 18,               // fall 1-9, winter break, spring 10-18
+  breakWeek: 9,            // winter break follows this week's gate
+  gates: { 3:'clinobs', 6:'top3', 9:'fallfinal', 12:'workslike', 15:'advworks', 18:'final' },
+  gateNames: {
+    clinobs:'Initial Clinical Observations', top3:'Top 3 Problems',
+    fallfinal:'Final Fall Presentations', workslike:'Initial Works-Like Prototype',
+    advworks:'Advanced Works-Like Prototype', final:'Final Presentation & THE BINDER',
+  },
+  thresholds: { clinobs:42, top3:48, fallfinal:54, workslike:62, advworks:68, final:76 },
   gateWeights: {
-    proposal: { P:.45, T:.30, M:.25 },
-    prototype:{ P:.45, T:.40, M:.15 },
-    final:    { P:.60, T:.25, M:.15 },
+    clinobs:  { P:.40, T:.20, M:.40 },
+    top3:     { P:.45, T:.30, M:.25 },
+    fallfinal:{ P:.45, T:.35, M:.20 },
+    workslike:{ P:.45, T:.40, M:.15 },
+    advworks: { P:.50, T:.35, M:.15 },
+    final:    { P:.55, T:.30, M:.15 },
   },
   basePool: 6, startSanity: 7, startPC: 7, maxMeter: 10,
   passesToWin: 3,
@@ -285,7 +293,7 @@ const ARCHS = {
     label:'The Over-Engineers',
     blurb:'Their architecture diagram has its own architecture diagram.',
     base:{ P:30, M:70, T:82, SA:42 }, bias:6,
-    coachLabel:'Force a scope cut', coachSub:'They will grieve the microservices.',
+    coachLabel:'Freeze the PDS', coachSub:'Ship the works-like. Grieve the rest.',
     supportLabel:'Morale support',
     reported:[ 'Status report: "Refactor 90% complete. Refactor of refactor scheduled."',
       'Status report: "We are ahead of schedule on infrastructure no one requested."' ],
@@ -299,7 +307,7 @@ const ARCHS = {
     label:'The Coasters',
     blurb:'Cohesive, cheerful, and producing almost nothing.',
     base:{ P:26, M:86, T:52, SA:28 }, bias:4,
-    coachLabel:'Confront the gap', coachSub:'Puncture the vibe. Assign actual work.',
+    coachLabel:'Audit their BINDER', coachSub:'Open it together. Watch the color drain.',
     supportLabel:'Morale support',
     reported:[ 'Status report: "Great team synergy this week!" No deliverables attached.',
       'Status report: a beautifully formatted document describing work that has not occurred.' ],
@@ -327,7 +335,7 @@ const ARCHS = {
     label:'The Overconfident Team',
     blurb:'Their self-assessment and their codebase have never met.',
     base:{ P:44, M:78, T:34, SA:12 }, bias:8,
-    coachLabel:'Line-by-line review', coachSub:'Show them what the tests would say, if they had tests.',
+    coachLabel:'Assign the Killer Experiment', coachSub:'One test designed to prove them wrong. It will.',
     supportLabel:'Morale support',
     reported:[ 'Status report: "Everything is on track." All twelve words of it.',
       'Status report: "No blockers, no risks, no concerns." No evidence, either.' ],
@@ -365,35 +373,37 @@ const ARCHS = {
     obsMorale:[ 'The Ghost Team seems fine, insofar as they can be observed at all.' ],
   },
   sponsorwhipped: {
-    label:'The Sponsor-Whipped',
-    blurb:'Their industry sponsor redesigns the project on every call.',
+    label:'The Mentor-Whipped',
+    blurb:'Their clinical champion redesigns the need after every case.',
     base:{ P:52, M:62, T:66, SA:55 }, bias:0,
-    coachLabel:'Refocus the scope', coachSub:'Write down what "done" means. Laminate it.',
+    coachLabel:'Freeze the need statement', coachSub:'Write down what "done" means. Laminate it.',
     supportLabel:'Morale support',
-    reported:[ 'Status report: "Adjusting to updated sponsor requirements." Third consecutive week.',
-      'Status report: includes a change log for the requirements, which is longer than the requirements.' ],
-    obsGood:[ 'The Sponsor-Whipped shipped to the frozen spec. The sponsor hasn’t noticed yet.',
-      'The Sponsor-Whipped made real progress while the sponsor was at a conference.' ],
-    obsBad:[ 'The Sponsor-Whipped rebuilt their UI for the sponsor’s new "vision." There will be another vision.',
-      'The Sponsor-Whipped’s sponsor discovered a competitor and would like everything to be different now.' ],
-    obsMorale:[ 'The Sponsor-Whipped have stopped arguing with the sponsor. This is not acceptance; it’s despair.' ],
+    reported:[ 'Status report: "Refining the need statement per clinical feedback." Third consecutive week.',
+      'Status report: includes a change log for the need statement, which is longer than the need statement.' ],
+    obsGood:[ 'The Mentor-Whipped built to the frozen need. The champion hasn’t noticed yet.',
+      'The Mentor-Whipped made real progress while their champion was at a conference.' ],
+    obsBad:[ 'The Mentor-Whipped reworked everything after their champion scrubbed into one unusual case.',
+      'The Mentor-Whipped’s champion saw a competing device at a meeting and would like everything to be different now.' ],
+    obsMorale:[ 'The Mentor-Whipped have stopped pushing back on their champion. This is not alignment; it’s despair.' ],
   },
 };
 
-const PROJECTS = [
-  'Low-Cost Infant Warmer', 'Autonomous Sample Courier', 'Wearable Hydration Monitor',
-  'Smart Surgical Retractor', 'Cold-Chain Integrity Logger', 'Rehab Feedback Glove',
-  'Portable Dialysis Monitor', 'AI-Enabled Triage Dashboard', 'Modular Suture Trainer',
-  'Sterile Field Sentinel',
+const AREAS = [
+  { name:'Cardiac',  need:'a way to cut bypass-circuit setup errors' },
+  { name:'Vascular', need:'a way to keep access lines from tangling mid-procedure' },
+  { name:'Ortho',    need:'a way to verify implant seating without extra fluoro' },
+  { name:'OTO',      need:'a way to keep the endoscope lens clear mid-case' },
+  { name:'Urology',  need:'a way to make stent placement less of a guessing game' },
+  { name:'Neuro',    need:'a way to track retractor pressure during long cases' },
 ];
 
 /* ---------- team + state construction ---------- */
-function makeTeam(S, key, i, projName){
+function makeTeam(S, key, i, area){
   const a = ARCHS[key];
   const stats = {};
   for (const k of ['P','M','T','SA']) stats[k] = clamp(a.base[k] + ri(S,13)-6, 5, 95);
   const t = {
-    key, table:i+1, project:projName,
+    key, table:i+1, area:area.name, need:area.need,
     stats, insight:0, lastTouched:0, snap:null,
     flags:{ conflict:0, capacity:1 },
     gates:{},
@@ -420,19 +430,21 @@ function newGame(seed){
   // shuffle
   for (let i=keys.length-1;i>0;i--){ const j=ri(S,i+1); const tmp=keys[i]; keys[i]=keys[j]; keys[j]=tmp; }
   const chosen = keys.slice(0,5);
-  const projs = PROJECTS.slice();
-  for (let i=projs.length-1;i>0;i--){ const j=ri(S,i+1); const tmp=projs[i]; projs[i]=projs[j]; projs[j]=tmp; }
-  S.teams = chosen.map((k,i)=>makeTeam(S,k,i,projs[i]));
+  const areas = AREAS.slice();
+  for (let i=areas.length-1;i>0;i--){ const j=ri(S,i+1); const tmp=areas[i]; areas[i]=areas[j]; areas[j]=tmp; }
+  S.teams = chosen.map((k,i)=>makeTeam(S,k,i,areas[i]));
   S.sched = {
-    stipend: 5+ri(S,3),        // 5-7
-    ferpa: 4+ri(S,5),          // 4-8
-    committee: 2+ri(S,2),      // 2-3
-    mentor: 6+ri(S,4),         // 6-9
-    drop: 5+ri(S,4),           // 5-8
-    deadweight: 6+ri(S,4),     // 6-9
-    conflictSeed: 5+ri(S,3),   // 5-7
-    pivot: 8,
-    chair: [3,7],
+    stipend: 8+ri(S,3),        // 8-10: the cut lands mid-year
+    ferpa: 5+ri(S,8),          // 5-12
+    committee: 2+ri(S,3),      // 2-4
+    mou: 4+ri(S,2),            // 4-5: unsigned Clinical MOU (fall)
+    mentor: 10+ri(S,5),        // 10-14: industry mentor reorged (spring)
+    drop: 6+ri(S,5),           // 6-10
+    deadweight: 8+ri(S,5),     // 8-12
+    conflictSeed: 7+ri(S,4),   // 7-10
+    pivot: 10+ri(S,2),         // 10-11: right after break, classic
+    chair: [5,14],             // the week before Top 3 and Advanced Works-Like
+    churn: [4,8,13,16],        // the clinical champion's "refinements"
   };
   startWeek(S);
   return S;
@@ -452,14 +464,14 @@ function reportedQuality(t){
 
 function teamView(S,ti){
   const t = S.teams[ti], a = ARCHS[t.key];
-  const v = { label:a.label, project:t.project, blurb:a.blurb, insight:t.insight,
+  const v = { label:a.label, clin:t.area+' Team', need:t.need, blurb:a.blurb, insight:t.insight,
               table:t.table, notes:[], warns:[], known:null, snapWeek:t.snap?t.snap.week:0 };
   if (t.key==='ghost' && t.insight===0){
-    v.chip = { cls:'grey', label:'no report filed' };
-    v.quote = 'No status report. No email. The tuition payments are the only sign of life.';
+    v.chip = { cls:'grey', label:'not started · overdue' };
+    v.quote = 'Nothing submitted. No email. The tuition payments are the only sign of life.';
   } else {
     const q = reportedQuality(t);
-    v.chip = q>=62 ? {cls:'green',label:'on track'} : q>=45 ? {cls:'amber',label:'some concerns'} : {cls:'red',label:'struggling'};
+    v.chip = q>=62 ? {cls:'green',label:'published · on time'} : q>=45 ? {cls:'amber',label:'pending review'} : {cls:'red',label:'in progress · overdue'};
     v.quote = a.reported.length ? a.reported[(S.week + ti) % a.reported.length]
             : 'A status report was located after some effort.';
   }
@@ -481,7 +493,7 @@ function teamView(S,ti){
 
 /* ---------- inbox cards ---------- */
 function card(S, def){ def.uid = S.uid++; return def; }
-function teamName(S,ti){ return ARCHS[S.teams[ti].key].label; }
+function teamName(S,ti){ const t=S.teams[ti]; return ARCHS[t.key].label+' ('+t.area+')'; }
 
 function buildInbox(S){
   const w = S.week, box = [];
@@ -515,10 +527,21 @@ function buildInbox(S){
     const ti = ri(S,5);
     box.push(card(S,{ key:'mentor', teamIdx:ti,
       from:'Industry Mentor (via auto-reply)', re:'Stepping back',
-      body:'The industry mentor for '+teamName(S,ti)+' has been "reorged into an exciting new opportunity" and is gone. The team’s technical guidance now defaults to you.',
+      body:'The industry mentor for '+teamName(S,ti)+' has been "reorged into an exciting new opportunity" and is gone. The team’s verification planning now defaults to you.',
       opts:[
         { label:'Step in as technical mentor', note:'You remember how to engineer. Probably.', ap:2, fx:[] },
         { label:'Let them self-direct', note:'What could go wrong that hasn’t already.', ap:0, fx:[['tstat','T',-10]] },
+      ]}));
+  }
+  if (w===sched.mou){
+    const ti = ri(S,5);
+    box.push(card(S,{ key:'mou', teamIdx:ti,
+      from:'Office of Clinical Research', re:'MOU status: unsigned',
+      body:'The Clinical MOU for '+teamName(S,ti)+' is still unsigned. Their surgeon champion is enthusiastic, unreachable, and double-booked until further notice. No signature, no OR access, no observations.',
+      opts:[
+        { label:'Walk it through the hospital yourself', note:'Two elevators, three signatures, one badge that doesn’t work.', ap:1, fx:[] },
+        { label:'Let the team keep emailing', note:'The auto-replies will pile up character.', ap:0,
+          fx:[['tstat','P',-6],['tstat','M',-4]] },
       ]}));
   }
   if (w===sched.deadweight){
@@ -526,7 +549,7 @@ function buildInbox(S){
     const ti = pref.length ? pref[ri(S,pref.length)] : ri(S,5);
     box.push(card(S,{ key:'deadweight', teamIdx:ti,
       from:'A student, in confidence', re:'Office hours, closed door',
-      body:'The "star" of '+teamName(S,ti)+' has been quietly re-committing one teammate’s work as their own — and doing little else. Reported progress was overstated. The teammate knows. Everyone knows.',
+      body:'The Monthly Team Observation Log for '+teamName(S,ti)+' finally says the quiet part: the "star" has been re-submitting one teammate’s work as their own — and doing little else. Reported progress was overstated. The teammate knows. Everyone knows.',
       opts:[
         { label:'Quietly restructure the roles', note:'No ceremony, new responsibilities, watch the diff.', ap:1,
           fx:[['tstat','P',-10],['tstat','M',+4],['insight',1]] },
@@ -539,7 +562,7 @@ function buildInbox(S){
     const ti = pref.length ? pref[ri(S,pref.length)] : ri(S,5);
     box.push(card(S,{ key:'pivot', teamIdx:ti,
       from:teamName(S,ti), re:'Exciting new direction!!',
-      body:teamName(S,ti)+' would like to pivot the entire project. In week '+w+'. Of twelve. They have a slide. The slide has momentum.',
+      body:teamName(S,ti)+' spent winter break falling in love with problem #2 from their Top 3 list and would like to pivot the entire project to it. They have a slide. The slide has momentum.',
       opts:[
         { label:'Approve the pivot', note:'Their eyes light up. Their timeline does not.', ap:0,
           fx:[['tstat','P',-15],['tstat','M',+12],['tstat','T',+5]] },
@@ -549,27 +572,27 @@ function buildInbox(S){
           fx:[['tstat','M',-14]] },
       ]}));
   }
-  // conditional: over-engineers extension request (they never descoped)
+  // conditional: over-engineers extension request (they never froze the PDS)
   const oe = S.teams.findIndex(t=>t.key==='overengineers');
-  if (w===9 && oe>=0 && !S.teams[oe].flags.descoped){
+  if (w===14 && oe>=0 && !S.teams[oe].flags.descoped){
     box.push(card(S,{ key:'extension', teamIdx:oe,
       from:'The Over-Engineers', re:'Timeline adjustment proposal (v3, final_FINAL)',
-      body:'The Over-Engineers request a three-week extension to a twelve-week course. The attached Gantt chart is, admittedly, beautiful.',
+      body:'The Over-Engineers request three more weeks before the Advanced Works-Like review. The attached Gantt chart is, admittedly, beautiful.',
       opts:[
-        { label:'Force the scope cut now', note:'Ship the kernel of the thing. Mourn the rest.', ap:2,
+        { label:'Freeze the PDS now', note:'Ship the kernel of the thing. Mourn the rest.', ap:2,
           fx:[['tflag','descoped',true],['tstat','P',+8],['tstat','M',-6]] },
-        { label:'Grant it "informally"', note:'There is no extension. There is only the final gate.', ap:0,
+        { label:'Grant it "informally"', note:'There is no extension. There is only May.', ap:0,
           fx:[['tstat','M',+6],['sanity',-1]] },
         { label:'Refuse flatly', note:'The Gantt chart deserved better.', ap:0,
           fx:[['tstat','M',-12]] },
       ]}));
   }
-  // conditional: coasters peer-eval bomb
+  // conditional: coasters feedback-loop bomb
   const co = S.teams.findIndex(t=>t.key==='coasters');
-  if (w===10 && co>=0 && !S.teams[co].flags.confronted){
+  if (w===16 && co>=0 && !S.teams[co].flags.confronted){
     box.push(card(S,{ key:'peereval', teamIdx:co,
-      from:'Peer evaluation system (automated)', re:'Anomaly report',
-      body:'The Coasters’ peer evaluations have arrived: five students, each privately confident the other four were doing the work. Total work performed: a logo.',
+      from:'Practera (automated)', re:'Collaboration Skills feedback loop — anomaly',
+      body:'The Coasters’ feedback loop has arrived: five students, each privately confident the other four were doing the work. Every activity marked Complete. The BINDER: a table of contents.',
       opts:[
         { label:'Emergency intervention', note:'Cancel your weekend. Define deliverables hourly.', ap:2,
           fx:[['tflag','confronted',true],['tstat','P',+12],['insight',2]] },
@@ -604,15 +627,15 @@ function buildInbox(S){
           fx:[['tstat','M',-8]] },
       ]}));
   }
-  // sponsor churn (sponsorwhipped, every 3rd week)
+  // clinical champion churn (mentor-whipped, scheduled)
   const sw = S.teams.findIndex(t=>t.key==='sponsorwhipped');
-  if (sw>=0 && (w===3||w===6||w===9||w===11)){
+  if (sw>=0 && sched.churn.includes(w)){
     box.push(card(S,{ key:'sponsor', teamIdx:sw,
-      from:'Industry Sponsor', re:'Quick pivot on the requirements :)',
-      body:'The sponsor has "refined the vision" for the Sponsor-Whipped again. The refinement contradicts the previous two refinements, which contradicted each other.',
+      from:'Clinical Champion (between cases)', re:'Quick refinement to the need :)',
+      body:'The champion has "refined the need" for the Mentor-Whipped again. The refinement contradicts the previous two refinements, which contradicted each other.',
       opts:[
-        { label:'Run interference', note:'Absorb the call yourself. Translate "no" into partnership language.', ap:1, fx:[] },
-        { label:'Let it hit the team', note:'They knew the sponsor was a snake when they picked them.', ap:0,
+        { label:'Run interference', note:'Take the call yourself. Translate "no" into partnership language.', ap:1, fx:[] },
+        { label:'Let it hit the team', note:'Clinical input is a gift. So is a flood.', ap:0,
           fx:[['tstat','P',-8],['tstat','M',-6],['tstat','T',-4]] },
       ]}));
   }
@@ -691,9 +714,10 @@ function buildInbox(S){
   // recurring random politics (none in week 1; lighter on gate weeks)
   if (w>1){
     const isGate = (w in CFG.gates);
-    const roll = rnd(S);
-    if (roll < (isGate ? 0.4 : 0.7)){
-      const kinds = ['ad','ad','binder'];
+    let nPol = rnd(S) < (isGate ? 0.4 : 0.7) ? 1 : 0;
+    if (nPol && !isGate && rnd(S) < 0.25) nPol = 2;
+    for (let pi=0; pi<nPol; pi++){
+      const kinds = ['ad','ad','binder','grading'];
       if (F.adminPushbacks < 2) kinds.push('admin','admin');
       const kind = pick(S,kinds);
       if (kind==='ad'){ F.adCount++;
@@ -714,7 +738,7 @@ function buildInbox(S){
             { label:'Walk it back to their desk', note:'A boundary! It will be reported as an incident.', ap:0,
               fx:[['pc',-1],['flag','adminPushbacks','++']] },
           ]}));
-      } else { F.binderCount++;
+      } else if (kind==='binder'){ F.binderCount++;
         box.push(card(S,{ key:'binder',
           from:'Accreditation Office', re:'Evidence binder — section 4.3.2(c)',
           body:'Accreditation requests updated "evidence of continuous improvement," due in a format last supported by Windows XP.',
@@ -722,6 +746,15 @@ function buildInbox(S){
             { label:'Compile it properly', note:'Someone will read this. Statistically, no one will read this.', ap:1, fx:[] },
             { label:'Change the dates on last year’s', note:'A time-honored academic tradition.', ap:0,
               fx:[['special','binderGamble']] },
+          ]}));
+      } else {
+        box.push(card(S,{ key:'grading',
+          from:'Practera (automated)', re:'26 submissions pending review',
+          body:'Twenty-six case-study homeworks are pending review. They have been pending for nine days. Practera has begun sending you gentle reminders in bold.',
+          opts:[
+            { label:'Grade them all tonight', note:'Rubric open, door closed, coffee wrong temperature.', ap:1, fx:[] },
+            { label:'Extend the deadline again', note:'The pile does not shrink. The pile watches.', ap:0,
+              fx:[['sanity',-1]] },
           ]}));
       }
     }
@@ -769,6 +802,8 @@ function act(S, ti, kind){
   const cost = ACTIONS[kind].ap;
   if (S.phase!=='allocate' || cost>S.attention) return false;
   const t = S.teams[ti];
+  if ((t.actionsThisWeek||0) >= 2) return false; // they need time to actually do the work
+  t.actionsThisWeek = (t.actionsThisWeek||0)+1;
   S.attention -= cost;
   t.lastTouched = S.week;
   if (kind==='check'){
@@ -781,7 +816,7 @@ function act(S, ti, kind){
     if (t.key==='coasters' && !t.flags.confronted){ t.flags.confronted=true; t.stats.M=clamp(t.stats.M-8,5,100); t.stats.SA=clamp(t.stats.SA+15,0,100); }
     if (t.key==='overconfident'){ t.stats.SA=clamp(t.stats.SA+8,0,100); }
     // a team can only absorb so much of you in one week
-    const gain = t.coachedThisWeek ? 4 : 7;
+    const gain = t.coachedThisWeek ? 3 : 5;
     t.coachedThisWeek = true;
     if (t.stats.T <= t.stats.P) t.stats.T=clamp(t.stats.T+gain,5,100);
     else t.stats.P=clamp(t.stats.P+gain,5,100);
@@ -807,8 +842,8 @@ function drift(S, t, lines){
 
   if (t.key==='overengineers'){
     dT += F.descoped?1:2;
-    dP += F.descoped?4 : (week<6?2:0);
-    if (!F.descoped && week>=6) dM -= 3;
+    dP += F.descoped?4 : (week<8?2:0);   // without a frozen PDS, progress stalls mid-fall
+    if (!F.descoped && week>=12) dM -= 3; // spring deadline dread
   }
   if (t.key==='coasters'){
     dP += F.confronted?4:1;
@@ -816,8 +851,8 @@ function drift(S, t, lines){
     if (F.confronted) st.SA = clamp(st.SA+4,0,100);
   }
   if (t.key==='imploding'){ dM -= 3; dP += st.M>40?3 : st.M>25?1:0; }
-  if (t.key==='overconfident'){ dP += F.shocked?2:3; dM -= 1; }
-  if (t.key==='anxious'){ dM -= t.supported?0:6; dP += st.M>35?5:1; dT += 1; }
+  if (t.key==='overconfident'){ dP += 2; dM -= 1; }
+  if (t.key==='anxious'){ dM -= t.supported?0:6; dP += st.M>35?4:1; dT += 1; }
   if (t.key==='ghost'){ dP += F.ghostMod===1?3:1; dT += 1; dM -= 1; }
   if (t.key==='sponsorwhipped'){ dP += 3; dM -= 1; }
 
@@ -825,6 +860,8 @@ function drift(S, t, lines){
   if (F.conflict>0 && !t.supported) dM -= 5*F.conflict;
   if (F.probation) dM -= 2;
   if (F.burnout){ dP = Math.min(dP,1); dM = Math.min(dM,0); }
+  // a project no one is steering drifts backward: stale mentors, scope rot
+  if (t.lastTouched !== week) dP -= 1;
 
   st.P = clamp(st.P + dP*cap, 5, 100);
   st.T = clamp(st.T + dT, 5, 100);
@@ -855,7 +892,7 @@ function drift(S, t, lines){
     }
     lines.push({ cls:'', txt: poolSrc[ri(S,poolSrc.length)] });
   }
-  t.supported = false; t.coachedThisWeek = false;
+  t.supported = false; t.coachedThisWeek = false; t.actionsThisWeek = 0;
 
   // insight decay: knowledge goes stale
   const gap = S.week - t.lastTouched;
@@ -869,7 +906,7 @@ function runGate(S, kind){
     const blindBefore = t.insight===0;
     const sc = Math.round(composite(t,w));
     const pass = sc >= thr;
-    const row = { ti, label:ARCHS[t.key].label, sc, pass, margin:sc-thr, blind:false };
+    const row = { ti, label:t.area+' · '+ARCHS[t.key].label, sc, pass, margin:sc-thr, blind:false };
     if (pass){
       t.stats.M = clamp(t.stats.M+6,5,100);
       if (t.flags.probation){ t.flags.probation=false; row.note='off probation'; }
@@ -891,7 +928,7 @@ function runGate(S, kind){
   });
   // political fallout is capped: the dean only has so much appetite per review
   S.pc = clamp(S.pc - Math.min(fails,3) - (anyBlind?1:0), 0, CFG.maxMeter);
-  if (fails===0){ S.sanity = clamp(S.sanity+1,0,CFG.maxMeter); S.pc = clamp(S.pc+1,0,CFG.maxMeter); }
+  if (fails===0){ S.pc = clamp(S.pc+1,0,CFG.maxMeter); }
   if (fails>=2) S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
   return { kind, name:CFG.gateNames[kind], thr, rows, fails };
 }
@@ -900,7 +937,8 @@ function gateComment(S, kind, row){
   if (row.pass && row.margin>=15) return pick(S,[
     'Reviewers used the word "exemplary." One asked if the team is available for hire.',
     'The panel had no questions, which has never happened before.',
-    'A reviewer took a photo of the poster "for internal inspiration."' ]);
+    'A reviewer took a photo of the poster "for internal inspiration."',
+    'One reviewer said the trace matrix alone deserved a poster.' ]);
   if (row.pass) return pick(S,[
     'Passed. The panel’s enthusiasm was described, generously, as polite.',
     'Passed, with the reviewer tone of people choosing their battles.',
@@ -911,7 +949,8 @@ function gateComment(S, kind, row){
     'Just under the bar. A reviewer mouthed "sorry" on the way out.' ]);
   return pick(S,[
     'The panel’s written feedback opens with "We have concerns," then numbers them.',
-    'A reviewer asked, gently, what the team had been doing since January.' ]);
+    'A reviewer asked, gently, what the team had been doing since orientation.',
+    'The panel asked to see the killer experiment. There was no killer experiment.' ]);
 }
 
 function checkDeath(S, immediate){
@@ -931,13 +970,13 @@ function makeEnding(S, key){
     reassigned: { title:'Quietly Reassigned', stamp:'fail', win:false,
       text:'There was no dramatic meeting. There was a calendar invite titled "Program Leadership — Path Forward," and by Friday the Assistant Director was signing your emails. She cc’d you, so you stay visible.' },
     reputation: { title:'Program Under Review', stamp:'fail', win:false,
-      text:'Only '+passes+' team'+(passes===1?'':'s')+' cleared the final gate. The dean has commissioned a "programmatic review," which is a committee, which is a verdict. Your name is in the appendix.' },
-    survive: { title:'You Survived the Semester', stamp:'pass', win:true,
-      text:passes+' teams landed well. Nobody sued, nobody unionized against you specifically, and the dean pronounced the showcase "solid." In this business, that is a parade.' },
+      text:'Only '+passes+' team'+(passes===1?'':'s')+' cleared the Final Presentation. The dean has commissioned a "programmatic review," which is a committee, which is a verdict. Your name is in the appendix.' },
+    survive: { title:'You Survived the Year', stamp:'pass', win:true,
+      text:passes+' teams landed well, BINDERs and all. Nobody sued, nobody unionized against you specifically, and the dean pronounced the showcase "solid." In this business, that is a parade.' },
     commend: { title:'Dean’s Commendation', stamp:'pass', win:true,
       text:passes+' of 5 teams delivered at quality. The dean called the program "a model," and the Assistant Director has begun describing it as a shared achievement. Let her. You know.' },
-    legend: { title:'A Semester for the Ages', stamp:'pass', win:true,
-      text:'All five teams cleared the final gate. Sponsors are calling. The Chair is telling people it was their idea to hire you. Enjoy this for exactly one week: next semester’s roster just posted.' },
+    legend: { title:'A Year for the Ages', stamp:'pass', win:true,
+      text:'All five teams cleared the Final Presentation, and all five BINDERs could survive an audit. The Chair is telling people it was their idea to hire you. Enjoy this for exactly one week: the incoming cohort’s interest survey just opened.' },
   }[key];
   return { key, title:E.title, text:E.text, stamp:E.stamp, win:E.win, passes, weeks:S.week, score };
 }
@@ -964,9 +1003,49 @@ function endWeek(S){
   return true;
 }
 
+/* ---------- winter break ---------- */
+const BREAK_OPTS = [
+  { label:'Unplug completely', note:'Out-of-office on. Phone in a drawer. The campus can burn without you for three weeks.' },
+  { label:'Light-touch check-ins', note:'One short, warm email per team per week. Boundaries, but make them visible.' },
+  { label:'Run optional work sessions', note:'The lab stays open. So, unfortunately, do you.' },
+];
+
+function breakChoice(S, idx){
+  if (S.phase!=='break') return false;
+  const lines = [];
+  if (idx===0){ S.sanity = clamp(S.sanity+3,0,CFG.maxMeter);
+    lines.push({ cls:'meta', txt:'You did not open your laptop once. You dreamt about Practera only twice. (+3 sanity)' }); }
+  if (idx===1){ S.sanity = clamp(S.sanity+1,0,CFG.maxMeter);
+    lines.push({ cls:'meta', txt:'Five short emails a week. Cheap for you, enormous for them. (+1 sanity)' }); }
+  if (idx===2){ S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
+    lines.push({ cls:'meta', txt:'The lab was warm, the pizza was cold, and the works-likes grew. (-1 sanity)' }); }
+  for (const t of S.teams){
+    const st = t.stats, cap = t.flags.capacity;
+    if (idx===0){
+      st.M = clamp(st.M + (t.key==='anxious'?-12:4), 5, 100);
+      st.P = clamp(st.P + 1*cap, 5, 100);
+      if (t.key==='overengineers' && !t.flags.descoped) st.T = clamp(st.T+4,5,100);
+    }
+    if (idx===1){ st.M = clamp(st.M + (t.key==='anxious'?10:5),5,100); st.P = clamp(st.P+2*cap,5,100); }
+    if (idx===2){ st.P = clamp(st.P+7*cap,5,100); st.M = clamp(st.M + (t.key==='coasters'?-6:-3),5,100); }
+  }
+  const a0 = S.teams.findIndex(t=>t.key==='anxious');
+  if (idx===0 && a0>=0) lines.push({ cls:'bad', txt:'<b>The Anxious High-Performers</b> read your silence as disapproval and rewrote their January.' });
+  if (idx===2){ const c0 = S.teams.findIndex(t=>t.key==='coasters');
+    if (c0>=0) lines.push({ cls:'', txt:'<b>The Coasters</b> attended one session, for the pizza. They took notes on the pizza.' }); }
+  const oe0 = S.teams.findIndex(t=>t.key==='overengineers');
+  if (idx===0 && oe0>=0 && !S.teams[oe0].flags.descoped)
+    lines.push({ cls:'', txt:'<b>The Over-Engineers</b> spent break migrating the repo to a better build system. There is still no device.' });
+  S.report = { week:'break', lines };
+  S.gate = null;
+  S.phase = 'report';
+  return true;
+}
+
 function advance(S){
   if (S.phase==='report' && S.gate){ S.phase='gate'; return; }
   if (S.ending){ S.phase='over'; return; }
+  if (S.phase==='gate' && S.week===CFG.breakWeek){ S.phase='break'; return; }
   if (S.week>=CFG.weeks){
     const passes = S.teams.filter(t=>t.gates.final).length;
     S.ending = makeEnding(S, passes>=5?'legend' : passes>=4?'commend' : passes>=CFG.passesToWin?'survive' : 'reputation');
@@ -988,7 +1067,7 @@ function startWeek(S){
   S.phase = S.inbox.length ? 'inbox' : 'allocate';
 }
 
-const ENGINE = { CFG, ARCHS, ACTIONS, newGame, resolveCard, act, endWeek, advance, teamView, composite, reportedQuality };
+const ENGINE = { CFG, ARCHS, ACTIONS, BREAK_OPTS, newGame, resolveCard, act, endWeek, advance, breakChoice, teamView, composite, reportedQuality };
 if (typeof module!=='undefined' && module.exports) module.exports = ENGINE;
 // ===ENGINE-END===
 </script>
@@ -1001,7 +1080,7 @@ if (typeof module!=='undefined' && module.exports) module.exports = ENGINE;
 'use strict';
 const E = ENGINE;
 const app = document.getElementById('app');
-const SAVE_KEY = 'capstone-chaos-v1';
+const SAVE_KEY = 'capstone-chaos-v2';
 let S = null;
 let sheetTeam = null;   // team index for open bottom sheet
 let confirmEnd = false;
@@ -1025,9 +1104,14 @@ function pips(val, max, cls, lowAt){
 }
 function topbar(){
   const gk = E.CFG.gates[S.week];
-  const gateNote = gk ? E.CFG.gateNames[gk].toUpperCase()+' FRIDAY'
-    : (E.CFG.gates[S.week+1] ? E.CFG.gateNames[E.CFG.gates[S.week+1]]+' next week' : 'Semester of record');
-  return '<div class="topbar"><div class="wk"><span><b>Week '+S.week+'</b> / '+E.CFG.weeks+'</span><span>'+esc(gateNote)+'</span></div>'
+  let gateNote;
+  if (gk) gateNote = E.CFG.gateNames[gk]+' — FRIDAY';
+  else {
+    const next = Object.keys(E.CFG.gates).map(Number).sort((a,b)=>a-b).find(w=>w>S.week);
+    gateNote = next ? E.CFG.gateNames[E.CFG.gates[next]]+' · wk '+next : 'Year of record';
+  }
+  const sem = S.week<=E.CFG.breakWeek ? 'Fall' : 'Spring';
+  return '<div class="topbar"><div class="wk"><span><b>'+sem+' wk '+S.week+'</b> / '+E.CFG.weeks+'</span><span>'+esc(gateNote)+'</span></div>'
     +'<div class="meters">'
     +'<div class="meter"><div class="mlab"><span>Attention</span><span class="mval">'+S.attention+'</span></div>'+pips(S.attention, Math.max(S.pool,S.attention), 'att', -1)+'</div>'
     +'<div class="meter"><div class="mlab"><span>Sanity</span><span class="mval">'+S.sanity+'</span></div>'+pips(S.sanity, 10, 'san', 2)+'</div>'
@@ -1039,16 +1123,16 @@ function topbar(){
 function renderTitle(){
   const hasSave = !!loadSave();
   app.innerHTML = '<div class="scroll"><div class="paper titlecard" style="margin-top:20px">'
-    +'<div class="kicker">Office of the Director · Engineering Capstone</div>'
+    +'<div class="kicker">BE 695 · Office of the Course Director</div>'
     +'<h1 class="gametitle">Capstone Chaos</h1>'
-    +'<div class="subtitle">One semester. Five teams. Six units of attention.</div>'
+    +'<div class="subtitle">Two semesters. Five teams. Six units of attention.</div>'
     +'<hr class="rule">'
-    +'<div class="memobody">You direct the graduate capstone. Five student teams, twelve weeks, three review gates. Your attention is the only real currency on this campus, and everyone knows it but you.</div>'
+    +'<div class="memobody">You direct the biomedical design capstone. Five clinical teams, a full academic year, six presentation milestones from Initial Clinical Observations to THE BINDER. Your attention is the only real currency on this campus, and everyone knows it but you.</div>'
     +'<ul class="rules">'
     +'<li><b>Spend Attention</b> each week: check in (see the truth), coach (fix the work), support (fix the people).</li>'
-    +'<li><b>The dashboard lies.</b> Teams report what they believe. Some teams believe remarkable things.</li>'
+    +'<li><b>The dashboard lies.</b> The LMS says "published (on time)." It is not lying, exactly. It is just not saying anything.</li>'
     +'<li><b>Politics intrude.</b> Handling them costs attention; dodging them costs political capital. Both run out.</li>'
-    +'<li><b>Gates judge everyone</b> — weeks 4, 8, and 12. Land 3+ teams at the final gate, and keep yourself above zero.</li>'
+    +'<li><b>Milestones judge everyone</b> — three each semester, with winter break in between. Land 3+ teams at the Final Presentation, and keep yourself above zero.</li>'
     +'</ul>'
     +'<button class="btn primary" data-act="new">Start the semester</button>'
     +(hasSave?'<button class="btn" data-act="resume">Resume saved semester</button>':'')
@@ -1092,8 +1176,8 @@ function teamCard(ti){
   const staleNote = v.known ? (v.stale>0 ? ' · as of wk '+v.snapWeek : ' · current') : '';
   let notes = v.notes.length ? '<span class="stamp-mini">'+esc(v.notes[0])+'</span>' : '';
   return '<button class="teamcard" data-team="'+ti+'">'+notes
-    +'<div class="tabrow"><div><div class="tname">'+esc(v.label)+'</div>'
-    +'<div class="tproj">Table '+v.table+' · '+esc(v.project)+'</div></div>'
+    +'<div class="tabrow"><div><div class="tname">'+esc(v.clin)+'</div>'
+    +'<div class="tproj">'+esc(v.label)+' · '+esc(v.need)+'</div></div>'
     +'<span class="chip '+v.chip.cls+'">'+esc(v.chip.label)+'</span></div>'
     +'<div class="quote">'+esc(v.quote)+'</div>'
     +'<div class="filestate"><span>'+fileLbl+staleNote+'</span><span>tap to open ›</span></div>'
@@ -1128,9 +1212,10 @@ function sheetHTML(ti){
     stats = '<div class="snote" style="margin-top:10px">No real information. Their self-report is all you have, and you know what that’s worth.</div>';
   }
   let warns = v.warns.map(w=>'<div class="warn">⚠ '+esc(w)+'</div>').join('');
+  const capped = (t.actionsThisWeek||0) >= 2;
   const btn = (kind,label,sub)=>{
     const cost = E.ACTIONS[kind].ap;
-    const cant = cost>S.attention;
+    const cant = capped || cost>S.attention;
     return '<button class="btn'+(cant?' disabled':'')+'" data-team-act="'+kind+'" data-team="'+ti+'">'
       +esc(label)+'<span class="cost">'+cost+' ATT</span>'
       +(sub?'<span class="sub">'+esc(sub)+'</span>':'')+'</button>';
@@ -1138,12 +1223,13 @@ function sheetHTML(ti){
   return '<div class="sheetwrap"><button class="shade" data-act="closesheet" aria-label="Close"></button>'
     +'<div class="sheet"><div class="grip"></div>'
     +'<div class="tabrow" style="display:flex;justify-content:space-between;align-items:center">'
-    +'<div><div class="tname" style="font-family:var(--memo);font-weight:700;font-size:18px">'+esc(v.label)+'</div>'
-    +'<div class="tproj" style="font-size:12.5px;color:var(--ink-soft)">'+esc(a.blurb)+'</div></div>'
+    +'<div><div class="tname" style="font-family:var(--memo);font-weight:700;font-size:18px">'+esc(v.clin)+'</div>'
+    +'<div class="tproj" style="font-size:12.5px;color:var(--ink-soft)">'+esc(v.label)+' — '+esc(a.blurb)+'</div></div>'
     +'<span class="chip '+v.chip.cls+'">'+esc(v.chip.label)+'</span></div>'
     + stats + warns
     + (v.notes.length?'<div class="warn">⚠ '+v.notes.join(' · ')+'</div>':'')
     +'<hr class="rule">'
+    + (capped?'<div class="snote" style="margin-bottom:2px">ENOUGH. They’ve had two doses of you this week — now they need to do the work.</div>':'')
     + btn('check','Check in','See where they really are. Cheap, and it goes stale.')
     + btn('coach', a.coachLabel, a.coachSub||'Push the work forward.')
     + btn('support', a.supportLabel, a.supportSub||'Shore up morale before it becomes your problem.')
@@ -1152,13 +1238,32 @@ function sheetHTML(ti){
 }
 
 function renderReport(){
+  const isBreak = S.report.week==='break';
   let lis = S.report.lines.map(l=>'<li class="'+l.cls+'">'+l.txt+'</li>').join('');
+  const head = isBreak ? 'Winter Break — <b>Updates</b>' : 'Director’s field notes · <b>Week '+S.report.week+'</b>';
+  const nextLbl = S.gate ? 'Proceed to '+esc(S.gate.name)
+    : S.ending ? 'Face the consequences'
+    : isBreak ? 'Spring semester begins'
+    : 'Begin week '+(S.week+1);
   app.innerHTML = topbar()
     +'<div class="scroll"><div class="paper">'
-    +'<div class="memohead">Director’s field notes · <b>Week '+S.report.week+'</b></div>'
+    +'<div class="memohead">'+head+'</div>'
     +'<ul class="loglist">'+lis+'</ul>'
-    +'<button class="btn primary" data-act="advance">'+(S.gate?'Proceed to '+esc(S.gate.name):(S.ending?'Face the consequences':'Begin week '+(S.week+1)))+'</button>'
+    +'<button class="btn primary" data-act="advance">'+nextLbl+'</button>'
     +'</div></div>';
+}
+
+function renderBreak(){
+  let opts = '';
+  E.BREAK_OPTS.forEach((o,i)=>{
+    opts += '<button class="btn'+(i===0?' primary':'')+'" data-break="'+i+'">'+esc(o.label)
+      +'<span class="sub">'+esc(o.note)+'</span></button>';
+  });
+  app.innerHTML = topbar()
+    +'<div class="scroll"><div class="paper">'
+    +'<div class="memohead">From: <b>You, allegedly on vacation</b><br>Re: <b>Plan for Winter Break</b></div>'
+    +'<div class="memobody">The fall semester is over. The teams have filed their Plans for Winter Break, which range from "rest" to a Gantt chart. The only plan that matters now is yours.</div>'
+    +opts+'</div></div>';
 }
 
 function renderGate(){
@@ -1185,7 +1290,7 @@ function renderOver(){
     const reached = 'final' in t.gates;
     const verdict = reached ? (passed?'LANDED':'FAILED') : 'NO VERDICT';
     const col = reached ? (passed?'var(--green)':'var(--red)') : 'var(--ink-faint)';
-    return '<div>'+esc(E.ARCHS[t.key].label)+'<span style="color:'+col+'">'+verdict+'</span></div>';
+    return '<div>'+esc(t.area+' · '+E.ARCHS[t.key].label)+'<span style="color:'+col+'">'+verdict+'</span></div>';
   }).join('');
   app.innerHTML = '<div class="scroll"><div class="paper" style="margin-top:20px">'
     +'<div class="kicker">Personnel file · end of semester record</div>'
@@ -1193,13 +1298,13 @@ function renderOver(){
     +'<div class="memobody">'+esc(e.text)+'</div>'
     +'<hr class="rule">'
     +'<div class="endstats">'+teamRows
-    +'<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:8px">Weeks survived<span>'+e.weeks+' / 12</span></div>'
-    +'<div>Teams through the final gate<span>'+e.passes+' / 5</span></div>'
+    +'<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:8px">Weeks survived<span>'+e.weeks+' / '+E.CFG.weeks+'</span></div>'
+    +'<div>Teams through the Final Presentation<span>'+e.passes+' / 5</span></div>'
     +'<div>Sanity remaining<span>'+S.sanity+'</span></div>'
     +'<div>Political capital remaining<span>'+S.pc+'</span></div>'
     +'<div><b>Semester score</b><span><b>'+e.score+'</b></span></div>'
     +'</div>'
-    +'<button class="btn primary" data-act="new">New semester (new teams)</button>'
+    +'<button class="btn primary" data-act="new">New year (new teams)</button>'
     +'<div class="fineprint">The teams are randomized each run. So are the crises. The Assistant Director is eternal.</div>'
     +'</div></div>';
 }
@@ -1212,6 +1317,7 @@ function render(){
     case 'allocate': renderAllocate(); break;
     case 'report': renderReport(); break;
     case 'gate': renderGate(); break;
+    case 'break': renderBreak(); break;
     case 'over': renderOver(); break;
     default: renderTitle();
   }
@@ -1228,6 +1334,7 @@ app.addEventListener('click', ev=>{
   if (act==='endweek'){ sheetTeam=null; E.endWeek(S); render(); return; }
   if (act==='advance'){ E.advance(S); render(); return; }
   if (act==='closesheet'){ sheetTeam=null; render(); return; }
+  if (b.dataset.break!=null){ E.breakChoice(S, +b.dataset.break); render(); return; }
   if (b.dataset.card){ E.resolveCard(S, +b.dataset.card, +b.dataset.opt); render(); return; }
   if (b.dataset.teamAct){ E.act(S, +b.dataset.team, b.dataset.teamAct);
     sheetTeam = +b.dataset.team; // keep sheet open so the player sees the updated file
