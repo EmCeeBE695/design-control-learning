@@ -471,11 +471,11 @@ function teamView(S,ti){
   const v = { label:a.label, clin:t.area+' Team', need:t.need, blurb:a.blurb, insight:t.insight,
               table:t.table, notes:[], warns:[], known:null, snapWeek:t.snap?t.snap.week:0 };
   if (t.key==='ghost' && t.insight===0){
-    v.chip = { cls:'grey', label:'not started · overdue' };
+    v.chip = { cls:'grey', label:'no status reported' };
     v.quote = 'Nothing submitted. No email. The tuition payments are the only sign of life.';
   } else {
     const q = reportedQuality(t);
-    v.chip = q>=62 ? {cls:'green',label:'published · on time'} : q>=45 ? {cls:'amber',label:'pending review'} : {cls:'red',label:'in progress · overdue'};
+    v.chip = q>=62 ? {cls:'green',label:'on schedule'} : q>=45 ? {cls:'amber',label:'at risk'} : {cls:'red',label:'behind schedule'};
     v.quote = a.reported.length ? a.reported[(S.week + ti) % a.reported.length]
             : 'A status report was located after some effort.';
   }
@@ -484,7 +484,7 @@ function teamView(S,ti){
     v.stale = stale;
     v.known = { P:t.snap.P, M:t.snap.M, T:(t.insight>=2 ? t.snap.T : null), exact:t.insight>=3 };
   }
-  if (t.flags.probation) v.notes.push('ON PROBATION');
+  if (t.flags.probation) v.notes.push('CORRECTIVE ACTION');
   if (t.flags.memberLost) v.notes.push('DOWN A MEMBER');
   if (t.flags.imploded) v.notes.push('FRACTURED');
   if (t.flags.burnout) v.notes.push('BURNED OUT');
@@ -875,14 +875,15 @@ function drift(S, t, lines){
     F.imploded = true; F.capacity = Math.min(cap,0.6);
     st.P = clamp(st.P-15,5,100); st.M = 18;
     S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
-    if (t.insight===0) S.pc = clamp(S.pc-1,0,CFG.maxMeter);
-    lines.push({ cls:'bad', txt:'<b>'+a.label+'</b> fractured this week. You learned about it from a forwarded email with the subject line "FYI".' });
+    const blindPC = t.insight===0;
+    if (blindPC) S.pc = clamp(S.pc-1,0,CFG.maxMeter);
+    lines.push({ cls:'bad', txt:'<b>'+a.label+'</b> fractured this week. You learned about it from a forwarded email with the subject line "FYI". (-1 sanity'+(blindPC?', -1 political capital':'')+')' });
     t.insight = Math.max(t.insight,2); snap(S,t); t.lastTouched=S.week;
   } else if (t.key==='anxious' && !F.burnout && st.M<20){
     F.burnout = true; F.capacity = Math.min(cap,0.5);
     st.P = clamp(st.P-20,5,100); st.T = clamp(st.T-12,5,100); st.M = 26;
     S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
-    lines.push({ cls:'bad', txt:'<b>The Anxious High-Performers</b> hit the wall. Their strongest member is on medical leave; the lab bench has gone quiet.' });
+    lines.push({ cls:'bad', txt:'<b>The Anxious High-Performers</b> hit the wall. Their strongest member is on medical leave; the lab bench has gone quiet. (-1 sanity)' });
     t.insight = Math.max(t.insight,2); snap(S,t); t.lastTouched=S.week;
   } else {
     // one observation line per team
@@ -920,7 +921,7 @@ function runGate(S, kind){
     const row = { ti, label:t.area+' · '+ARCHS[t.key].label, sc, pass, margin:sc-thr, blind:false, docBonus };
     if (pass){
       t.stats.M = clamp(t.stats.M+6,5,100);
-      if (t.flags.probation){ t.flags.probation=false; row.note='off probation'; }
+      if (t.flags.probation){ t.flags.probation=false; row.note='corrective action closed'; }
     } else {
       fails++;
       t.stats.M = clamp(t.stats.M-8,5,100);
@@ -931,37 +932,39 @@ function runGate(S, kind){
         t.stats.SA = clamp(t.stats.SA+30,0,100);
       }
     }
-    // review panels see the truth — the fog lifts
+    // the design review sees the truth — the fog lifts
     t.insight = Math.max(t.insight,2); snap(S,t); t.lastTouched = S.week;
     t.gates[kind] = pass;
     row.comment = gateComment(S,kind,row);
     rows.push(row);
   });
   // political fallout is capped: the dean only has so much appetite per review
+  const pcBefore = S.pc, sanBefore = S.sanity;
   S.pc = clamp(S.pc - Math.min(fails,3) - (anyBlind?1:0), 0, CFG.maxMeter);
   if (fails===0){ S.pc = clamp(S.pc+1,0,CFG.maxMeter); }
   if (fails>=2) S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
-  return { kind, name:CFG.gateNames[kind], thr, rows, fails };
+  return { kind, name:CFG.gateNames[kind], thr, rows, fails,
+           dPC:S.pc-pcBefore, dSan:S.sanity-sanBefore };
 }
 
 function gateComment(S, kind, row){
   if (row.pass && row.margin>=15) return pick(S,[
-    'Reviewers used the word "exemplary." One asked if the team is available for hire.',
-    'The panel had no questions, which has never happened before.',
-    'A reviewer took a photo of the poster "for internal inspiration."',
-    'One reviewer said the trace matrix alone deserved a poster.' ]);
+    'The instructors used the word "exemplary." One asked if the team is available for hire.',
+    'The instructors had no questions, which has never happened before.',
+    'An instructor took a photo of the poster "for internal inspiration."',
+    'One instructor said the trace matrix alone deserved a poster.' ]);
   if (row.pass) return pick(S,[
-    'Passed. The panel’s enthusiasm was described, generously, as polite.',
-    'Passed, with the reviewer tone of people choosing their battles.',
+    'Passed. The instructors’ enthusiasm was described, generously, as polite.',
+    'Passed, in the tone of instructors choosing their battles.',
     'Cleared the bar. The bar heard about it.' ]);
   if (row.blind) return 'Failed — and the complaint reached the dean before it reached you. You had no file on this team.';
   if (row.margin>=-6) return pick(S,[
-    'Missed by a hair. The panel’s notes say "so close" in three handwritings.',
-    'Just under the bar. A reviewer mouthed "sorry" on the way out.' ]);
+    'Missed by a hair. The instructors’ notes say "so close" in three handwritings.',
+    'Just under the bar. An instructor mouthed "sorry" on the way out.' ]);
   return pick(S,[
-    'The panel’s written feedback opens with "We have concerns," then numbers them.',
-    'A reviewer asked, gently, what the team had been doing since orientation.',
-    'The panel asked to see the killer experiment. There was no killer experiment.' ]);
+    'The instructors’ written feedback opens with "We have concerns," then numbers them.',
+    'An instructor asked, gently, what the team had been doing since orientation.',
+    'The instructors asked to see the killer experiment. There was no killer experiment.' ]);
 }
 
 function checkDeath(S, immediate){
@@ -997,13 +1000,17 @@ function endWeek(S){
   if (S.phase!=='allocate') return false;
   const lines = [];
   const leftover = S.attention;
-  if (leftover>=2 && S.sanity<CFG.maxMeter){
-    S.sanity++; lines.push({ cls:'meta', txt:'You left before dark and ate a meal at a table. Unprecedented. (+1 sanity)' });
-  }
-  // heavy inbox weeks grind you down
-  if (S.weekLoad>=2){
+  // Leaving early (banking >=2 attention) is a real, reliable recovery: it also
+  // shields you from the heavy-week grind. Only one of these fires per week.
+  if (leftover>=2){
+    if (S.sanity<CFG.maxMeter){
+      S.sanity++; lines.push({ cls:'meta', txt:'You left before dark and ate a meal at a table. Unprecedented. (+1 sanity)' });
+    } else {
+      lines.push({ cls:'meta', txt:'You left before dark and ate a meal at a table. Unprecedented.' });
+    }
+  } else if (S.weekLoad>=2){
     S.sanity = clamp(S.sanity-1,0,CFG.maxMeter);
-    lines.push({ cls:'meta', txt:'The week was mostly other people’s emergencies. (-1 sanity)' });
+    lines.push({ cls:'meta', txt:'The week was mostly other people’s emergencies, and you never left the office. (-1 sanity)' });
   }
   for (const t of S.teams) drift(S,t,lines);
   S.report = { week:S.week, lines };
@@ -1142,7 +1149,7 @@ function renderTitle(){
     +'<div class="memobody">You direct the biomedical design capstone. Five clinical teams across fall and spring, seven course milestones from Initial Clinical Observations to THE BINDER. Your attention is the only real currency on this campus, and everyone knows it but you.</div>'
     +'<ul class="rules">'
     +'<li><b>Spend Attention</b> each week: check in (see the truth), coach (push the work), support (steady the people).</li>'
-    +'<li><b>The dashboard lies.</b> Practera says "published (on time)." It is not lying, exactly. It is just not saying anything.</li>'
+    +'<li><b>The dashboard lies.</b> The tracker says "on schedule." It is not lying, exactly. It is just not saying anything.</li>'
     +'<li><b>Politics intrude.</b> Handling them costs attention; dodging them costs political capital. Both run out.</li>'
     +'<li><b>Milestones judge everyone</b> — three in fall, four in spring, winter break between. Land 3+ teams through THE BINDER, and keep yourself above zero.</li>'
     +'</ul>'
@@ -1287,11 +1294,16 @@ function renderGate(){
     +'<span class="stamp small '+(r.pass?'pass':'fail')+'">'+(r.pass?'Pass':'Fail')+'</span></div>').join('');
   const isFinal = g.kind===E.CFG.finalGate;
   const isBinder = g.kind==='binder';
+  const meter = (d,lab)=> d ? '<span class="'+(d>0?'pos':'neg')+'">'+lab+' '+(d>0?'+':'')+d+'</span>' : '';
+  const deltas = [meter(g.dPC,'Political capital'), meter(g.dSan,'Sanity')].filter(Boolean).join(' &nbsp;·&nbsp; ');
+  const meterLine = deltas
+    ? '<div class="deltas" style="margin-top:12px">'+(g.fails===0?'Clean review — ':'Review fallout — ')+deltas+'</div>'
+    : '';
   app.innerHTML = topbar()
     +'<div class="scroll"><div class="paper">'
-    +'<div class="memohead">'+(isBinder?'Design history file review · ':'Review panel results · ')+'<b>'+esc(g.name)+'</b></div>'
-    +'<div class="fineprint" style="margin-top:4px">'+(isBinder?'The BINDER is the whole year in one place. Nothing hides in it.':'The panel sees everything. Your files on all five teams are now current.')+'</div>'
-    +'<hr class="rule">'+rows
+    +'<div class="memohead">'+(isBinder?'Design history file review · ':'Design review · ')+'<b>'+esc(g.name)+'</b></div>'
+    +'<div class="fineprint" style="margin-top:4px">'+(isBinder?'The BINDER is the whole year in one place. Nothing hides in it.':'The instructors see everything. Your files on all five teams are now current.')+'</div>'
+    +'<hr class="rule">'+rows+meterLine
     +'<button class="btn primary" data-act="advance">'+((isFinal||S.ending)?'Face the reckoning':'Begin week '+(S.week+1))+'</button>'
     +'</div></div>';
 }
