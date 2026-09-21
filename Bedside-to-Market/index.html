@@ -195,6 +195,11 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 .strip-seg{min-width:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700;overflow:hidden}
 .strip-seg.up{background:var(--color-primary);color:var(--color-text-inverse)}
 .strip-seg.down{border:1.5px dashed var(--color-border);color:var(--color-text-faint);background:transparent}
+.strip-barwrap{position:relative;padding-top:20px}
+.strip-mark{position:absolute;top:0;bottom:0;width:2px;background:var(--color-error);z-index:2}
+.strip-mark::after{content:"";position:absolute;bottom:-4px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--color-error)}
+.strip-mark-l{position:absolute;top:0;left:6px;font-size:.62rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--color-error);white-space:nowrap}
+.strip-mark.right .strip-mark-l{left:auto;right:6px}
 .strip-notes{margin-top:var(--space-3);display:flex;flex-direction:column;gap:var(--space-1)}
 .strip-note{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6;padding-left:var(--space-4);position:relative}
 .strip-note::before{content:"↑";position:absolute;left:0;color:var(--color-text-faint)}
@@ -377,7 +382,7 @@ kbd{font-family:var(--font-mono);font-size:.85em;border:1px solid var(--color-bo
     </a>
     <div class="topbar-spacer"></div>
     <div class="topmeters" id="meters"></div>
-    <span class="topbar-badge">Fictional case</span>
+    <span class="topbar-badge" id="badge">Fictional case</span>
     <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -477,6 +482,18 @@ const TERMS = {
    Draws one case to scale. segs are [minutes, cuffIsUp] pairs; rows are the
    totals printed underneath. Used three times, so students learn to read it
    once and then recognise it. */
+/* Where a given number of CUFF-UP minutes falls along the elapsed bar. */
+function markAt(segs, upMinutes) {
+  const total = segs.reduce((a, s) => a + s[0], 0);
+  let up = 0, elapsed = 0;
+  for (const [min, isUp] of segs) {
+    if (isUp && up + min >= upMinutes) return ((elapsed + (upMinutes - up)) / total) * 100;
+    if (isUp) up += min;
+    elapsed += min;
+  }
+  return 100;
+}
+
 function caseStrip(o) {
   const total = o.segs.reduce((a, s) => a + s[0], 0);
   const bar = o.segs.map(([min, up]) =>
@@ -488,7 +505,11 @@ function caseStrip(o) {
       <span class="strip-key"><span class="strip-swatch up"></span>cuff <b>up</b> — inflated, blood flow stopped</span>
       <span class="strip-key"><span class="strip-swatch down"></span>cuff <b>down</b> — deflated, blood flowing again</span>
     </div>
-    <div class="strip-bar">${bar}</div>
+    <div class="strip-barwrap">
+      <div class="strip-bar">${bar}</div>
+      ${o.mark ? (() => { const x = markAt(o.segs, o.mark.at);
+        return `<div class="strip-mark${x > 62 ? " right" : ""}" style="left:${x}%"><span class="strip-mark-l">${o.mark.label}</span></div>`; })() : ""}
+    </div>
     ${o.notes ? `<div class="strip-notes">${o.notes.map((n) => `<div class="strip-note">${n}</div>`).join("")}</div>` : ""}
     <div class="strip-rows">
       ${o.rows.map((r) => `<div class="strip-row ${r.k || ""}"><span>${r.l}</span><span class="strip-row-v">${r.v}</span></div>`).join("")}
@@ -662,9 +683,116 @@ const STAGES = [
         nt: "Most of the protection for a fraction of the delay, by spending real units only where a difference could reach a patient."
       }
     ],
-  },
+  }
+];
 
-  {
+/* ==================== MONTH 6, TWO VERSIONS ====================
+   Default is the display-placement question: the number is correct and it is
+   behind the anaesthesia screen. ?mode=advanced swaps in the harder version,
+   where a hidden ten-minute rule makes a correct device produce a wrong room.
+   Both use the same risk key and the same probabilities, so every consequence,
+   ending and probability downstream is untouched. */
+const ADVANCED = /[?&]mode=advanced\b/.test(location.search) || location.hash === "#advanced";
+
+const T3_DISPLAY = {
+  stage: {
+    id: "t3",
+    kicker: "Month 6",
+    name: "Where the number appears",
+    beats: [
+      "<p>Feature freeze is next week. One decision is still open, and nobody has been treating it as a decision: where does the number actually show up?</p>",
+
+      "<p>Think about where everyone is standing. The tourniquet pump lives on a cart at the foot of the bed, past the anaesthesia screen. That is where the controller would naturally go, because that is where the hardware already is.</p>" +
+      "<p>The surgeon is at the knee, gowned and gloved, hands in the field. For the next hour they will not walk anywhere, turn around, or touch anything that isn't sterile. The circulating nurse can see the cart, and is also fetching trays, charting, and answering the door.</p>",
+
+      "<p>Here is Dr. Okonjo's case again, with her own limit marked.</p>" +
+      caseStrip({
+        title: "The same case · the surgeon's limit at 60 minutes of cuff time",
+        segs: CASE_SEGS,
+        mark: { at: 60, label: "limit" },
+        rows: [
+          { l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" },
+          { l: "Her limit reached at", v: "60 min", k: "shown" }
+        ],
+        caption: "At that mark something has to happen, and someone has to decide it. Whichever option you pick, the device will know. The question is who finds out."
+      })
+    ],
+    beatsIf: {
+      around: "<p><b>Worth noticing:</b> designing around the patent already put a scanner on a bracket at the patient's side, so there is a mount by the field that somebody has already paid to tool.</p>"
+    },
+    revealLabel: "See the options",
+    question: "Where does the display go?",
+    options: [
+      {
+        t: "On the pump cart",
+        d: "Use the screen that is already part of the tourniquet hardware. No new parts, no new tooling, nothing extra to test or manufacture.",
+        e: "75% the number doesn't reach anyone in time", eClass: "risk",
+        m: { sch: 2, bud: -5, risk: 14 },
+        risk: { key: "use", p: 0.75 },
+        fbKind: "risk",
+        verdict: "The number will be correct, and it will be behind the drape.",
+        fb: "<p>Information that exists but never reaches the person who has to act on it is not information. The surgeon cannot leave the field to read it. The circulator can, and is doing four other things. A <span class='T' data-t='useerror'>use error</span> is what happens when a device works exactly as designed and a person still gets the wrong result — and a screen nobody is positioned to read is one of the most ordinary ways to produce one.</p>",
+        nt: "Cheapest to build, and it puts the number where the person who must act on it cannot see it."
+      },
+      {
+        t: "Add a second display in the surgeon's sightline",
+        d: "A small repeater screen on a boom arm, positioned where the surgeon already looks. Another part, another supplier, more tooling and more testing.",
+        e: "5% residual · the number is where the decision is", eClass: "",
+        eIf: { around: "Nearly free — the bracket by the field is already tooled", aroundClass: "" },
+        mIf: { around: { sch: 5, bud: -7, risk: -8 } },
+        m: { sch: 10, bud: -14, risk: -8 },
+        risk: { key: "use", p: 0.05 },
+        fbKind: "good",
+        verdict: "You put the number where the decision gets made.",
+        fb: "<p>It costs a part, a supplier and a tooling cycle, and it means the person who has to call for the cuff to come down can see the number without asking anyone.</p>",
+        fbIf: {
+          around: "<p>And it cost you far less than it would have cost anyone else, because the mount you designed for the wristband scanner in month 2 carries this too. A decision taken for legal reasons made the safer design affordable.</p>"
+        },
+        nt: "Expensive in parts and tooling, and it puts the number in the sightline of the person who must act."
+      },
+      {
+        t: "Cart display plus an audible callout",
+        d: "Keep the single screen, and have the device speak up at the limit and every five minutes after. Cheaper than a second display, and it does not need anyone to be looking.",
+        e: "25% residual · sound reaches the room", eClass: "warn",
+        m: { sch: 6, bud: -10, risk: -4 },
+        risk: { key: "use", p: 0.25 },
+        fbKind: "good",
+        verdict: "You used the one channel that doesn't need anyone to be looking.",
+        fb: "<p>Sound reaches the whole room, including the person whose hands are busy. It is weaker than putting the number in the sightline — a loud room can swallow it, and rooms full of alarms learn to stop hearing them — but it removes most of the problem for a fraction of the cost.</p>",
+        nt: "Reaches the room without anyone looking up, and competes with every other noise in it."
+      }
+    ],
+    relocateIf: "around"
+  },
+  complaint: "“The alert was going off down at the foot of the bed while we were drilling. Nobody registered it until we were closing.”",
+  field: {
+    title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+    segs: [[29, true], [13, false], [42, true]],
+    mark: { at: 60, label: "alert fired" },
+    rows: [
+      { l: "Time the leg spent with no blood flow", v: "71 min", k: "actual" },
+      { l: "The device asked for attention at", v: "60 min", k: "shown" }
+    ],
+    caption: "The device was right, on time, and eleven minutes of cuff time went by before anyone acted on it. Every unit met every specification you wrote."
+  },
+  recall: "Every unit examined worked exactly as specified. The alert fired at the limit, on the cart, past the anaesthesia screen, and the people who needed it were looking somewhere else. ",
+  luck: "You put the only display where the person who has to act cannot see it, at a stated 75%.",
+  stand: [
+    "<b>Month 6 — you put the only display on the pump cart.</b> Nobody has evidence that the person who must act on the number can read it, so the <span class='T' data-t='hf'>human factors</span> burden is heavier.",
+    "<b>Month 6 — you put a display in the surgeon's sightline.</b> The person who acts on the number can see it, which makes the human factors story short.",
+    "<b>Month 6 — you added an audible callout.</b> The room is told without anyone having to look, and that is a reasonable answer to give a reviewer."
+  ],
+  owed: "Human factors evidence that the number actually reaches the person who has to act on it — and you have none, because nobody outside the company has used this device in a real room.",
+  tlWhat: "You decided where the number appears.",
+  tlCause: (use) => [
+    "On the pump cart. " + (use ? "The alert fired on time and nobody in a position to act was looking at it." : "It didn't bite. The odds said it probably would."),
+    "A second display in the sightline. " + (use ? "The 5% residual landed anyway." : "The number was where the decision was."),
+    "Cart plus audible callout. " + (use ? "The residual 25% landed anyway — a loud room swallowed it." : "The room heard it without having to look.")
+  ]
+};
+
+const T3_HIDDEN = {
+  stage:   {
     id: "t3",
     kicker: "Month 6",
     name: "Features versus use risk",
@@ -735,8 +863,37 @@ const STAGES = [
       }
     ],
     relocateIf: "around",
-  }
-];
+  },
+  complaint: "“Device showed 42 minutes. My circulating nurse's notes say 71. It seems to have reset itself partway through.”",
+  field: {
+    title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+    segs: [[29, true], [13, false], [42, true]],
+    notes: ["The pause ran <b>13 minutes</b>. Over ten, so the device started counting again from zero."],
+    rows: [
+      { l: "Time the leg spent with no blood flow", v: "71 min", k: "actual" },
+      { l: "What the display read when they closed", v: "42 min", k: "shown" }
+    ],
+    caption: "The nurse's note said 71. The screen said 42. Both were honest, and the device met every specification you wrote for it."
+  },
+  recall: "Every unit examined performed exactly to specification. The ten-minute rule did precisely what it was designed to do, and the room couldn't see it happening. ",
+  luck: "You shipped a mode the user cannot see, at a stated 75%.",
+  stand: [
+    "<b>Month 6 — you shipped a hidden mode.</b> A device whose behaviour the user cannot see carries a heavier <span class='T' data-t='hf'>human factors</span> burden, and you have no data about how the room uses it.",
+    "<b>Month 6 — you kept the timer explicit.</b> There is no hidden state to explain, which makes the human factors story short.",
+    "<b>Month 6 — you made the mode visible.</b> The feature stayed, and so did a reasonable answer about how users know what the device is doing."
+  ],
+  owed: "Human factors evidence covering the mode users cannot see — and you have none, because nobody outside the company has used this device.",
+  tlWhat: "You froze the timer behaviour.",
+  tlCause: (use) => [
+    "A hidden mode. " + (use ? "It produced a wrong number in a real operating room." : "It didn't bite. The odds said it probably would."),
+    "Explicit. " + (use ? "The 5% residual landed anyway." : "No hidden state, no wrong number."),
+    "Mode shown. " + (use ? "The residual 25% landed anyway." : "Users could see what the device was counting.")
+  ]
+};
+
+const T3 = ADVANCED ? T3_HIDDEN : T3_DISPLAY;
+STAGES.push(T3.stage);
+
 
 const RELOCATE_TEXT =
   "<b>Risk controls relocate risk more often than they remove it.</b> Designing around the patent moved the use error rather than deleting it. Somebody can forget to scan, and the timer never starts at all — a worse failure, carrying its own <b>15% chance</b> whichever option you picked.";
@@ -1017,9 +1174,7 @@ function standLines() {
   if (S.picks.t2 === 0) L.push("<b>Month 4 — you tested prototypes.</b> Your performance data describes units built by hand, and a reviewer may ask what you actually tested.");
   if (S.picks.t2 === 1) L.push("<b>Month 4 — you tested production-equivalent units.</b> That is the answer reviewers want, and it is already written down.");
   if (S.picks.t2 === 2) L.push("<b>Month 4 — you split the test plan.</b> The safety-critical tests ran on real units, which covers the questions most likely to be asked.");
-  if (S.picks.t3 === 0) L.push("<b>Month 6 — you shipped a hidden mode.</b> A device whose behaviour the user cannot see carries a heavier <span class='T' data-t='hf'>human factors</span> burden, and you have no data about how the room uses it.");
-  if (S.picks.t3 === 1) L.push("<b>Month 6 — you kept the timer explicit.</b> There is no hidden state to explain, which makes the human factors story short.");
-  if (S.picks.t3 === 2) L.push("<b>Month 6 — you made the mode visible.</b> The feature stayed, and so did a reasonable answer about how users know what the device is doing.");
+  L.push(T3.stand[S.picks.t3]);
   if (claimsBig()) L.push("<b>Month 1 — your need statement promised fewer nerve injuries.</b> That is a clinical claim, and clinical claims need clinical evidence.");
   return L;
 }
@@ -1034,7 +1189,7 @@ function owedItems() {
   } else {
     L.push("A <span class='T' data-t='k510'>510(k)</span> arguing substantial equivalence to an existing tourniquet system.");
   }
-  if (S.picks.t3 === 0) L.push("Human factors evidence covering the mode users cannot see — and you have none, because nobody outside the company has used this device.");
+  if (S.picks.t3 === 0) L.push(T3.owed);
   else L.push("<span class='T' data-t='validation'>Design validation</span> showing the finished device meets real users' needs, usually through simulated use rather than a clinical trial.");
   if (S.picks.t2 === 0) L.push("A defensible answer to “what were these units?”, which your current data cannot give.");
   if (claimsBig()) L.push("Clinical evidence for the injury-reduction claim your investors were sold, which nothing in your file supports.");
@@ -1271,7 +1426,7 @@ function complaints() {
       h: "Complaint 1063 · Granite Bay Regional",
       q: S.rolls.scan && !S.rolls.use
         ? "“Device showed nothing at all for most of the case. Nobody had opened a case on it and we did not notice until closing.”"
-        : "“Device showed 42 minutes. My circulating nurse's notes say 71. It seems to have reset itself partway through.”"
+        : T3.complaint
     }
   ];
 }
@@ -1333,18 +1488,7 @@ function showComplaints() {
 /* The third appearance of the strip: the case behind complaint 1063, shown
    only after the choice is locked so it can't hint at which one is real. */
 function fieldStrip() {
-  if (S.rolls.use) {
-    return caseStrip({
-      title: "Behind complaint 1063 · Granite Bay Regional, month 13",
-      segs: [[29, true], [13, false], [42, true]],
-      notes: ["The pause ran <b>13 minutes</b>. Over ten, so the device started counting again from zero."],
-      rows: [
-        { l: "Time the leg spent with no blood flow", v: "71 min", k: "actual" },
-        { l: "What the display read when they closed", v: "42 min", k: "shown" }
-      ],
-      caption: "The nurse's note said 71. The screen said 42. Both were honest, and the device met every specification you wrote for it."
-    });
-  }
+  if (S.rolls.use) return caseStrip(T3.field);
   if (S.rolls.scan) {
     return caseStrip({
       title: "Behind complaint 1063 · Granite Bay Regional, month 13",
@@ -1459,7 +1603,7 @@ function resolveEnding() {
       title: "Cleared, Then Recalled",
       body:
         `<p>The complaints kept arriving, and in month 19 one came with a patient attached — prolonged numbness after a long revision case where the displayed time and the recorded time did not match.</p>
-         <p>${S.rolls.use ? "Every unit examined performed exactly to specification. The ten-minute rule did precisely what it was designed to do, and the room couldn't see it happening. " : ""}${S.rolls.scan ? "The case had never been opened on the device, so the timer never started, and nobody noticed a screen quietly showing nothing. " : ""}${S.rolls.prod ? "The alert was there, at a volume the production housing had taken out of it. " : ""}${claimsBig() ? "It's worse than it would have been, because you marketed the device as preventing exactly this. " : ""}A correction goes out under far more scrutiny than it would have in month 14.</p>`
+         <p>${S.rolls.use ? T3.recall : ""}${S.rolls.scan ? "The case had never been opened on the device, so the timer never started, and nobody noticed a screen quietly showing nothing. " : ""}${S.rolls.prod ? "The alert was there, at a volume the production housing had taken out of it. " : ""}${claimsBig() ? "It's worse than it would have been, because you marketed the device as preventing exactly this. " : ""}A correction goes out under far more scrutiny than it would have in month 14.</p>`
     };
   }
 
@@ -1520,10 +1664,7 @@ function timeline() {
       , "Split plan. " + (S.rolls.prod ? "The residual 20% landed anyway." : "The tests that mattered ran on real units.")][S.picks.t2],
     !!S.rolls.prod, S.picks.t2, STAGES[2].options);
 
-  push("Month 6", "You froze the timer behaviour.",
-    ["A hidden mode. " + (S.rolls.use ? "It produced a wrong number in a real operating room." : "It didn't bite. The odds said it probably would.")
-      , "Explicit. " + (S.rolls.use ? "The 5% residual landed anyway." : "No hidden state, no wrong number.")
-      , "Mode shown. " + (S.rolls.use ? "The residual 25% landed anyway." : "Users could see what the device was counting.")][S.picks.t3],
+  push("Month 6", T3.tlWhat, T3.tlCause(!!S.rolls.use)[S.picks.t3],
     !!S.rolls.use, S.picks.t3, STAGES[3].options);
 
   if (S.rolls.scan) {
@@ -1578,7 +1719,7 @@ function luckVsYou() {
   if (S.picks.setup === 0) you.push("You wrote the solution into the need statement.");
   if (S.picks.setup === 2) you.push("You committed to an outcome claim in month 1 and had to live with it at submission.");
   if (S.picks.t2 === 0) you.push("You tested prototypes, with 70% printed on the option.");
-  if (S.picks.t3 === 0) you.push("You shipped a mode the user cannot see, at a stated 75%.");
+  if (S.picks.t3 === 0) you.push(T3.luck);
   if (S.picks.payoff === 2) you.push("You submitted without the evidence, knowing the odds.");
   if (S.picks.post === 0 && anySignal()) you.push("The pattern was in the complaint file and you closed it as routine.");
   if (S.picks.post === 2 && !anySignal()) you.push("You halted shipments with nothing pointing at a common cause.");
@@ -1745,6 +1886,8 @@ document.addEventListener("keydown", (e) => {
     if (target) { target.click(); e.preventDefault(); }
   }
 });
+
+if (ADVANCED) $("badge").textContent = "Fictional case · advanced";
 
 /* ==================== THEME ==================== */
 (function () {
