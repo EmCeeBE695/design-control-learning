@@ -152,7 +152,10 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 .opt-body{display:block;flex:1;min-width:0}
 .opt-t{display:block;font-size:var(--text-base);font-weight:700;letter-spacing:-0.01em;line-height:1.35}
 .opt-d{display:block;font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6;margin-top:var(--space-2)}
-.opt-e{display:block;font-size:var(--text-xs);font-weight:700;margin-top:var(--space-2);color:var(--color-primary)}
+/* Consequence line: hidden until a choice is locked in, so nobody plays
+   "spot the green one" instead of thinking about the decision. */
+.opt-e{display:none;font-size:var(--text-xs);font-weight:700;margin-top:var(--space-2);color:var(--color-primary)}
+.opt-e.shown{display:block;animation:fadeIn .3s ease}
 .opt-e.warn{color:var(--color-orange)}
 .opt-e.risk{color:var(--color-error)}
 .opt-lock{display:block;font-size:var(--text-xs);font-weight:700;color:var(--color-error);margin-top:var(--space-2)}
@@ -167,7 +170,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 .feedback-body{font-size:var(--text-sm);color:var(--color-text);line-height:1.7}
 .feedback-body p+p{margin-top:var(--space-3)}
 
-/* Unlabelled aside for regulatory / practice / simplification notes */
+/* Closing note on what the simulation compressed */
 .aside{
   margin-top:var(--space-4);padding:var(--space-3) var(--space-4);
   border-left:3px solid var(--color-border);background:var(--color-surface-2);
@@ -177,9 +180,36 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 .aside b{color:var(--color-text);font-weight:650}
 .aside p+p{margin-top:var(--space-2)}
 
+/* ==================== CASE STRIP ====================
+   One case drawn to scale: solid blocks are minutes with the cuff inflated,
+   dashed gaps are minutes with it down. Reused in months 1, 6 and 14. */
+.strip{margin-top:var(--space-4);border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.strip-title{font-size:var(--text-xs);font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+.strip-legend{display:flex;gap:var(--space-5);flex-wrap:wrap;font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3)}
+.strip-key{display:inline-flex;align-items:flex-start;gap:6px;line-height:1.5}
+.strip-swatch{width:17px;height:12px;border-radius:3px;flex-shrink:0;margin-top:4px}
+.strip-swatch.up{background:var(--color-primary)}
+.strip-swatch.down{border:1.5px dashed var(--color-border);background:transparent}
+.strip-bar{display:flex;gap:3px;align-items:stretch;height:46px}
+.strip-seg{min-width:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700;overflow:hidden}
+.strip-seg.up{background:var(--color-primary);color:var(--color-text-inverse)}
+.strip-seg.down{border:1.5px dashed var(--color-border);color:var(--color-text-faint);background:transparent}
+.strip-notes{margin-top:var(--space-3);display:flex;flex-direction:column;gap:var(--space-1)}
+.strip-note{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6;padding-left:var(--space-4);position:relative}
+.strip-note::before{content:"↑";position:absolute;left:0;color:var(--color-text-faint)}
+.strip-rows{margin-top:var(--space-4);display:flex;flex-direction:column;gap:var(--space-2)}
+.strip-row{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-3);font-size:var(--text-sm);line-height:1.5}
+.strip-row+.strip-row{border-top:1px dotted var(--color-border);padding-top:var(--space-2)}
+.strip-row-v{font-family:var(--font-mono);font-weight:700;white-space:nowrap;font-size:var(--text-base)}
+.strip-row.actual .strip-row-v{color:var(--color-primary)}
+.strip-row.shown .strip-row-v{color:var(--color-orange)}
+.strip-caption{font-size:var(--text-sm);line-height:1.7;margin-top:var(--space-4)}
+
 /* Beats — one block of story revealed at a time */
 .beat{animation:fadeIn .34s ease}
 .beat+.beat{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--color-divider)}
+/* A bridge beat opens a new month inside the feedback card — separate it. */
+.feedback-card .beat:first-child{margin-top:var(--space-5);padding-top:var(--space-5);border-top:1px solid var(--color-divider)}
 .beat p{font-size:var(--text-sm);line-height:1.75}
 .beat p+p{margin-top:var(--space-3)}
 .beat-lead{font-size:var(--text-base);font-weight:650;line-height:1.5}
@@ -444,6 +474,32 @@ const TERMS = {
   tourniquet: ["Pneumatic tourniquet", "An inflatable cuff placed around a limb and pumped to a pressure high enough to stop arterial blood flow, so the surgical field stays clear of blood."]
 };
 
+/* ==================== CASE STRIP ====================
+   Draws one case to scale. segs are [minutes, cuffIsUp] pairs; rows are the
+   totals printed underneath. Used three times, so students learn to read it
+   once and then recognise it. */
+function caseStrip(o) {
+  const total = o.segs.reduce((a, s) => a + s[0], 0);
+  const bar = o.segs.map(([min, up]) =>
+    `<div class="strip-seg ${up ? "up" : "down"}" style="flex:${min} 1 0" aria-label="${min} minutes cuff ${up ? "up" : "down"}">${min}</div>`
+  ).join("");
+  return `<div class="strip">
+    ${o.title ? `<div class="strip-title">${o.title}</div>` : ""}
+    <div class="strip-legend">
+      <span class="strip-key"><span class="strip-swatch up"></span>cuff <b>up</b> — inflated, blood flow stopped</span>
+      <span class="strip-key"><span class="strip-swatch down"></span>cuff <b>down</b> — deflated, blood flowing again</span>
+    </div>
+    <div class="strip-bar">${bar}</div>
+    ${o.notes ? `<div class="strip-notes">${o.notes.map((n) => `<div class="strip-note">${n}</div>`).join("")}</div>` : ""}
+    <div class="strip-rows">
+      ${o.rows.map((r) => `<div class="strip-row ${r.k || ""}"><span>${r.l}</span><span class="strip-row-v">${r.v}</span></div>`).join("")}
+    </div>
+  </div>${o.caption ? `<div class="strip-caption">${o.caption}</div>` : ""}`;
+}
+
+/* Dr. Okonjo's case: 85 minutes end to end, 68 of them under pressure. */
+const CASE_SEGS = [[32, true], [6, false], [14, true], [11, false], [22, true]];
+
 /* ==================== STAGES ==================== */
 /* Each stage is a list of beats revealed one at a time, then a decision. */
 
@@ -459,8 +515,14 @@ const STAGES = [
       "<p>So the team uses a <span class='T' data-t='tourniquet'>pneumatic tourniquet</span> — an inflatable cuff around the upper thigh, pumped hard enough to stop arterial flow. The field stays clear of blood, and in exchange the leg below the cuff gets no blood supply at all for as long as it stays up.</p>" +
       "<p>That is the whole trade. Muscle and nerve tolerate <span class='T' data-t='ischemia'>ischemia</span> for a while, and then they stop tolerating it: prolonged tourniquet time is associated with nerve and muscle injury, which is why every surgeon works to a limit and expects the room to know where they are against it.</p>",
 
-      "<p>Today the cuff comes down twice. Once around the forty-minute mark so the team can confirm the leg is perfusing, and again later while everyone waits for the right implant tray to arrive from sterile processing. Both times it goes back up.</p>" +
-      "<p>At the end the circulating nurse writes a tourniquet time into the record. Reading it that afternoon, Dr. Okonjo cannot tell whether the number means the last stretch or the whole case. Nothing malfunctioned. The cuff held its pressure, the pump held its setting, every person did their job. The total simply was never anywhere.</p>",
+      "<p>Today the cuff comes down twice. Once about half an hour in, so the team can confirm the leg is perfusing. Again later, while everyone waits for the right implant tray to arrive from sterile processing. Both times it goes back up.</p>" +
+      "<p>Drawn to scale, the case looks like this.</p>" +
+      caseStrip({
+        title: "Dr. Okonjo's case · 85 minutes, start to finish",
+        segs: CASE_SEGS,
+        rows: [{ l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" }]
+      }) +
+      "<p style='margin-top:var(--space-4)'>At the end the circulating nurse writes a tourniquet time into the record. Reading it that afternoon, Dr. Okonjo cannot tell what the number counted: the last stretch, the longest stretch, or all three added together. Nothing malfunctioned. The cuff held its pressure, the pump held its setting, every person did their job. The total simply was never anywhere.</p>",
 
       "<p>She calls two engineers she trained with. They incorporate as Fernwall Surgical and spend three weeks standing in operating rooms, watching.</p>" +
       "<p>Now they have to write down what they are solving. It is one sentence, and every decision in the next two years will be built on top of it.</p>"
@@ -499,7 +561,6 @@ const STAGES = [
         nt: "An outcome claim in the need statement quietly sets the evidence bar you must clear at submission."
       }
     ],
-    aside: "Writing a need as problem, population and measurable outcome with no solution inside it is a convention taught in design courses and used widely in industry. No regulation requires the format. It earns its place by keeping the design space open long enough for the team to understand the problem.",
     bridge: [
       "<p class='beat-lead'>Month 2.</p>" +
       "<p>Before committing to an architecture, the team runs a <span class='T' data-t='ftop'>patent search</span>. This is ordinary practice and it is done early on purpose: patents are public, and learning in month 2 that somebody already owns your approach is survivable. Learning it in month 30, after tooling and testing, is not.</p>" +
@@ -554,7 +615,6 @@ const STAGES = [
         nt: "Clears the legal and regulatory path in one move, and spends the budget you'd otherwise have for evidence."
       }
     ],
-    aside: "Clearing a moderate-risk device in the US usually means showing it is <span class='T' data-t='se'>substantially equivalent</span> to something already legally on the market: same intended use, and technology that either matches the predicate's or differs without raising different questions about safety and effectiveness. That part is a requirement. A real patent dispute — years, lawyers, its own budget — is compressed here into one line on your outcome screen.",
     bridge: [
       "<p class='beat-lead'>Month 4.</p>" +
       "<p>The architecture is settled and the first working units exist. The board wants data to show at the spring investor meeting, and the team has to decide what, exactly, they are going to run their tests on.</p>"
@@ -607,7 +667,6 @@ const STAGES = [
         nt: "Most of the protection for a fraction of the delay, by spending real units only where a difference could reach a patient."
       }
     ],
-    aside: "Running your pre-submission testing on units built the way production will build them is common industry practice rather than a fixed rule, and reviewers do ask what the test units were. How closely they have to match depends on the device and on which test you are talking about.",
     bridge: [
       "<p class='beat-lead'>Month 6.</p>" +
       "<p>Feature freeze is next week, and the surgeon advisory panel has one more request. It is genuinely clever, which is part of the problem.</p>"
@@ -620,7 +679,22 @@ const STAGES = [
     name: "Features versus use risk",
     beats: [
       "<p>The panel wants <b>smart auto-resume</b>. Deflate and reinflate within ten minutes and the timer keeps counting, because obviously it's the same patient. Longer than ten minutes and the device assumes a new case and starts fresh.</p>" +
-      "<p>It is a good idea in the way that good ideas are dangerous. It removes a step, it demos beautifully, and the rule that governs it lives entirely inside the software — so nobody standing at the table can tell which of the two behaviours is currently running.</p>"
+      "<p>It saves the team a step, and it removes the risk of somebody forgetting to reset between patients. Nobody on the panel thinks it is a compromise.</p>",
+
+      "<p>Here is that rule running on the case you watched in month 1.</p>" +
+      caseStrip({
+        title: "The same case, with auto-resume switched on",
+        segs: CASE_SEGS,
+        notes: [
+          "First pause: <b>6 minutes</b>. Under ten, so the timer keeps counting — 32 becomes 46.",
+          "Second pause: <b>11 minutes</b>. Over ten, so the device decides this is a new patient and starts from zero."
+        ],
+        rows: [
+          { l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" },
+          { l: "What the display reads at the end of the case", v: "22 min", k: "shown" }
+        ],
+        caption: "The rule did exactly what the panel specified, twice, in two different ways — and nothing on the screen said which of the two was happening."
+      })
     ],
     beatsIf: {
       around: "<p><b>Worth noticing:</b> your device already makes a person open a case by hand. The boundary is declared, not guessed, so you don't strictly need the panel's feature at all.</p>"
@@ -667,7 +741,6 @@ const STAGES = [
         nt: "Keeps the clever feature and removes most, though not all, of the hidden-state problem."
       }
     ],
-    aside: "The international standard for medical device risk management ranks controls in a fixed order: design the hazard out first, add protective measures second, tell the user about it last. Warnings are the weakest control there is, which is why “we documented it in the instructions” is not an answer to a hidden mode. Where risks are use-related, <span class='T' data-t='hf'>human factors testing</span> with representative users is expected practice rather than an optional extra.",
     relocateIf: "around",
     bridge: [
       "<p class='beat-lead'>Month 9.</p>" +
@@ -892,6 +965,17 @@ function optHTML(o, k) {
   </button>`;
 }
 
+/* Locks the row and shows every option's consequence line, not just the
+   chosen one — seeing what you passed up is half the lesson. */
+function revealConsequences(k) {
+  Array.from($("opts").children).forEach((btn, j) => {
+    btn.disabled = true;
+    if (!btn.classList.contains("locked")) btn.classList.add(j === k ? "chosen" : "dimmed");
+    const e = btn.querySelector(".opt-e");
+    if (e) e.classList.add("shown");
+  });
+}
+
 function choose(k) {
   if (S.locked) return;
   S.locked = true;
@@ -907,10 +991,7 @@ function choose(k) {
   if (o.risk) S.rolls[o.risk.key] = chance(o.risk.p);
   if (st.id === "t3" && around()) S.rolls.scan = chance(0.15);
 
-  Array.from($("opts").children).forEach((btn, j) => {
-    btn.disabled = true;
-    btn.classList.add(j === k ? "chosen" : "dimmed");
-  });
+  revealConsequences(k);
 
   let fb = o.fb;
   if (o.fbIf && o.fbIf.around && around()) fb += o.fbIf.around;
@@ -921,7 +1002,6 @@ function choose(k) {
        <div class="feedback-verdict">${o.verdict}</div>
        <div class="feedback-body">${fb}</div>
        ${relocate}
-       ${st.aside ? `<div class="aside">${st.aside}</div>` : ""}
        <div id="bridge-slot"></div>
      </div>`;
   wireTerms($("feedback-slot"));
@@ -1082,9 +1162,6 @@ const PAYOFF_OPTS = [
   }
 ];
 
-const PAYOFF_ASIDE =
-  "Worth keeping apart. That a submission must show substantial equivalence, and that validation must show the finished device meets real users' needs, are requirements. That most such submissions clear without a clinical trial is how it usually goes, not a rule — clinical evidence turns up where the claim is clinical or the departure from the predicate is large. Months of correspondence with a reviewer are compressed here into one screen and at most one roll.";
-
 function fundLocked() { return S.bud < 35; }
 
 function renderPayoffOptions() {
@@ -1119,10 +1196,7 @@ function choosePayoff(k) {
   applyMeters(o.m);
   updateMeters();
 
-  Array.from($("opts").children).forEach((btn, j) => {
-    btn.disabled = true;
-    if (!btn.classList.contains("locked")) btn.classList.add(j === k ? "chosen" : "dimmed");
-  });
+  revealConsequences(k);
 
   if (k === 2) { renderHopeRoll(); return; }
 
@@ -1133,7 +1207,6 @@ function choosePayoff(k) {
     `<div class="card feedback-card ${k === 0 ? "" : "warn"}">
        <div class="feedback-verdict">${o.verdict}</div>
        <div class="feedback-body">${fb}</div>
-       <div class="aside">${PAYOFF_ASIDE}</div>
        <div id="bridge-slot"></div>
      </div>`;
   wireTerms($("feedback-slot"));
@@ -1179,8 +1252,7 @@ function renderHopeRoll() {
              ? "This worked, and the odds were against you. A good outcome from a poor decision is dangerous for a young company, because it teaches the wrong lesson."
              : "The months you saved by not doing the work are being spent anyway, with less money and less goodwill."}</p>
          </div>
-         <div class="aside">${PAYOFF_ASIDE}</div>
-         <div id="bridge-slot"></div>`;
+           <div id="bridge-slot"></div>`;
       wireTerms($("feedback-slot"));
       runBeats($("bridge-slot"), [stalled() ? STALL_BRIDGE : LAUNCH_BRIDGE], "Continue &rarr;", afterPayoff);
     }, 1250);
@@ -1244,9 +1316,6 @@ const POST_OPTS = [
   }
 ];
 
-const POST_ASIDE =
-  "Investigating complaints and correcting what needs correcting is a requirement, not a courtesy — in the US those duties sit in the quality system regulation that took effect in February 2026, which brings the international quality management standard in by reference. A real complaint system is a standing process with records and trending. Here, three emails stand in for all of it.";
-
 function renderPostmarket() {
   showScreen("screen-play");
   clearDeltas();
@@ -1277,6 +1346,36 @@ function showComplaints() {
   div.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+/* The third appearance of the strip: the case behind complaint 1063, shown
+   only after the choice is locked so it can't hint at which one is real. */
+function fieldStrip() {
+  if (S.rolls.use) {
+    return caseStrip({
+      title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+      segs: [[29, true], [13, false], [42, true]],
+      notes: ["The pause ran <b>13 minutes</b>. Over ten, so the device started counting again from zero."],
+      rows: [
+        { l: "Time the leg spent with no blood flow", v: "71 min", k: "actual" },
+        { l: "What the display read when they closed", v: "42 min", k: "shown" }
+      ],
+      caption: "The nurse's note said 71. The screen said 42. Both were honest, and the device met every specification you wrote for it."
+    });
+  }
+  if (S.rolls.scan) {
+    return caseStrip({
+      title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+      segs: [[66, true]],
+      notes: ["Nobody scanned the patient in, so no case was ever open for the device to count against."],
+      rows: [
+        { l: "Time the leg spent with no blood flow", v: "66 min", k: "actual" },
+        { l: "What the display read the whole time", v: "nothing", k: "shown" }
+      ],
+      caption: "A blank screen is easy to walk past. This is the failure you moved the risk to when you designed around the patent."
+    });
+  }
+  return "";
+}
+
 function choosePost(k) {
   if (S.locked) return;
   S.locked = true;
@@ -1287,9 +1386,7 @@ function choosePost(k) {
   applyMeters(m);
   updateMeters();
 
-  Array.from($("opts").children).forEach((btn, j) => {
-    btn.disabled = true; btn.classList.add(j === k ? "chosen" : "dimmed");
-  });
+  revealConsequences(k);
 
   const sig = anySignal();
   let verdict, fb, kind;
@@ -1325,7 +1422,7 @@ function choosePost(k) {
     `<div class="card feedback-card ${kind}">
        <div class="feedback-verdict">${verdict}</div>
        <div class="feedback-body">${fb}</div>
-       <div class="aside">${POST_ASIDE}</div>
+       ${fieldStrip()}
        <div id="post-end"></div>
      </div>`;
   wireTerms($("feedback-slot"));
