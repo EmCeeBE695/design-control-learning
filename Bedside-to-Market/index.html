@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downstream — Bedside to Market</title>
+<style>
+/* ==================== DESIGN TOKENS ==================== */
+:root, [data-theme="light"] {
+  --color-bg: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-offset: #f1f5f9;
+  --color-surface-dynamic: #e2e8f0;
+  --color-divider: #e2e8f0;
+  --color-border: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+  --color-text-inverse: #ffffff;
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-highlight: #f0fdfa;
+  --color-warning: #964219;
+  --color-warning-highlight: #ddcfc6;
+  --color-error: #a12c7b;
+  --color-error-highlight: #e0ced7;
+  --color-success: #437a22;
+  --color-success-highlight: #d4dfcc;
+  --color-orange: #da7101;
+  --color-gold: #d19900;
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;
+  --space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0f1112;
+  --color-surface: #161a1c;
+  --color-surface-2: #1c2124;
+  --color-surface-offset: #1a1e21;
+  --color-surface-dynamic: #252c30;
+  --color-divider: #232a2e;
+  --color-border: #2e3740;
+  --color-text: #d0d8de;
+  --color-text-muted: #7a8892;
+  --color-text-faint: #4a5560;
+  --color-text-inverse: #0f1112;
+  --color-primary: #4fb8c0;
+  --color-primary-hover: #2fa0a9;
+  --color-primary-highlight: #1d3538;
+  --color-warning: #e08040;
+  --color-warning-highlight: #3a2a1e;
+  --color-error: #d468b5;
+  --color-error-highlight: #3a1e30;
+  --color-success: #72bb50;
+  --color-success-highlight: #1e2e18;
+  --color-orange: #f5a040;
+  --color-gold: #e8c050;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.5);
+}
+
+/* ==================== BASE ==================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+img,canvas,svg{display:block;max-width:100%;height:auto}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition)}
+
+/* ==================== LAYOUT ==================== */
+.app-shell{display:grid;grid-template-rows:56px 1fr;min-height:100dvh}
+.topbar{display:flex;align-items:center;gap:var(--space-4);padding:0 var(--space-6);background:var(--color-surface);border-bottom:1px solid var(--color-border);position:sticky;top:0;z-index:50}
+.topbar-logo{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:var(--color-text)}
+.topbar-logo svg{flex-shrink:0}
+.logo-text{display:block;font-size:var(--text-sm);font-weight:600;letter-spacing:-0.01em}
+.logo-sub{display:block;font-size:var(--text-xs);color:var(--color-text-muted);font-weight:400}
+.topbar-spacer{flex:1}
+.topbar-badge{font-size:var(--text-xs);padding:var(--space-1) var(--space-3);background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-full);font-weight:600;white-space:nowrap}
+.theme-toggle{padding:var(--space-2);border-radius:var(--radius-md);color:var(--color-text-muted)}
+.theme-toggle:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+
+.panel{overflow-y:auto;padding:var(--space-6)}
+.container{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:var(--space-5)}
+
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap}
+.page-title{font-size:var(--text-xl);font-weight:700;letter-spacing:-0.02em;line-height:1.1;color:var(--color-text)}
+.page-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-1)}
+
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.card-title{font-size:var(--text-sm);font-weight:700;color:var(--color-text);text-transform:uppercase;letter-spacing:0.06em}
+.card-hint{font-size:var(--text-xs);color:var(--color-text-muted)}
+.stack{display:flex;flex-direction:column;gap:var(--space-5)}
+
+/* ==================== METERS (in the fixed topbar) ==================== */
+.topmeters{display:flex;gap:var(--space-5);align-items:center}
+.tm{display:flex;flex-direction:column;gap:3px;min-width:70px}
+.tm-l{font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-faint);line-height:1}
+.tm-v{font-size:.76rem;font-weight:700;line-height:1.1;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.tm-arrow{font-size:.62rem;opacity:0;transition:opacity var(--transition)}
+.tm-arrow.on{opacity:1}
+.tm-bar{height:3px;border-radius:2px;background:var(--color-surface-dynamic);overflow:hidden}
+.tm-fill{height:100%;border-radius:2px;width:0;transition:width 560ms cubic-bezier(0.16,1,0.3,1),background 300ms}
+
+/* ==================== STAGE ==================== */
+.stage-kicker{font-size:var(--text-xs);font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--color-primary)}
+.stage-name{font-size:var(--text-lg);font-weight:700;letter-spacing:-0.015em;line-height:1.2;margin-top:2px}
+.situation{font-size:var(--text-sm);line-height:1.7;margin-top:var(--space-3);color:var(--color-text)}
+.situation p+p{margin-top:var(--space-3)}
+.question{font-size:var(--text-sm);font-weight:700;margin-top:var(--space-4)}
+
+.progress-dots{display:flex;gap:6px;align-items:center}
+.pdot{width:9px;height:9px;border-radius:50%;background:var(--color-surface-dynamic)}
+.pdot.done{background:var(--color-primary)}
+.pdot.now{background:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-highlight)}
+
+/* ==================== OPTIONS ==================== */
+.opts{display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-4)}
+.opt{
+  display:flex;gap:var(--space-4);width:100%;text-align:left;
+  border:1.5px solid var(--color-border);border-radius:var(--radius-lg);
+  background:var(--color-surface);padding:var(--space-4);align-items:flex-start;
+}
+.opt:hover:not(:disabled),.opt:focus-visible{border-color:var(--color-primary);background:var(--color-surface-2);outline:none;transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.opt:disabled{cursor:not-allowed}
+.opt.chosen{border-color:var(--color-primary);background:var(--color-primary-highlight);border-width:2px}
+.opt.dimmed{opacity:.42}
+.opt.locked{opacity:.55;background:var(--color-surface-2);border-style:dashed}
+.opt-num{
+  flex-shrink:0;width:30px;height:30px;border-radius:var(--radius-md);
+  background:var(--color-surface-dynamic);color:var(--color-text-muted);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--text-sm);
+  font-family:var(--font-mono);
+}
+.opt.chosen .opt-num{background:var(--color-primary);color:var(--color-text-inverse)}
+.opt-body{display:block;flex:1;min-width:0}
+.opt-t{display:block;font-size:var(--text-base);font-weight:700;letter-spacing:-0.01em;line-height:1.35}
+.opt-d{display:block;font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6;margin-top:var(--space-2)}
+/* Consequence line: hidden until a choice is locked in, so nobody plays
+   "spot the green one" instead of thinking about the decision. */
+.opt-e{display:none;font-size:var(--text-xs);font-weight:700;margin-top:var(--space-2);color:var(--color-primary)}
+.opt-e.shown{display:block;animation:fadeIn .3s ease}
+.opt-e.warn{color:var(--color-orange)}
+.opt-e.risk{color:var(--color-error)}
+.opt-lock{display:block;font-size:var(--text-xs);font-weight:700;color:var(--color-error);margin-top:var(--space-2)}
+
+/* ==================== FEEDBACK ==================== */
+.feedback-card{border-left:4px solid var(--color-primary);margin-top:var(--space-4)}
+.feedback-card.warn{border-left-color:var(--color-orange)}
+.feedback-card.risk{border-left-color:var(--color-error)}
+.feedback-verdict{font-size:var(--text-base);font-weight:700;margin-bottom:var(--space-2);color:var(--color-primary);line-height:1.35}
+.feedback-card.warn .feedback-verdict{color:var(--color-orange)}
+.feedback-card.risk .feedback-verdict{color:var(--color-error)}
+.feedback-body{font-size:var(--text-sm);color:var(--color-text);line-height:1.7}
+.feedback-body p+p{margin-top:var(--space-3)}
+
+/* Closing note on what the simulation compressed */
+.aside{
+  margin-top:var(--space-4);padding:var(--space-3) var(--space-4);
+  border-left:3px solid var(--color-border);background:var(--color-surface-2);
+  border-radius:0 var(--radius-md) var(--radius-md) 0;
+  font-size:var(--text-xs);line-height:1.7;color:var(--color-text-muted);
+}
+.aside b{color:var(--color-text);font-weight:650}
+.aside p+p{margin-top:var(--space-2)}
+
+/* ==================== CASE STRIP ====================
+   One case drawn to scale: solid blocks are minutes with the cuff inflated,
+   dashed gaps are minutes with it down. Reused in months 1, 6 and 14. */
+.strip{margin-top:var(--space-4);border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.strip-title{font-size:var(--text-xs);font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+.strip-legend{display:flex;gap:var(--space-5);flex-wrap:wrap;font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3)}
+.strip-key{display:inline-flex;align-items:flex-start;gap:6px;line-height:1.5}
+.strip-swatch{width:17px;height:12px;border-radius:3px;flex-shrink:0;margin-top:4px}
+.strip-swatch.up{background:var(--color-primary)}
+.strip-swatch.down{border:1.5px dashed var(--color-border);background:transparent}
+.strip-bar{display:flex;gap:3px;align-items:stretch;height:46px}
+.strip-seg{min-width:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700;overflow:hidden}
+.strip-seg.up{background:var(--color-primary);color:var(--color-text-inverse)}
+.strip-seg.down{border:1.5px dashed var(--color-border);color:var(--color-text-faint);background:transparent}
+.strip-barwrap{position:relative;padding-top:20px}
+.strip-mark{position:absolute;top:0;bottom:0;width:2px;background:var(--color-error);z-index:2}
+.strip-mark::after{content:"";position:absolute;bottom:-4px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--color-error)}
+.strip-mark-l{position:absolute;top:0;left:6px;font-size:.62rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--color-error);white-space:nowrap}
+.strip-mark.right .strip-mark-l{left:auto;right:6px}
+.strip-notes{margin-top:var(--space-3);display:flex;flex-direction:column;gap:var(--space-1)}
+.strip-note{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6;padding-left:var(--space-4);position:relative}
+.strip-note::before{content:"↑";position:absolute;left:0;color:var(--color-text-faint)}
+.strip-rows{margin-top:var(--space-4);display:flex;flex-direction:column;gap:var(--space-2)}
+.strip-row{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-3);font-size:var(--text-sm);line-height:1.5}
+.strip-row+.strip-row{border-top:1px dotted var(--color-border);padding-top:var(--space-2)}
+.strip-row-v{font-family:var(--font-mono);font-weight:700;white-space:nowrap;font-size:var(--text-base)}
+.strip-row.actual .strip-row-v{color:var(--color-primary)}
+.strip-row.shown .strip-row-v{color:var(--color-orange)}
+.strip-caption{font-size:var(--text-sm);line-height:1.7;margin-top:var(--space-4)}
+
+/* Beats — one block of story revealed at a time */
+.beat{animation:fadeIn .34s ease}
+.beat+.beat{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--color-divider)}
+.beat p{font-size:var(--text-sm);line-height:1.75}
+.beat p+p{margin-top:var(--space-3)}
+.beat-lead{font-size:var(--text-base);font-weight:650;line-height:1.5}
+
+.relocate{
+  margin-top:var(--space-4);padding:var(--space-3) var(--space-4);
+  border:1.5px dashed var(--color-orange);border-radius:var(--radius-lg);
+  font-size:var(--text-sm);line-height:1.65;
+}
+.relocate b{color:var(--color-orange)}
+
+/* ==================== TERMS / TOOLTIP ==================== */
+.term{
+  border:none;border-bottom:1.5px dotted var(--color-primary);color:inherit;
+  padding:0;font:inherit;cursor:help;
+}
+.term:hover,.term:focus-visible{background:var(--color-primary-highlight);outline:none}
+.term::after{content:"?";font-size:.62em;vertical-align:super;color:var(--color-primary);font-weight:700;margin-left:1px}
+#tip{
+  position:fixed;z-index:200;max-width:330px;background:var(--color-surface);
+  border:1.5px solid var(--color-primary);border-radius:var(--radius-lg);
+  padding:var(--space-3) var(--space-4);box-shadow:var(--shadow-lg);
+  font-size:var(--text-xs);line-height:1.6;color:var(--color-text);display:none;
+}
+#tip.show{display:block;animation:fadeIn .16s ease}
+#tip .tip-t{font-weight:700;margin-bottom:3px;color:var(--color-primary)}
+
+/* ==================== ROLL ==================== */
+.roll-card{border:2px dashed var(--color-gold);background:transparent}
+.roll-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap}
+.roll-tag{font-size:var(--text-xs);font-weight:800;letter-spacing:.12em;color:var(--color-gold);border:1.5px solid var(--color-gold);border-radius:var(--radius-full);padding:1px 11px}
+.roll-title{font-size:var(--text-sm);font-weight:700}
+.roll-odds{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-top:var(--space-4)}
+.odd{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4);background:var(--color-surface-2)}
+.odd-p{font-size:var(--text-lg);font-weight:700;font-family:var(--font-mono);line-height:1.1}
+.odd-t{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin-top:var(--space-1)}
+.odd.hit{border-color:var(--color-gold);border-width:2.5px;background:var(--color-surface)}
+.odd.miss{opacity:.35}
+.die{
+  width:74px;height:74px;border-radius:var(--radius-lg);border:2.5px solid var(--color-gold);
+  display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;
+  font-family:var(--font-mono);color:var(--color-gold);margin:var(--space-4) auto var(--space-2);
+  background:var(--color-surface);
+}
+.die.spin{animation:shake .5s ease infinite}
+@keyframes shake{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+.roll-result{text-align:center;font-size:var(--text-sm);font-weight:700;margin-top:var(--space-2);line-height:1.5}
+
+/* ==================== COMPLAINTS ==================== */
+.owed{border:1.5px solid var(--color-primary);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-primary-highlight)}
+.owed-h{font-size:var(--text-xs);font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-primary);margin-bottom:var(--space-2)}
+/* Block, not flex: inline <b> and tooltip buttons must stay in the text flow. */
+.owed-l{font-size:var(--text-sm);line-height:1.65;margin-top:var(--space-3);position:relative;padding-left:var(--space-5)}
+.owed-l::before{content:"▸";position:absolute;left:0;top:0;color:var(--color-primary);font-weight:700}
+.owed.warn{border-color:var(--color-orange);background:transparent}
+.owed.warn .owed-h{color:var(--color-orange)}
+.owed.warn .owed-l::before{color:var(--color-orange)}
+
+.cmp-list{display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-4)}
+.cmp{border:1.5px solid var(--color-border);border-left-width:4px;border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4);background:var(--color-surface-2)}
+.cmp-h{font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-text-faint);font-weight:600}
+.cmp-q{font-size:var(--text-sm);line-height:1.6;margin-top:var(--space-1);font-style:italic}
+
+/* ==================== OUTCOME ==================== */
+.outcome-hero{text-align:center;padding:var(--space-6) var(--space-4) var(--space-5)}
+.outcome-eyebrow{font-size:var(--text-xs);font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--color-text-muted)}
+.outcome-title{font-size:var(--text-xl);font-weight:750;letter-spacing:-0.025em;line-height:1.1;margin-top:var(--space-2)}
+.outcome-title.good{color:var(--color-primary)}
+.outcome-title.mixed{color:var(--color-orange)}
+.outcome-title.bad{color:var(--color-error)}
+.outcome-body{font-size:var(--text-sm);line-height:1.75;margin-top:var(--space-4);text-align:left;max-width:64ch;margin-left:auto;margin-right:auto}
+.outcome-body p+p{margin-top:var(--space-3)}
+
+.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+.split-box{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.split-box.luck{border-color:var(--color-gold)}
+.split-box.you{border-color:var(--color-error)}
+.split-h{font-size:var(--text-xs);font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:var(--space-3)}
+.split-box.luck .split-h{color:var(--color-gold)}
+.split-box.you .split-h{color:var(--color-error)}
+.split-i{font-size:var(--text-sm);line-height:1.6;padding-left:var(--space-4);position:relative;margin-top:var(--space-2)}
+.split-i::before{content:"—";position:absolute;left:0;color:var(--color-text-faint)}
+.split-empty{font-size:var(--text-sm);color:var(--color-text-muted);font-style:italic}
+
+/* Timeline */
+.tl{position:relative;padding-left:var(--space-6);margin-top:var(--space-4)}
+.tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--color-divider)}
+.tl-item{position:relative;padding-bottom:var(--space-5)}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{
+  content:"";position:absolute;left:calc(-1 * var(--space-6) + 1px);top:5px;
+  width:14px;height:14px;border-radius:50%;background:var(--color-surface);
+  border:2.5px solid var(--color-primary);
+}
+.tl-item.fired::before{border-color:var(--color-error);background:var(--color-error-highlight)}
+.tl-month{font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-text-faint);font-weight:600}
+.tl-what{font-size:var(--text-sm);font-weight:700;line-height:1.4;margin-top:1px}
+.tl-cause{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6;margin-top:var(--space-1)}
+.tl-cause .arrow{color:var(--color-error);font-weight:700}
+details.nt{margin-top:var(--space-2)}
+details.nt summary{
+  font-size:var(--text-xs);font-weight:700;color:var(--color-primary);cursor:pointer;
+  list-style:none;display:inline-flex;align-items:center;gap:5px;padding:2px 0;
+}
+details.nt summary::-webkit-details-marker{display:none}
+details.nt summary::before{content:"▸";transition:transform var(--transition)}
+details.nt[open] summary::before{transform:rotate(90deg)}
+.nt-body{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.65;margin-top:var(--space-2);padding-left:var(--space-4);border-left:2px solid var(--color-divider)}
+.nt-body div+div{margin-top:var(--space-2)}
+
+/* ==================== BUTTONS ==================== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-3) var(--space-6);background:var(--color-primary);color:var(--color-text-inverse);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:600;min-height:46px}
+.btn:hover:not(:disabled){background:var(--color-primary-hover)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.secondary{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn.secondary:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.btn.gold{background:var(--color-gold);color:#fff}
+.btn.gold:hover:not(:disabled){filter:brightness(.92)}
+.btn-row{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-5)}
+.kbd-hint{font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-3)}
+kbd{font-family:var(--font-mono);font-size:.85em;border:1px solid var(--color-border);border-bottom-width:2px;border-radius:var(--radius-sm);padding:0 5px;background:var(--color-surface-2)}
+.footnote{font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.7}
+
+.fiction{border:1.5px solid var(--color-orange);border-radius:var(--radius-lg);padding:var(--space-4);background:transparent}
+.fiction-h{font-size:var(--text-xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--color-orange);margin-bottom:var(--space-2)}
+.fiction-b{font-size:var(--text-sm);line-height:1.7}
+
+.howto{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)}
+.howto-i{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);background:var(--color-surface-2)}
+.howto-n{font-size:var(--text-xs);font-family:var(--font-mono);font-weight:700;color:var(--color-primary);text-transform:uppercase;letter-spacing:.08em}
+.howto-t{font-size:var(--text-sm);font-weight:700;margin-top:var(--space-1)}
+.howto-d{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6;margin-top:var(--space-2)}
+
+/* ==================== RESPONSIVE ==================== */
+@media(max-width:760px){
+  .panel{padding:var(--space-4)}
+  .container{gap:var(--space-4)}
+  .roll-odds,.split-grid,.howto{grid-template-columns:1fr}
+  .logo-sub{display:none}
+  .topbar{padding:0 var(--space-3);gap:var(--space-2)}
+  .topbar-badge{display:none}
+  .topmeters{gap:var(--space-3)}
+  .tm{min-width:52px}
+  .tm-l{font-size:.52rem;letter-spacing:.05em}
+  .tm-v{font-size:.66rem}
+  .opt{padding:var(--space-3);gap:var(--space-3)}
+  .kbd-hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <header class="topbar">
+    <a class="topbar-logo" href="#" onclick="goHome(event)">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Downstream logo">
+        <rect width="28" height="28" rx="7" fill="var(--color-primary)" opacity="0.15"/>
+        <path d="M14 5v13" stroke="var(--color-primary)" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M9.5 13.5L14 18.5l4.5-5" stroke="var(--color-orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6 22h16" stroke="var(--color-primary)" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <span>
+        <span class="logo-text">Downstream</span>
+        <span class="logo-sub">Bedside to Market · a device decision simulation</span>
+      </span>
+    </a>
+    <div class="topbar-spacer"></div>
+    <div class="topmeters" id="meters"></div>
+    <span class="topbar-badge" id="badge">Fictional case</span>
+    <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <main class="panel">
+    <div class="container">
+
+      <!-- ============ INTRO ============ -->
+      <section class="screen active" id="screen-intro">
+        <div class="stack">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Downstream</div>
+              <div class="page-subtitle">One fictional device, from a bedside observation to its first complaint. Six decisions, about fifteen minutes.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="feedback-body">
+              <p>Every decision here is a bet placed with incomplete information, and the cost almost never lands on the screen where you made it. A choice made for legal reasons creates a testing obligation. A choice made for speed creates a use risk.</p>
+            </div>
+          </div>
+
+          <div class="fiction">
+            <div class="fiction-h">This case is invented</div>
+            <div class="fiction-b">The company, device, competitor, clinicians and events are fictional, though modelled on how device development typically goes. Every number in the story — months, odds, complaint counts — is part of the fiction, not real-world data.</div>
+          </div>
+
+          <div class="card">
+            <div class="howto">
+              <div class="howto-i">
+                <div class="howto-n">Three meters</div>
+                <div class="howto-t">Schedule, budget, patient risk</div>
+                <div class="howto-d">In words, not numbers. They move only when you decide something.</div>
+              </div>
+              <div class="howto-i">
+                <div class="howto-n">Three dice</div>
+                <div class="howto-t">Odds shown before you commit</div>
+                <div class="howto-d">A good decision can still turn out badly.</div>
+              </div>
+              <div class="howto-i">
+                <div class="howto-n">One timeline</div>
+                <div class="howto-t">Every effect traced to its cause</div>
+                <div class="howto-d">Including the roads you didn't take.</div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="startGame()">Start &rarr;</button>
+            </div>
+            <div class="kbd-hint">The story arrives a piece at a time — press <kbd>Enter</kbd> to continue, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to choose.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PLAY ============ -->
+      <section class="screen" id="screen-play">
+        <div class="stack">
+          <div class="card" id="stage-card"></div>
+          <div id="feedback-slot"></div>
+        </div>
+      </section>
+
+      <!-- ============ OUTCOME ============ -->
+      <section class="screen" id="screen-outcome">
+        <div class="stack" id="outcome-slot"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+"use strict";
+
+/* ==================== GLOSSARY ==================== */
+const TERMS = {
+  predicate: ["Predicate device", "A device already legally on the US market that you compare yours to. The comparison is the backbone of a 510(k)."],
+  se: ["Substantial equivalence", "The argument that your device is as safe and effective as a predicate: same intended use, and technology that either matches or differs without raising different questions of safety and effectiveness."],
+  k510: ["510(k)", "The most common US pathway for moderate-risk devices. You show substantial equivalence to a predicate rather than proving safety and effectiveness from scratch."],
+  denovo: ["De Novo", "A route for a low-to-moderate-risk device type with no suitable predicate. It creates a new classification and asks for more evidence and time than a 510(k)."],
+  verification: ["Verification", "Testing that the device you built meets the specifications you wrote. Did we build it right?"],
+  validation: ["Design validation", "Evidence that the finished device meets user needs in the hands of actual users — usually simulated use and human factors work, not a clinical trial."],
+  hf: ["Human factors testing", "Watching representative users operate the device in realistic conditions to find errors the design invites. Not a satisfaction survey."],
+  useerror: ["Use error", "A mistake made while the device works exactly as designed. The device didn't fail; the design let a person get the wrong result."],
+  indication: ["Intended use", "What the device is for, in the manufacturer's own words. Change it and you change what you have to prove."],
+  trend: ["Complaint trend", "A pattern across complaints pointing at one underlying cause, as opposed to unrelated one-off reports. Finding it is the job."],
+  ftop: ["Patent search", "Also called a freedom-to-operate search: looking through published patents before committing to a design, to find out whether building it that way would infringe someone else's."],
+  ischemia: ["Ischemia", "Tissue deprived of its blood supply, and therefore of oxygen. Muscle and nerve tolerate it for a limited time before injury begins."],
+  revision: ["Revision surgery", "Replacing an implant that has already been in the patient — here, a knee replacement that has loosened. Slower and more technically demanding than the original operation."],
+  tourniquet: ["Pneumatic tourniquet", "An inflatable cuff placed around a limb and pumped to a pressure high enough to stop arterial blood flow, so the surgical field stays clear of blood."]
+};
+
+/* ==================== CASE STRIP ====================
+   Draws one case to scale. segs are [minutes, cuffIsUp] pairs; rows are the
+   totals printed underneath. Used three times, so students learn to read it
+   once and then recognise it. */
+/* Where a given number of CUFF-UP minutes falls along the elapsed bar. */
+function markAt(segs, upMinutes) {
+  const total = segs.reduce((a, s) => a + s[0], 0);
+  let up = 0, elapsed = 0;
+  for (const [min, isUp] of segs) {
+    if (isUp && up + min >= upMinutes) return ((elapsed + (upMinutes - up)) / total) * 100;
+    if (isUp) up += min;
+    elapsed += min;
+  }
+  return 100;
+}
+
+function caseStrip(o) {
+  const total = o.segs.reduce((a, s) => a + s[0], 0);
+  const bar = o.segs.map(([min, up]) =>
+    `<div class="strip-seg ${up ? "up" : "down"}" style="flex:${min} 1 0" aria-label="${min} minutes cuff ${up ? "up" : "down"}">${min}</div>`
+  ).join("");
+  return `<div class="strip">
+    ${o.title ? `<div class="strip-title">${o.title}</div>` : ""}
+    <div class="strip-legend">
+      <span class="strip-key"><span class="strip-swatch up"></span>cuff <b>up</b> — inflated, blood flow stopped</span>
+      <span class="strip-key"><span class="strip-swatch down"></span>cuff <b>down</b> — deflated, blood flowing again</span>
+    </div>
+    <div class="strip-barwrap">
+      <div class="strip-bar">${bar}</div>
+      ${o.mark ? (() => { const x = markAt(o.segs, o.mark.at);
+        return `<div class="strip-mark${x > 62 ? " right" : ""}" style="left:${x}%"><span class="strip-mark-l">${o.mark.label}</span></div>`; })() : ""}
+    </div>
+    ${o.notes ? `<div class="strip-notes">${o.notes.map((n) => `<div class="strip-note">${n}</div>`).join("")}</div>` : ""}
+    <div class="strip-rows">
+      ${o.rows.map((r) => `<div class="strip-row ${r.k || ""}"><span>${r.l}</span><span class="strip-row-v">${r.v}</span></div>`).join("")}
+    </div>
+  </div>${o.caption ? `<div class="strip-caption">${o.caption}</div>` : ""}`;
+}
+
+/* Dr. Okonjo's case: 85 minutes end to end, 68 of them under pressure. */
+const CASE_SEGS = [[32, true], [6, false], [14, true], [11, false], [22, true]];
+
+/* ==================== STAGES ==================== */
+/* Each stage is a list of beats revealed one at a time, then a decision. */
+
+const STAGES = [
+  {
+    id: "setup",
+    kicker: "Month 1",
+    name: "From observation to need",
+    beats: [
+      "<p class='beat-lead'>Granite Bay Regional, Tuesday morning.</p>" +
+      "<p>Dr. Nadia Okonjo is doing a <span class='T' data-t='revision'>revision</span> knee replacement. The implant that went in eleven years ago has loosened, and it has to come out before a new one goes in. Revisions are slower and fussier than first-time replacements: old components have to be worked free without wrecking the bone around them, and none of that is possible if the surgeon can't see what they are touching.</p>",
+
+      "<p>So the team uses a <span class='T' data-t='tourniquet'>pneumatic tourniquet</span> — an inflatable cuff around the upper thigh, pumped hard enough to stop arterial flow. The field stays clear of blood, and in exchange the leg below the cuff gets no blood supply at all for as long as it stays up.</p>" +
+      "<p>That is the whole trade. Muscle and nerve tolerate <span class='T' data-t='ischemia'>ischemia</span> for a while, and then they stop tolerating it: prolonged tourniquet time is associated with nerve and muscle injury, which is why every surgeon works to a limit and expects the room to know where they are against it.</p>",
+
+      "<p>Today the cuff comes down twice. Once about half an hour in, so the team can confirm the leg is perfusing. Again later, while everyone waits for the right implant tray to arrive from sterile processing. Both times it goes back up.</p>" +
+      "<p>Drawn to scale, the case looks like this.</p>" +
+      caseStrip({
+        title: "Dr. Okonjo's case · 85 minutes, start to finish",
+        segs: CASE_SEGS,
+        rows: [{ l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" }]
+      }) +
+      "<p style='margin-top:var(--space-4)'>At the end the circulating nurse writes a tourniquet time into the record. Reading it that afternoon, Dr. Okonjo cannot tell what the number counted: the last stretch, the longest stretch, or all three added together. Nothing malfunctioned. The cuff held its pressure, the pump held its setting, every person did their job. The total simply was never anywhere.</p>",
+
+      "<p>She calls two engineers she trained with. They incorporate as Fernwall Surgical and spend three weeks standing in operating rooms, watching.</p>" +
+      "<p>Now they have to write down what they are solving. It is one sentence, and every decision in the next two years will be built on top of it.</p>"
+    ],
+    revealLabel: "Write the need statement",
+    question: "Which need statement does the team carry forward?",
+    options: [
+      {
+        t: "Build an automatic tourniquet timer with alarms",
+        d: "Concrete, and everyone agrees immediately. The team can start designing on Monday.",
+        e: "Fast start · the solution is already chosen", eClass: "risk",
+        m: { sch: 0, bud: -3, risk: 3 },
+        fbKind: "risk",
+        verdict: "You skipped the question and wrote down an answer.",
+        fb: "<p>The solution sits inside the sentence, so the team stops asking what that room needs to know and starts asking how to build a timer. You have also promised investors an alarm, which will make the simple option expensive later.</p>",
+        nt: "Naming the device in the need statement closes the design space before anyone has understood the problem."
+      },
+      {
+        t: "Surgical teams in limb procedures need to know cumulative tourniquet time at any point in a case, so they can act before it passes the surgeon's limit",
+        d: "A problem, a population, an outcome you could measure. No device in the sentence.",
+        e: "Three weeks slower · a clean intended use", eClass: "",
+        m: { sch: 4, bud: -4, risk: 0 },
+        fbKind: "good",
+        verdict: "This is the sentence that survives contact with a regulator.",
+        fb: "<p>Who, what they need to know, and no solution. Two years from now, when somebody asks what your device is for, you can answer without contradicting your own founding document.</p>",
+        nt: "Problem, population and outcome keeps the design space open and gives you a clean <span class='T' data-t='indication'>intended use</span> to build on."
+      },
+      {
+        t: "Reduce tourniquet-related nerve injuries",
+        d: "Ambitious, fundable, and exactly the sentence that ends up on slide three of the pitch deck.",
+        e: "A great story · an outcome you cannot measure", eClass: "risk",
+        m: { sch: 0, bud: -3, risk: 2 },
+        fbKind: "risk",
+        verdict: "You just wrote your marketing claim into your need statement.",
+        fb: "<p>Injury reduction is a clinical outcome. Claiming it means proving it, which is a far larger evidence problem than showing a timer is accurate. Your investors are attached to this sentence now, and they will quote it back when you try to narrow the claim.</p>",
+        nt: "An outcome claim in the need statement quietly sets the evidence bar you must clear at submission."
+      }
+    ],
+  },
+
+  {
+    id: "t1",
+    kicker: "Month 2",
+    name: "Intellectual property versus regulatory",
+    beats: [
+      "<p>Before committing to an architecture, the team runs a <span class='T' data-t='ftop'>patent search</span>. This is ordinary practice and it is done early on purpose: patents are public, and learning in month 2 that somebody already owns your approach is survivable. Learning it in month 30, after tooling and testing, is not.</p>" +
+      "<p>The search comes back with a problem.</p>",
+
+      "<p>Ravelin Orthopaedics holds a patent on the exact step that makes this device work: automatically deciding where one patient's case ends and the next begins.</p>" +
+      "<p>Not the cuff. Not the display. Not the alarm. The <i>inference</i> — a device that watches inflations and deflations and concludes on its own that this is still the same case, or that a new patient is on the table. Build something that infers the case boundary and you are doing the patented thing, whatever else your device also does.</p>",
+
+      "<p>Which is worse than a purely legal nuisance, because that same approach is what every tourniquet system already on the market resembles.</p>" +
+      "<p>Clearing a device in the US usually means arguing that it is close enough to something already being sold — so the nearer you stay to Ravelin's method, the easier that argument becomes and the sharper your legal exposure gets. Move away from the patent and the legal problem shrinks while the regulatory one grows.</p>" +
+      "<p>The two risks point in opposite directions. You have to choose where to stand.</p>"
+    ],
+    revealLabel: "See the options",
+    question: "How does Fernwall handle the patent?",
+    options: [
+      {
+        t: "Design around it",
+        d: "Don't infer. A person scans the patient's wristband to open a case, and every inflation accumulates against that patient until somebody closes it.",
+        e: "Patent risk gone · nothing already on the market works this way", eClass: "warn",
+        m: { sch: 14, bud: -22, risk: -4 },
+        fbKind: "warn",
+        verdict: "You bought your way out of one problem and into another.",
+        fb: "<p>Nobody can accuse you of using Ravelin's method, because you aren't. But your device now works unlike everything already cleared, and a <span class='T' data-t='k510'>510(k)</span> lives or dies on how close you are to a <span class='T' data-t='predicate'>predicate</span>. That gets answered at submission, not today.</p>" +
+            "<p>A larger departure doesn't reliably mean <i>more testing</i>. It means <i>different questions</i> — which can mean more data, or can mean the 510(k) route isn't open to you at all.</p>",
+        nt: "Designing around removes the infringement problem and opens a regulatory one, because the device stops resembling anything already cleared."
+      },
+      {
+        t: "Stay close to the predicate",
+        d: "Build it the conventional way, the way existing tourniquet systems already work, and accept the exposure.",
+        e: "Cleanest regulatory story · infringement risk stays live", eClass: "risk",
+        m: { sch: 2, bud: -6, risk: 2 },
+        fbKind: "risk",
+        verdict: "The regulatory argument almost writes itself. The legal one doesn't.",
+        fb: "<p>Your device looks like devices already on the market, which is exactly what a 510(k) wants. The patent problem hasn't gone anywhere — it simply isn't due yet, and unlike a regulatory question it has no date.</p>",
+        nt: "The cheapest regulatory position available, with the infringement exposure left entirely unresolved."
+      },
+      {
+        t: "License the patent from Ravelin",
+        d: "Pay for the right to use the patented approach. Both problems disappear in one signature.",
+        e: "Both risks gone · most of your cash goes with them", eClass: "warn",
+        m: { sch: 4, bud: -60, risk: -2 },
+        fbKind: "warn",
+        verdict: "The cleanest decision available, and the most expensive one.",
+        fb: "<p>You build the device you wanted and argue substantial equivalence without straining. What you spent is the thing that couples every other decision together: money buys evidence, and evidence is what submission runs on.</p>",
+        nt: "Clears the legal and regulatory path in one move, and spends the budget you'd otherwise have for evidence."
+      }
+    ],
+  },
+
+  {
+    id: "t2",
+    kicker: "Month 4",
+    name: "Speed versus evidence",
+    beats: [
+      "<p>The architecture is settled and the first working units exist. The board wants data to show at the spring investor meeting, and the team has to decide what, exactly, they are going to run their tests on.</p>",
+
+      "<p>Your <span class='T' data-t='verification'>verification</span> plan answers a question that sounds administrative and isn't: which physical units go on the test bench?</p>" +
+      "<p>The units in the lab right now are printed housings, a bench power supply and hand-soldered displays. The units you will eventually sell will come out of injection-moulding tools, with parts a contract manufacturer can actually source at volume, assembled by a process that doesn't exist yet.</p>" +
+      "<p>They are not the same object, and some of the differences are exactly the ones that matter: how loud an alert is once it has to escape a moulded shell, how readable a display is at an angle under theatre lights.</p>"
+    ],
+    revealLabel: "See the options",
+    question: "What do you test?",
+    options: [
+      {
+        t: "Test the lab prototypes now",
+        d: "Printed housings, bench supply, hand-soldered displays. Six weeks to data, and the board gets its numbers on time.",
+        e: "Fast and cheap · 70% something changes in production", eClass: "risk",
+        m: { sch: 2, bud: -5, risk: 6 },
+        risk: { key: "prod", p: 0.70 },
+        fbKind: "risk",
+        verdict: "Your prototype is not your product.",
+        fb: "<p>Every test will pass, and every test will have measured something you aren't going to ship. The failure mode isn't a bad result — it's a good result about the wrong object.</p>",
+        nt: "Fast data, and blindness to everything the production process changes."
+      },
+      {
+        t: "Wait for production-equivalent units",
+        d: "Real tooling, supplier parts, the actual assembly process. Four months and real money before you learn anything.",
+        e: "Nothing surprises you later · the board is unhappy", eClass: "",
+        m: { sch: 16, bud: -20, risk: -6 },
+        risk: { key: "prod", p: 0 },
+        fbKind: "good",
+        verdict: "Slow, expensive, and nothing in production will ambush you.",
+        fb: "<p>Four months to remove a category of surprise entirely. Whether that was worth it depends on what else you needed those months for, which is the honest shape of this decision and why it's hard.</p>",
+        nt: "Months up front to eliminate the failure where the thing you tested isn't the thing you ship."
+      },
+      {
+        t: "Split the plan",
+        d: "Prototypes for functional tests. Production-equivalent units only for the three that could hurt somebody: alert audibility, display legibility, timing accuracy.",
+        e: "Most of the protection · 20% residual surprise", eClass: "warn",
+        m: { sch: 8, bud: -12, risk: -2 },
+        risk: { key: "prod", p: 0.20 },
+        fbKind: "good",
+        verdict: "You asked the better question.",
+        fb: "<p>It was never how much testing. It was which tests need the real product. The ones where a production difference could reach a patient get real units; the rest don't.</p>",
+        nt: "Most of the protection for a fraction of the delay, by spending real units only where a difference could reach a patient."
+      }
+    ],
+  }
+];
+
+/* ==================== MONTH 6, TWO VERSIONS ====================
+   Default is the display-placement question: the number is correct and it is
+   behind the anaesthesia screen. ?mode=advanced swaps in the harder version,
+   where a hidden ten-minute rule makes a correct device produce a wrong room.
+   Both use the same risk key and the same probabilities, so every consequence,
+   ending and probability downstream is untouched. */
+const ADVANCED = /[?&]mode=advanced\b/.test(location.search) || location.hash === "#advanced";
+
+const T3_DISPLAY = {
+  stage: {
+    id: "t3",
+    kicker: "Month 6",
+    name: "Where the number appears",
+    beats: [
+      "<p>Feature freeze is next week. One decision is still open, and nobody has been treating it as a decision: where does the number actually show up?</p>",
+
+      "<p>Think about where everyone is standing. The tourniquet pump lives on a cart at the foot of the bed, past the anaesthesia screen. That is where the controller would naturally go, because that is where the hardware already is.</p>" +
+      "<p>The surgeon is at the knee, gowned and gloved, hands in the field. For the next hour they will not walk anywhere, turn around, or touch anything that isn't sterile. The circulating nurse can see the cart, and is also fetching trays, charting, and answering the door.</p>",
+
+      "<p>Here is Dr. Okonjo's case again, with her own limit marked.</p>" +
+      caseStrip({
+        title: "The same case · the surgeon's limit at 60 minutes of cuff time",
+        segs: CASE_SEGS,
+        mark: { at: 60, label: "limit" },
+        rows: [
+          { l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" },
+          { l: "Her limit reached at", v: "60 min", k: "shown" }
+        ],
+        caption: "At that mark something has to happen, and someone has to decide it. Whichever option you pick, the device will know. The question is who finds out."
+      })
+    ],
+    beatsIf: {
+      around: "<p><b>Worth noticing:</b> designing around the patent already put a scanner on a bracket at the patient's side, so there is a mount by the field that somebody has already paid to tool.</p>"
+    },
+    revealLabel: "See the options",
+    question: "Where does the display go?",
+    options: [
+      {
+        t: "On the pump cart",
+        d: "Use the screen that is already part of the tourniquet hardware. No new parts, no new tooling, nothing extra to test or manufacture.",
+        e: "75% the number doesn't reach anyone in time", eClass: "risk",
+        m: { sch: 2, bud: -5, risk: 14 },
+        risk: { key: "use", p: 0.75 },
+        fbKind: "risk",
+        verdict: "The number will be correct, and it will be behind the drape.",
+        fb: "<p>Information that exists but never reaches the person who has to act on it is not information. The surgeon cannot leave the field to read it. The circulator can, and is doing four other things. A <span class='T' data-t='useerror'>use error</span> is what happens when a device works exactly as designed and a person still gets the wrong result — and a screen nobody is positioned to read is one of the most ordinary ways to produce one.</p>",
+        nt: "Cheapest to build, and it puts the number where the person who must act on it cannot see it."
+      },
+      {
+        t: "Add a second display in the surgeon's sightline",
+        d: "A small repeater screen on a boom arm, positioned where the surgeon already looks. Another part, another supplier, more tooling and more testing.",
+        e: "5% residual · the number is where the decision is", eClass: "",
+        eIf: { around: "Nearly free — the bracket by the field is already tooled", aroundClass: "" },
+        mIf: { around: { sch: 5, bud: -7, risk: -8 } },
+        m: { sch: 10, bud: -14, risk: -8 },
+        risk: { key: "use", p: 0.05 },
+        fbKind: "good",
+        verdict: "You put the number where the decision gets made.",
+        fb: "<p>It costs a part, a supplier and a tooling cycle, and it means the person who has to call for the cuff to come down can see the number without asking anyone.</p>",
+        fbIf: {
+          around: "<p>And it cost you far less than it would have cost anyone else, because the mount you designed for the wristband scanner in month 2 carries this too. A decision taken for legal reasons made the safer design affordable.</p>"
+        },
+        nt: "Expensive in parts and tooling, and it puts the number in the sightline of the person who must act."
+      },
+      {
+        t: "Cart display plus an audible callout",
+        d: "Keep the single screen, and have the device speak up at the limit and every five minutes after. Cheaper than a second display, and it does not need anyone to be looking.",
+        e: "25% residual · sound reaches the room", eClass: "warn",
+        m: { sch: 6, bud: -10, risk: -4 },
+        risk: { key: "use", p: 0.25 },
+        fbKind: "good",
+        verdict: "You used the one channel that doesn't need anyone to be looking.",
+        fb: "<p>Sound reaches the whole room, including the person whose hands are busy. It is weaker than putting the number in the sightline — a loud room can swallow it, and rooms full of alarms learn to stop hearing them — but it removes most of the problem for a fraction of the cost.</p>",
+        nt: "Reaches the room without anyone looking up, and competes with every other noise in it."
+      }
+    ],
+    relocateIf: "around"
+  },
+  complaint: "“The alert was going off down at the foot of the bed while we were drilling. Nobody registered it until we were closing.”",
+  field: {
+    title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+    segs: [[29, true], [13, false], [42, true]],
+    mark: { at: 60, label: "alert fired" },
+    rows: [
+      { l: "Time the leg spent with no blood flow", v: "71 min", k: "actual" },
+      { l: "The device asked for attention at", v: "60 min", k: "shown" }
+    ],
+    caption: "The device was right, on time, and eleven minutes of cuff time went by before anyone acted on it. Every unit met every specification you wrote."
+  },
+  recall: "Every unit examined worked exactly as specified. The alert fired at the limit, on the cart, past the anaesthesia screen, and the people who needed it were looking somewhere else. ",
+  luck: "You put the only display where the person who has to act cannot see it, at a stated 75%.",
+  stand: [
+    "<b>Month 6 — you put the only display on the pump cart.</b> Nobody has evidence that the person who must act on the number can read it, so the <span class='T' data-t='hf'>human factors</span> burden is heavier.",
+    "<b>Month 6 — you put a display in the surgeon's sightline.</b> The person who acts on the number can see it, which makes the human factors story short.",
+    "<b>Month 6 — you added an audible callout.</b> The room is told without anyone having to look, and that is a reasonable answer to give a reviewer."
+  ],
+  owed: "Human factors evidence that the number actually reaches the person who has to act on it — and you have none, because nobody outside the company has used this device in a real room.",
+  tlWhat: "You decided where the number appears.",
+  tlCause: (use) => [
+    "On the pump cart. " + (use ? "The alert fired on time and nobody in a position to act was looking at it." : "It didn't bite. The odds said it probably would."),
+    "A second display in the sightline. " + (use ? "The 5% residual landed anyway." : "The number was where the decision was."),
+    "Cart plus audible callout. " + (use ? "The residual 25% landed anyway — a loud room swallowed it." : "The room heard it without having to look.")
+  ]
+};
+
+const T3_HIDDEN = {
+  stage:   {
+    id: "t3",
+    kicker: "Month 6",
+    name: "Features versus use risk",
+    beats: [
+      "<p>Feature freeze is next week, and the surgeon advisory panel has one more request. It is genuinely clever, which is part of the problem.</p>",
+
+      "<p>The panel wants <b>smart auto-resume</b>. Deflate and reinflate within ten minutes and the timer keeps counting, because obviously it's the same patient. Longer than ten minutes and the device assumes a new case and starts fresh.</p>" +
+      "<p>It saves the team a step, and it removes the risk of somebody forgetting to reset between patients. Nobody on the panel thinks it is a compromise.</p>",
+
+      "<p>Here is that rule running on the case you watched in month 1.</p>" +
+      caseStrip({
+        title: "The same case, with auto-resume switched on",
+        segs: CASE_SEGS,
+        notes: [
+          "First pause: <b>6 minutes</b>. Under ten, so the timer keeps counting — 32 becomes 46.",
+          "Second pause: <b>11 minutes</b>. Over ten, so the device decides this is a new patient and starts from zero."
+        ],
+        rows: [
+          { l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" },
+          { l: "What the display reads at the end of the case", v: "22 min", k: "shown" }
+        ],
+        caption: "The rule did exactly what the panel specified, twice, in two different ways — and nothing on the screen said which of the two was happening."
+      })
+    ],
+    beatsIf: {
+      around: "<p><b>Worth noticing:</b> your device already makes a person open a case by hand. The boundary is declared, not guessed, so you don't strictly need the panel's feature at all.</p>"
+    },
+    revealLabel: "See the options",
+    question: "What ships?",
+    options: [
+      {
+        t: "Add auto-resume",
+        d: "The panel loves it and it demos beautifully. The ten-minute rule lives inside the software — nobody in the room can see which mode the device is in.",
+        e: "75% a use error reaches the field", eClass: "risk",
+        m: { sch: 4, bud: -8, risk: 14 },
+        risk: { key: "use", p: 0.75 },
+        fbKind: "risk",
+        verdict: "This is the kind of failure that doesn't look like a failure.",
+        fb: "<p>Every unit performs to specification, every test passes, and the number on the screen is still wrong. A <span class='T' data-t='useerror'>use error</span> happens while the device works as designed — the design simply let a person get the wrong answer. A hidden mode is one of the most reliable ways to produce one.</p>",
+        nt: "The device can be correct and the room still wrong, because nobody can see which behaviour is active."
+      },
+      {
+        t: "Keep it explicit",
+        d: "Time accumulates for the case. Resetting takes a deliberate End Case action that records who did it. One extra tap, no hidden modes.",
+        e: "5% residual · one extra tap", eClass: "",
+        eIf: { around: "Nearly free — your device already works this way", aroundClass: "" },
+        mIf: { around: { sch: 1, bud: -3, risk: -8 } },
+        m: { sch: 3, bud: -6, risk: -8 },
+        risk: { key: "use", p: 0.05 },
+        fbKind: "good",
+        verdict: "Boring, and the room always knows what the device is doing.",
+        fb: "<p>You traded a tap for the ability to answer “what is this number counting?” without opening a manual.</p>",
+        fbIf: {
+          around: "<p>And it cost almost nothing, because the detour you took for legal reasons in month 2 already made the case boundary an explicit human action. A decision made to avoid a patent handed you the safer interface.</p>"
+        },
+        nt: "Removes hidden modes at the cost of one deliberate action per case."
+      },
+      {
+        t: "Add auto-resume, but show the mode",
+        d: "A persistent banner reading CONTINUING or NEW CASE, and a prompt at the ten-minute boundary so somebody has to agree with the device.",
+        e: "25% residual · costs time and money", eClass: "warn",
+        m: { sch: 9, bud: -14, risk: -4 },
+        risk: { key: "use", p: 0.25 },
+        fbKind: "good",
+        verdict: "You kept the feature and made it visible, which is most of the way there.",
+        fb: "<p>A visible mode is a real risk control, not a warning label — the information is in front of the user at the moment of use, not in a manual nobody reads in an operating room. Still weaker than not having the mode.</p>",
+        nt: "Keeps the clever feature and removes most, though not all, of the hidden-state problem."
+      }
+    ],
+    relocateIf: "around",
+  },
+  complaint: "“Device showed 42 minutes. My circulating nurse's notes say 71. It seems to have reset itself partway through.”",
+  field: {
+    title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+    segs: [[29, true], [13, false], [42, true]],
+    notes: ["The pause ran <b>13 minutes</b>. Over ten, so the device started counting again from zero."],
+    rows: [
+      { l: "Time the leg spent with no blood flow", v: "71 min", k: "actual" },
+      { l: "What the display read when they closed", v: "42 min", k: "shown" }
+    ],
+    caption: "The nurse's note said 71. The screen said 42. Both were honest, and the device met every specification you wrote for it."
+  },
+  recall: "Every unit examined performed exactly to specification. The ten-minute rule did precisely what it was designed to do, and the room couldn't see it happening. ",
+  luck: "You shipped a mode the user cannot see, at a stated 75%.",
+  stand: [
+    "<b>Month 6 — you shipped a hidden mode.</b> A device whose behaviour the user cannot see carries a heavier <span class='T' data-t='hf'>human factors</span> burden, and you have no data about how the room uses it.",
+    "<b>Month 6 — you kept the timer explicit.</b> There is no hidden state to explain, which makes the human factors story short.",
+    "<b>Month 6 — you made the mode visible.</b> The feature stayed, and so did a reasonable answer about how users know what the device is doing."
+  ],
+  owed: "Human factors evidence covering the mode users cannot see — and you have none, because nobody outside the company has used this device.",
+  tlWhat: "You froze the timer behaviour.",
+  tlCause: (use) => [
+    "A hidden mode. " + (use ? "It produced a wrong number in a real operating room." : "It didn't bite. The odds said it probably would."),
+    "Explicit. " + (use ? "The 5% residual landed anyway." : "No hidden state, no wrong number."),
+    "Mode shown. " + (use ? "The residual 25% landed anyway." : "Users could see what the device was counting.")
+  ]
+};
+
+const T3 = ADVANCED ? T3_HIDDEN : T3_DISPLAY;
+STAGES.push(T3.stage);
+
+
+const RELOCATE_TEXT =
+  "<b>Risk controls relocate risk more often than they remove it.</b> Designing around the patent moved the use error rather than deleting it. Somebody can forget to scan, and the timer never starts at all — a worse failure, carrying its own <b>15% chance</b> whichever option you picked.";
+
+/* ==================== STATE ==================== */
+let S = null;
+
+function freshState() {
+  return {
+    i: 0, picks: {}, rolls: {},
+    sch: 10, bud: 100, risk: 20,
+    last: { sch: 0, bud: 0, risk: 0 },
+    locked: false, ended: false
+  };
+}
+
+const $ = (id) => document.getElementById(id);
+const chance = (p) => Math.random() < p;
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  $(id).classList.add("active");
+  document.querySelector(".panel").scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+/* ==================== METERS ====================
+   Built once, then updated in place. Rebuilding the markup would restart the
+   bar animation and make the meters look like they moved on every reveal. */
+const METERS = [
+  ["Schedule", "sch", "Schedule"],
+  ["Budget", "bud", "Budget"],
+  ["Risk", "risk", "Patient risk"]
+];
+const BANDS = {
+  sch: [[25, "On track", "var(--color-primary)"], [55, "Slipping", "var(--color-gold)"], [82, "Badly behind", "var(--color-orange)"], [999, "Out of runway", "var(--color-error)"]],
+  bud: [[65, "Healthy", "var(--color-primary)"], [35, "Tight", "var(--color-gold)"], [12, "Nearly gone", "var(--color-orange)"], [-999, "Gone", "var(--color-error)"]],
+  risk: [[25, "Low", "var(--color-primary)"], [55, "Watch", "var(--color-gold)"], [80, "High", "var(--color-orange)"], [999, "Severe", "var(--color-error)"]]
+};
+
+function band(key, v) {
+  const b = BANDS[key];
+  if (key === "bud") { for (const [th, label, col] of b) if (v > th) return [label, col]; return b[b.length - 1].slice(1); }
+  for (const [th, label, col] of b) if (v < th) return [label, col];
+  return b[b.length - 1].slice(1);
+}
+
+function buildMeters() {
+  $("meters").innerHTML = METERS.map(([label, key, full]) =>
+    `<div class="tm" title="${full}">
+       <div class="tm-l">${label}</div>
+       <div class="tm-v"><span id="mv-${key}"></span><span class="tm-arrow" id="ma-${key}"></span></div>
+       <div class="tm-bar"><div class="tm-fill" id="mf-${key}"></div></div>
+     </div>`).join("");
+  updateMeters();
+}
+
+function updateMeters() {
+  if (!S || !$("mv-sch")) return;
+  METERS.forEach(([, key]) => {
+    const val = S[key];
+    const [word, col] = band(key, val);
+    const pct = Math.min(100, Math.max(key === "bud" ? 0 : 4, val));
+    $("mv-" + key).textContent = word;
+    $("mv-" + key).style.color = col;
+    $("mf-" + key).style.width = pct + "%";
+    $("mf-" + key).style.background = col;
+    const d = S.last[key];
+    const a = $("ma-" + key);
+    if (!d) { a.classList.remove("on"); a.textContent = ""; return; }
+    const worse = key === "bud" ? d < 0 : d > 0;
+    a.textContent = worse ? "\u25BC" : "\u25B2";
+    a.style.color = worse ? "var(--color-orange)" : "var(--color-primary)";
+    a.classList.add("on");
+  });
+}
+
+function clearDeltas() { S.last = { sch: 0, bud: 0, risk: 0 }; updateMeters(); }
+
+/* ==================== TOOLTIPS ==================== */
+function wireTerms(root) {
+  root.querySelectorAll(".T").forEach((el) => {
+    const key = el.dataset.t;
+    if (!TERMS[key]) return;
+    const btn = document.createElement("button");
+    btn.className = "term";
+    btn.type = "button";
+    btn.innerHTML = el.innerHTML;
+    btn.setAttribute("aria-label", "Definition of " + TERMS[key][0]);
+    btn.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); showTip(btn, key); });
+    el.replaceWith(btn);
+  });
+}
+
+function showTip(anchor, key) {
+  const tip = $("tip");
+  if (!anchor.dataset.aid) anchor.dataset.aid = "a" + Math.random().toString(36).slice(2, 8);
+  if (tip.classList.contains("show") && tip.dataset.anchor === anchor.dataset.aid) { hideTip(); return; }
+  const [title, body] = TERMS[key];
+  tip.dataset.anchor = anchor.dataset.aid;
+  tip.innerHTML = `<div class="tip-t">${title}</div><div>${body}</div>`;
+  tip.classList.add("show");
+  const r = anchor.getBoundingClientRect();
+  const tr = tip.getBoundingClientRect();
+  let left = r.left + r.width / 2 - tr.width / 2;
+  left = Math.max(10, Math.min(left, window.innerWidth - tr.width - 10));
+  let top = r.bottom + 8;
+  if (top + tr.height > window.innerHeight - 10) top = Math.max(10, r.top - tr.height - 8);
+  tip.style.left = left + "px";
+  tip.style.top = top + "px";
+}
+function hideTip() { const t = $("tip"); t.classList.remove("show"); t.dataset.anchor = ""; }
+document.addEventListener("click", (e) => { if (!e.target.closest("#tip") && !e.target.closest(".term")) hideTip(); });
+window.addEventListener("resize", hideTip);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
+
+/* ==================== HELPERS ==================== */
+function around() { return S.picks.t1 === 0; }
+function licensed() { return S.picks.t1 === 2; }
+function claimsBig() { return S.picks.setup === 2; }
+function reckless() { return S.picks.t2 === 0 && S.picks.t3 === 0; }
+function anySignal() { return !!(S.rolls.prod || S.rolls.use || S.rolls.scan); }
+function signalCount() { return (S.rolls.prod ? 1 : 0) + ((S.rolls.use || S.rolls.scan) ? 1 : 0); }
+
+function applyMeters(m) {
+  S.last = { sch: m.sch || 0, bud: m.bud || 0, risk: m.risk || 0 };
+  S.sch += m.sch || 0; S.bud += m.bud || 0; S.risk += m.risk || 0;
+  S.risk = Math.max(0, S.risk);
+}
+
+/* ==================== BEAT RUNNER ====================
+   Reveals one block of story at a time into a slot, then calls done(). */
+/* Appends a "next" button to a slot and wires it. Uses a direct element
+   reference rather than an id: several slots can be alive at once (a hidden
+   play screen behind a live outcome screen), and duplicate ids would make
+   getElementById hand back the wrong, stale button. */
+function advanceButton(slot, label, primary, onClick) {
+  const row = document.createElement("div");
+  row.className = "btn-row beat-btns";
+  const btn = document.createElement("button");
+  btn.className = "btn beat-advance" + (primary ? "" : " secondary");
+  btn.innerHTML = label;
+  btn.addEventListener("click", () => { row.remove(); onClick(); });
+  row.appendChild(btn);
+  slot.appendChild(row);
+  return row;
+}
+
+function runBeats(slot, beats, lastLabel, done) {
+  let idx = 0;
+  function step() {
+    const wrap = document.createElement("div");
+    wrap.className = "beat";
+    wrap.innerHTML = beats[idx];
+    slot.appendChild(wrap);
+    wireTerms(wrap);
+
+    const stale = slot.querySelector(".beat-btns");
+    if (stale) stale.remove();
+
+    const isLast = idx === beats.length - 1;
+    advanceButton(slot, isLast ? lastLabel : "Continue &rarr;", isLast, () => {
+      if (isLast) done(); else { idx++; step(); }
+    });
+    if (idx > 0) wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  step();
+}
+
+function stageHeader(kicker, name, doneCount, nowIdx) {
+  const dots = Array.from({ length: 6 }, (_, k) =>
+    `<span class="pdot ${k < nowIdx ? "done" : k === nowIdx ? "now" : ""}"></span>`).join("");
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-4);flex-wrap:wrap">
+       <div><div class="stage-kicker">${kicker}</div><div class="stage-name">${name}</div></div>
+       <div class="progress-dots" aria-label="Decision ${nowIdx + 1} of 6">${dots}</div>
+     </div>`;
+}
+
+/* ==================== STAGES ==================== */
+function renderStage() {
+  const st = STAGES[S.i];
+  clearDeltas();
+  $("stage-card").innerHTML = stageHeader(st.kicker, st.name, S.i, S.i) + `<div id="beats"></div>`;
+  $("feedback-slot").innerHTML = "";
+
+  let beats = st.beats.slice();
+  if (st.beatsIf && st.beatsIf.around && around()) beats[beats.length - 1] += st.beatsIf.around;
+
+  runBeats($("beats"), beats, st.revealLabel, showOptions);
+}
+
+function showOptions() {
+  const st = STAGES[S.i];
+  const div = document.createElement("div");
+  div.innerHTML =
+    `<div class="question">${st.question}</div>
+     <div class="opts" id="opts">${st.options.map((o, k) => optHTML(o, k)).join("")}</div>
+     <div class="kbd-hint">Press <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to choose.</div>`;
+  $("beats").appendChild(div);
+  Array.from($("opts").children).forEach((btn, k) => btn.addEventListener("click", () => choose(k)));
+  wireTerms(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function optHTML(o, k) {
+  let e = o.e, ec = o.eClass || "";
+  if (o.eIf && o.eIf.around && around()) { e = o.eIf.around; ec = o.eIf.aroundClass || ""; }
+  return `<button class="opt" data-k="${k}">
+    <span class="opt-num">${k + 1}</span>
+    <span class="opt-body">
+      <span class="opt-t">${o.t}</span>
+      <span class="opt-d">${o.d}</span>
+      <span class="opt-e ${ec}">${e}</span>
+    </span>
+  </button>`;
+}
+
+/* Locks the row and shows every option's consequence line, not just the
+   chosen one — seeing what you passed up is half the lesson. */
+function revealConsequences(k) {
+  Array.from($("opts").children).forEach((btn, j) => {
+    btn.disabled = true;
+    if (!btn.classList.contains("locked")) btn.classList.add(j === k ? "chosen" : "dimmed");
+    const e = btn.querySelector(".opt-e");
+    if (e) e.classList.add("shown");
+  });
+}
+
+function choose(k) {
+  if (S.locked) return;
+  S.locked = true;
+  const st = STAGES[S.i];
+  const o = st.options[k];
+  S.picks[st.id] = k;
+
+  let m = o.m;
+  if (o.mIf && o.mIf.around && around()) m = o.mIf.around;
+  applyMeters(m);
+  updateMeters();
+
+  if (o.risk) S.rolls[o.risk.key] = chance(o.risk.p);
+  if (st.id === "t3" && around()) S.rolls.scan = chance(0.15);
+
+  revealConsequences(k);
+
+  let fb = o.fb;
+  if (o.fbIf && o.fbIf.around && around()) fb += o.fbIf.around;
+  const relocate = (st.relocateIf === "around" && around()) ? `<div class="relocate">${RELOCATE_TEXT}</div>` : "";
+
+  $("feedback-slot").innerHTML =
+    `<div class="card feedback-card ${o.fbKind === "good" ? "" : o.fbKind}">
+       <div class="feedback-verdict">${o.verdict}</div>
+       <div class="feedback-body">${fb}</div>
+       ${relocate}
+       <div id="fb-end"></div>
+     </div>`;
+  wireTerms($("feedback-slot"));
+  advanceButton($("fb-end"), "Continue &rarr;", true, next);
+  $("feedback-slot").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function next() {
+  S.i++; S.locked = false;
+  if (S.i < STAGES.length) renderStage();
+  else renderPayoff();
+}
+
+/* ==================== PAYOFF ==================== */
+function standLines() {
+  const L = [];
+  if (around()) {
+    L.push("<b>Month 2 — you designed around the patent.</b> Your device asks a human to open the case, which is not how anything already cleared behaves. What you owe now depends on how a reviewer reads that departure, and you don't get to decide.");
+  } else if (licensed()) {
+    L.push("<b>Month 2 — you licensed the patent.</b> You built the conventional way, so the <span class='T' data-t='se'>substantial equivalence</span> argument is straightforward. Your bank balance is not.");
+  } else {
+    L.push("<b>Month 2 — you stayed close to the predicate.</b> The substantial equivalence argument is the easiest one available to you.");
+  }
+  if (S.picks.t2 === 0) L.push("<b>Month 4 — you tested prototypes.</b> Your performance data describes units built by hand, and a reviewer may ask what you actually tested.");
+  if (S.picks.t2 === 1) L.push("<b>Month 4 — you tested production-equivalent units.</b> That is the answer reviewers want, and it is already written down.");
+  if (S.picks.t2 === 2) L.push("<b>Month 4 — you split the test plan.</b> The safety-critical tests ran on real units, which covers the questions most likely to be asked.");
+  L.push(T3.stand[S.picks.t3]);
+  if (claimsBig()) L.push("<b>Month 1 — your need statement promised fewer nerve injuries.</b> That is a clinical claim, and clinical claims need clinical evidence.");
+  return L;
+}
+
+function owedItems() {
+  const L = [];
+  const denovo = S.rolls.pathway === "denovo";
+  if (denovo) {
+    L.push("A <span class='T' data-t='denovo'>De Novo</span> submission rather than a 510(k) — a longer route that creates a new classification, and asks for more evidence than substantial equivalence would have.");
+  } else if (around()) {
+    L.push("A <span class='T' data-t='k510'>510(k)</span>, with more performance data than a conventional design would have needed, because you have to show your different approach is no less safe.");
+  } else {
+    L.push("A <span class='T' data-t='k510'>510(k)</span> arguing substantial equivalence to an existing tourniquet system.");
+  }
+  if (S.picks.t3 === 0) L.push(T3.owed);
+  else L.push("<span class='T' data-t='validation'>Design validation</span> showing the finished device meets real users' needs, usually through simulated use rather than a clinical trial.");
+  if (S.picks.t2 === 0) L.push("A defensible answer to “what were these units?”, which your current data cannot give.");
+  if (claimsBig()) L.push("Clinical evidence for the injury-reduction claim your investors were sold, which nothing in your file supports.");
+  return L;
+}
+
+function renderPayoff() {
+  clearDeltas();
+  $("stage-card").innerHTML = stageHeader("Month 9", "The regulatory reckoning", 4, 4) + `<div id="beats"></div>`;
+  $("feedback-slot").innerHTML = "";
+
+  const openBeat = "<p>The design is frozen, the testing is done, and the submission has to be written. This is the month when the three decisions you have already made stop being independent and start adding up.</p>";
+  const standBeat =
+    `<p>Everything you decided is now a single question: what does this submission have to contain?</p>
+     <div class="owed" style="margin-top:var(--space-4)">
+       <div class="owed-h">Where you stand</div>
+       ${standLines().map((l) => `<div class="owed-l">${l}</div>`).join("")}
+     </div>`;
+
+  runBeats($("beats"), [openBeat, standBeat],
+    around() ? "And one thing you can't control &rarr;" : "So what do you owe? &rarr;",
+    around() ? renderPathwayRoll : showOwed);
+}
+
+function renderPathwayRoll() {
+  const div = document.createElement("div");
+  div.className = "beat";
+  div.innerHTML =
+    `<div class="card roll-card">
+       <div class="roll-head"><span class="roll-tag">ROLL</span><span class="roll-title">Which route is even available to you?</span></div>
+       <div class="feedback-body" style="margin-top:var(--space-3);font-size:var(--text-sm)">
+         Your device departs from every available <span class='T' data-t='predicate'>predicate</span>. Whether that raises <i>different questions of safety and effectiveness</i> is a reviewer's judgement, not a number you can compute in advance.
+       </div>
+       <div class="roll-odds">
+         <div class="odd" id="odd-a"><div class="odd-p">2 in 3</div><div class="odd-t">Still a <span class='T' data-t='k510'>510(k)</span>, with more data owed.</div></div>
+         <div class="odd" id="odd-b"><div class="odd-p">1 in 3</div><div class="odd-t">Different questions. The 510(k) route isn't open and you're looking at <span class='T' data-t='denovo'>De Novo</span>.</div></div>
+       </div>
+       <div class="die" id="die">?</div>
+       <div class="btn-row" style="justify-content:center"><button class="btn gold" id="rollbtn">Roll</button></div>
+       <div class="roll-result" id="rollres"></div>
+     </div>`;
+  $("beats").appendChild(div);
+  wireTerms(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  $("rollbtn").addEventListener("click", doPathwayRoll);
+}
+
+function doPathwayRoll() {
+  const btn = $("rollbtn"); btn.disabled = true;
+  const die = $("die"); die.classList.add("spin");
+  const iv = setInterval(() => { die.textContent = String(1 + Math.floor(Math.random() * 6)); }, 90);
+  setTimeout(() => {
+    clearInterval(iv);
+    die.classList.remove("spin");
+    const denovo = chance(1 / 3);
+    S.rolls.pathway = denovo ? "denovo" : "k510more";
+    die.textContent = denovo ? "3" : "1";
+    $("odd-a").classList.add(denovo ? "miss" : "hit");
+    $("odd-b").classList.add(denovo ? "hit" : "miss");
+    $("rollres").innerHTML = denovo
+      ? `<span style="color:var(--color-error)">De Novo.</span> The reviewer's questions aren't the predicate's questions.`
+      : `<span style="color:var(--color-primary)">Still a 510(k)</span> — with more data owed than a conventional design would have needed.`;
+    const row = advanceButton($("rollres").parentElement, "So what do you owe? &rarr;", true, showOwed);
+    row.style.justifyContent = "center";
+  }, 1250);
+}
+
+function showOwed() {
+  const beat =
+    `<div class="owed warn">
+       <div class="owed-h">What you owe</div>
+       ${owedItems().map((l) => `<div class="owed-l">${l}</div>`).join("")}
+     </div>
+     <p style="margin-top:var(--space-4)">None of that was chosen on this screen. It was decided in months 2, 4 and 6, and it arrived here as a bill.</p>`;
+  const wrap = document.createElement("div");
+  wrap.className = "beat";
+  wrap.innerHTML = beat;
+  $("beats").appendChild(wrap);
+  wireTerms(wrap);
+
+  advanceButton($("beats"), "What do you do about it? &rarr;", true, renderPayoffOptions);
+  wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+const PAYOFF_OPTS = [
+  {
+    t: "Fund the evidence you owe",
+    d: "Pay for the testing, write the file properly, submit something you can defend line by line.",
+    e: "Expensive · defensible", eClass: "",
+    m: { sch: 10, bud: -25, risk: -5 },
+    verdict: "You bought the only thing that settles a review: evidence.",
+    fb: "<p>It cost months and most of what was left, and your submission now says what you can show. That is the whole trade.</p>",
+    nt: "The expensive path that leaves nothing for a reviewer to be surprised by."
+  },
+  {
+    t: "Narrow the claim",
+    d: "Claim what you can support: the device displays cumulative inflation time and alerts at a set interval. Nothing about injury.",
+    e: "Smaller market · smaller burden", eClass: "warn",
+    m: { sch: 4, bud: -8, risk: -3 },
+    verdict: "You made the claim match the evidence instead of the other way round.",
+    fb: "<p>A narrow claim you can support beats a broad one you can't. The commercial team will not enjoy the conversation, and the file is internally consistent.</p>",
+    fbIf: { big: "<p>It costs you more than it would cost someone else. Your founding need statement promised injury reduction and your investors have repeated it for two years. Walking it back spends credibility you acquired in month 1.</p>" },
+    nt: "Shrinks the market and makes the submission defensible with the evidence you already hold."
+  },
+  {
+    t: "Submit as-is and hope",
+    d: "File what you have. Maybe the reviewer doesn't ask the question you can't answer.",
+    e: "2 in 5 clean · otherwise months lost", eClass: "risk",
+    m: { sch: 0, bud: -3, risk: 4 },
+    verdict: "You put the decision in somebody else's hands.",
+    fb: "",
+    nt: "Costs nothing now and hands your timeline to a reviewer."
+  }
+];
+
+function fundLocked() { return S.bud < 35; }
+
+function renderPayoffOptions() {
+  const locked = fundLocked();
+  const div = document.createElement("div");
+  div.innerHTML =
+    `<div class="question">Given what you owe, what do you do?</div>
+     <div class="opts" id="opts">${PAYOFF_OPTS.map((o, k) => {
+       if (k === 0 && locked) {
+         return `<button class="opt locked" disabled data-k="0">
+           <span class="opt-num">1</span>
+           <span class="opt-body"><span class="opt-t">${o.t}</span><span class="opt-d">${o.d}</span>
+           <span class="opt-lock">Locked — ${licensed() ? "the licensing payment in month 2 took this off the table." : "there isn't enough budget left to pay for it."}</span></span></button>`;
+       }
+       return optHTML(o, k);
+     }).join("")}</div>
+     <div class="kbd-hint">Press <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to choose.</div>`;
+  $("beats").appendChild(div);
+  Array.from($("opts").children).forEach((btn, k) => {
+    if (!btn.disabled) btn.addEventListener("click", () => choosePayoff(k));
+  });
+  wireTerms(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function choosePayoff(k) {
+  if (S.locked) return;
+  if (k === 0 && fundLocked()) return;
+  S.locked = true;
+  S.picks.payoff = k;
+  const o = PAYOFF_OPTS[k];
+  applyMeters(o.m);
+  updateMeters();
+
+  revealConsequences(k);
+
+  if (k === 2) { renderHopeRoll(); return; }
+
+  let fb = o.fb;
+  if (k === 1 && claimsBig() && o.fbIf) fb += o.fbIf.big;
+
+  $("feedback-slot").innerHTML =
+    `<div class="card feedback-card ${k === 0 ? "" : "warn"}">
+       <div class="feedback-verdict">${o.verdict}</div>
+       <div class="feedback-body">${fb}</div>
+       <div id="fb-end"></div>
+     </div>`;
+  wireTerms($("feedback-slot"));
+  advanceButton($("fb-end"), "Continue &rarr;", true, afterPayoff);
+  $("feedback-slot").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+const LAUNCH_BRIDGE =
+  "<p class='beat-lead'>Month 12.</p>" +
+  "<p>The device clears and Fernwall starts shipping. The first hospitals go live over the summer, and for a while the only thing anybody hears back is that surgeons like the display.</p>";
+
+function renderHopeRoll() {
+  $("feedback-slot").innerHTML =
+    `<div class="card roll-card">
+       <div class="roll-head"><span class="roll-tag">ROLL</span><span class="roll-title">Does the reviewer ask?</span></div>
+       <div class="roll-odds">
+         <div class="odd" id="h-a"><div class="odd-p">2 in 5</div><div class="odd-t">Clean review. Nobody pulls the thread.</div></div>
+         <div class="odd" id="h-b"><div class="odd-p">3 in 5</div><div class="odd-t">A request for more information. Months, and money you were counting on.</div></div>
+       </div>
+       <div class="die" id="die2">?</div>
+       <div class="btn-row" style="justify-content:center"><button class="btn gold" id="rollbtn2">Roll</button></div>
+       <div class="roll-result" id="rollres2"></div>
+       <div id="hope-after"></div>
+     </div>`;
+  $("rollbtn2").addEventListener("click", () => {
+    const b = $("rollbtn2"); b.disabled = true;
+    const die = $("die2"); die.classList.add("spin");
+    const iv = setInterval(() => { die.textContent = String(1 + Math.floor(Math.random() * 6)); }, 90);
+    setTimeout(() => {
+      clearInterval(iv); die.classList.remove("spin");
+      const clean = chance(0.4);
+      S.rolls.hope = clean;
+      die.textContent = clean ? "5" : "2";
+      $("h-a").classList.add(clean ? "hit" : "miss");
+      $("h-b").classList.add(clean ? "miss" : "hit");
+      if (!clean) { applyMeters({ sch: 14, bud: -12, risk: 2 }); updateMeters(); }
+      $("rollres2").innerHTML = clean
+        ? `<span style="color:var(--color-primary)">Clean.</span> Nobody asked the question you couldn't answer.`
+        : `<span style="color:var(--color-error)">They asked.</span> A request for more information lands on exactly the weakest part of your file.`;
+      $("hope-after").innerHTML =
+        `<div class="feedback-body" style="margin-top:var(--space-4)">
+           <p>${clean
+             ? "This worked, and the odds were against you. A good outcome from a poor decision is dangerous for a young company, because it teaches the wrong lesson."
+             : "The months you saved by not doing the work are being spent anyway, with less money and less goodwill."}</p>
+         </div>
+           <div id="fb-end"></div>`;
+      wireTerms($("feedback-slot"));
+      advanceButton($("fb-end"), "Continue &rarr;", true, afterPayoff);
+    }, 1250);
+  });
+}
+
+function stalled() {
+  const denovo = S.rolls.pathway === "denovo";
+  if (S.picks.payoff === 2 && S.rolls.hope === false) {
+    if (denovo || claimsBig() || S.bud <= 0) return true;
+  }
+  if (denovo && S.picks.payoff === 1 && S.bud <= 0) return true;
+  return false;
+}
+
+function afterPayoff() {
+  S.locked = false;
+  if (stalled()) { S.ended = true; renderOutcome(); return; }
+  renderPostmarket();
+}
+
+/* ==================== POSTMARKET ==================== */
+function complaints() {
+  return [
+    { h: "Complaint 1041 · Wescott General", q: "“Display arrived cracked. Shipping damage. We replaced the unit and moved on.”" },
+    { h: "Complaint 1052 · Palmer Ridge Surgical", q: "“Can the alert be made louder? Our rooms are noisy and we have missed it twice during drilling.”" },
+    {
+      h: "Complaint 1063 · Granite Bay Regional",
+      q: S.rolls.scan && !S.rolls.use
+        ? "“Device showed nothing at all for most of the case. Nobody had opened a case on it and we did not notice until closing.”"
+        : T3.complaint
+    }
+  ];
+}
+
+const POST_OPTS = [
+  {
+    t: "Handle them routinely",
+    d: "Log each one, reply to the customer, no design change. This is what a complaint file looks like on an ordinary week.",
+    e: "Correct when all three are noise", eClass: "",
+    m: { sch: 0, bud: 0, risk: 0 },
+    nt: "Right when nothing in the file points at a common cause, wrong when something does."
+  },
+  {
+    t: "Investigate the pattern",
+    d: "Pull the records, look for a common cause, confirm whether there is a trend, and if there is, correct the design and tell users.",
+    e: "Costs money and months · finds a real trend", eClass: "warn",
+    m: { sch: 6, bud: -18, risk: -15 },
+    nt: "The only option that can find a cause hiding behind unrelated-looking reports."
+  },
+  {
+    t: "Halt shipments",
+    d: "Stop everything, notify the field today, and work out what happened afterwards.",
+    e: "Right only if the signal is severe", eClass: "risk",
+    m: { sch: 10, bud: -40, risk: -12 },
+    nt: "The heaviest response available; without a root cause you can't tell users what to do differently."
+  }
+];
+
+function renderPostmarket() {
+  showScreen("screen-play");
+  clearDeltas();
+  $("stage-card").innerHTML = stageHeader("Month 14", "The complaint file", 5, 5) + `<div id="beats"></div>`;
+  $("feedback-slot").innerHTML = "";
+
+  const beat =
+    `<p>Two years of decisions, and this is where you find out which of them mattered.</p>
+     <p>Complaints arrive constantly in a device business, and most of them are nothing: shipping damage, a user who wants a different default, a unit that was mishandled. The job is not to react to each one. It is to notice when several of them are the same thing wearing different clothes.</p>
+     <p>There are three open in the file this morning.</p>`;
+
+  runBeats($("beats"), [LAUNCH_BRIDGE, beat], "Open the complaint file &rarr;", showComplaints);
+}
+
+function showComplaints() {
+  const div = document.createElement("div");
+  div.className = "beat";
+  div.innerHTML =
+    `<div class="cmp-list">${complaints().map((c) => `
+       <div class="cmp"><div class="cmp-h">${c.h}</div><div class="cmp-q">${c.q}</div></div>`).join("")}
+     </div>
+     <div class="question">What do you do?</div>
+     <div class="opts" id="opts">${POST_OPTS.map((o, k) => optHTML(o, k)).join("")}</div>
+     <div class="kbd-hint">Press <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to choose.</div>`;
+  $("beats").appendChild(div);
+  Array.from($("opts").children).forEach((btn, k) => btn.addEventListener("click", () => choosePost(k)));
+  wireTerms(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* The third appearance of the strip: the case behind complaint 1063, shown
+   only after the choice is locked so it can't hint at which one is real. */
+function fieldStrip() {
+  if (S.rolls.use) return caseStrip(T3.field);
+  if (S.rolls.scan) {
+    return caseStrip({
+      title: "Behind complaint 1063 · Granite Bay Regional, month 13",
+      segs: [[66, true]],
+      notes: ["Nobody scanned the patient in, so no case was ever open for the device to count against."],
+      rows: [
+        { l: "Time the leg spent with no blood flow", v: "66 min", k: "actual" },
+        { l: "What the display read the whole time", v: "nothing", k: "shown" }
+      ],
+      caption: "A blank screen is easy to walk past. This is the failure you moved the risk to when you designed around the patent."
+    });
+  }
+  return "";
+}
+
+function choosePost(k) {
+  if (S.locked) return;
+  S.locked = true;
+  S.picks.post = k;
+  const o = POST_OPTS[k];
+  const m = Object.assign({}, o.m);
+  if (k === 0 && anySignal()) m.risk = 25;
+  applyMeters(m);
+  updateMeters();
+
+  revealConsequences(k);
+
+  const sig = anySignal();
+  let verdict, fb, kind;
+  if (k === 0) {
+    if (sig) {
+      verdict = "You closed a real signal as an ordinary week."; kind = "risk";
+      fb = signalCount() > 1
+        ? "<p>Two of those complaints share a cause. One at a time, each looks like a customer with a preference. Read together they are the same failure arriving twice, which is what looking for a trend is for.</p>"
+        : "<p>One of those three is not a preference and not shipping damage — it is your design reaching a patient. Closed one at a time, every complaint looks like a one-off. That is exactly why the question is always whether anything connects them.</p>";
+    } else {
+      verdict = "Correct. Three unrelated complaints are three unrelated complaints."; kind = "";
+      fb = "<p>Restraint is a real skill here. Nothing points at a common cause, and treating noise as a signal burns money and credibility you'll need when something real arrives.</p>";
+    }
+  } else if (k === 1) {
+    if (sig) {
+      verdict = "You found it."; kind = "";
+      fb = "<p>The pattern was there and you went looking. A correction goes out, users are told what changed and why, and the thing that was going to hurt somebody doesn't.</p>";
+    } else {
+      verdict = "You looked, and there was nothing to find."; kind = "";
+      fb = "<p>Money spent for no finding isn't wasted — it's what a working complaint process costs in the weeks when nothing is wrong. The alternative is only knowing after it matters.</p>";
+    }
+  } else {
+    if (sig) {
+      verdict = "The heaviest response, before you knew what you were responding to."; kind = "warn";
+      fb = "<p>Something real was in the file, so stopping was defensible. You still can't tell users what to do differently, because you halted before understanding the cause, and the bill arrives regardless.</p>";
+    } else {
+      verdict = "You pulled a working product off the market."; kind = "risk";
+      fb = "<p>Nothing pointed at a common cause. Proportionality is part of the job: over-reacting to a thin signal costs what a real correction costs and buys nothing.</p>";
+    }
+  }
+
+  $("feedback-slot").innerHTML =
+    `<div class="card feedback-card ${kind}">
+       <div class="feedback-verdict">${verdict}</div>
+       <div class="feedback-body">${fb}</div>
+       ${fieldStrip()}
+       <div id="post-end"></div>
+     </div>`;
+  wireTerms($("feedback-slot"));
+  advanceButton($("post-end"), "See how it ends &rarr;", true, () => { S.ended = true; renderOutcome(); });
+  $("feedback-slot").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* ==================== ENDINGS ==================== */
+function resolveEnding() {
+  if (stalled()) {
+    return {
+      id: "stalled", tone: "bad", eyebrow: "Ending · never launched",
+      title: "Stalled in Regulatory",
+      body:
+        `<p>The submission never cleared. ${S.rolls.pathway === "denovo"
+          ? "De Novo asked for evidence you hadn't budgeted for, and you had already chosen not to fund it."
+          : claimsBig()
+            ? "The claim you filed was bigger than the evidence behind it, and the questions coming back were the ones you'd avoided since month 1."
+            : "The questions coming back were the ones your file couldn't answer."}</p>
+         <p>Fernwall spends its remaining months answering a reviewer instead of selling anything. The device works. Nobody outside the company will use it.</p>`
+    };
+  }
+
+  const sig = anySignal();
+  const broke = S.bud <= 0;
+
+  if (S.picks.post === 2 && !sig) {
+    return {
+      id: "pulled", tone: "bad", eyebrow: "Ending · over-corrected",
+      title: "You Pulled a Working Product",
+      body:
+        `<p>Three unrelated complaints became a field action. Shipments stopped, customers were told about a problem nobody could name, and it cost what a genuine correction costs.</p>
+         <p>The device was fine. The judgement wasn't, and a company this size makes that mistake once.</p>`
+    };
+  }
+
+  if (broke) {
+    return {
+      id: "broke", tone: "bad", eyebrow: "Ending · out of runway",
+      title: "Out of Money",
+      body:
+        `<p>No single decision was indefensible. ${licensed() ? "Licensing was the safest legal move available. " : ""}${S.picks.payoff === 0 ? "Funding the evidence you owed was right. " : ""}${S.picks.post === 2 ? "Halting shipments was cautious. " : ""}Each was reasonable on the screen where you made it.</p>
+         <p>Together they spent a budget that only had room for one of them. Coupling isn't a metaphor: money is the resource every other decision quietly draws on.</p>`
+    };
+  }
+
+  if (sig && S.picks.post === 0) {
+    return {
+      id: "recalled", tone: "bad", eyebrow: "Ending · field action",
+      title: "Cleared, Then Recalled",
+      body:
+        `<p>The complaints kept arriving, and in month 19 one came with a patient attached — prolonged numbness after a long revision case where the displayed time and the recorded time did not match.</p>
+         <p>${S.rolls.use ? T3.recall : ""}${S.rolls.scan ? "The case had never been opened on the device, so the timer never started, and nobody noticed a screen quietly showing nothing. " : ""}${S.rolls.prod ? "The alert was there, at a volume the production housing had taken out of it. " : ""}${claimsBig() ? "It's worse than it would have been, because you marketed the device as preventing exactly this. " : ""}A correction goes out under far more scrutiny than it would have in month 14.</p>`
+    };
+  }
+
+  if (sig && (S.picks.post === 1 || S.picks.post === 2)) {
+    return {
+      id: "corrected", tone: "mixed", eyebrow: "Ending · caught in time",
+      title: "Cleared, Then Corrected",
+      body:
+        `<p>There was a real problem in the field, and you found it before a patient did. ${S.picks.post === 2 ? "You stopped shipments to do it, heavier than the signal required and priced accordingly." : "A correction goes out with a clear explanation of what changed and why."}</p>
+         <p>This is the expensive version of being right. One decision put the problem there; a later one caught it, and the second is the only reason this isn't a recall.</p>`
+    };
+  }
+
+  if (reckless()) {
+    return {
+      id: "lucky", tone: "mixed", eyebrow: "Ending · cleared",
+      title: "Cleared — and Lucky",
+      body:
+        `<p>You tested prototypes, shipped a hidden mode, and nothing came back. The device is on the market and the complaint file is quiet.</p>
+         <p>Look at the odds you were shown. You took a 70% chance and a 75% chance and neither landed. That happens, and it's the most dangerous outcome available to a company, because next time everyone in the room will remember that it worked.</p>`
+    };
+  }
+
+  return {
+    id: "credible", tone: "good", eyebrow: "Ending · cleared",
+    title: "Cleared and Credible",
+    body:
+      `<p>The device is on the market. The claim matches the evidence, the file answers the questions a reviewer actually asked, and the complaints arriving are the ordinary kind.</p>
+       <p>It cost ${S.sch > 55 ? "considerably more time than you planned" : "about what you expected"} and ${S.bud < 35 ? "nearly everything you had" : "a budget you could absorb"}. Nobody outside the company will know which decisions bought this, which is the usual reward for getting them right.</p>`
+  };
+}
+
+/* ==================== TIMELINE ==================== */
+function timeline() {
+  const T = [];
+  const push = (month, what, cause, fired, pickIdx, optsArr) => {
+    const nts = optsArr
+      ? optsArr.map((o, k) => (k === pickIdx ? null : `<div><b>${o.t}</b> — ${o.nt}</div>`)).filter(Boolean).join("")
+      : "";
+    T.push({ month, what, cause, fired, nts });
+  };
+
+  push("Month 1", "You wrote the need statement.",
+    ["It named the solution, so the design space closed early.",
+     "Problem, population and outcome, with no device in it.",
+     "It promised an outcome you would later have to prove."][S.picks.setup],
+    S.picks.setup === 2, S.picks.setup, STAGES[0].options);
+
+  push("Month 2", "The patent search found Ravelin.",
+    ["You designed around it. The device stopped resembling anything already cleared.",
+     "You stayed close to the predicate and left the infringement question open.",
+     "You licensed it, and the money left the building."][S.picks.t1],
+    false, S.picks.t1, STAGES[1].options);
+
+  push("Month 4", "You set the verification plan.",
+    ["Prototypes. " + (S.rolls.prod ? "Production tooling changed the acoustics and you had no way to know." : "Production happened to match. Luck, not method.")
+      , "Production-equivalent units. Nothing in production could surprise you."
+      , "Split plan. " + (S.rolls.prod ? "The residual 20% landed anyway." : "The tests that mattered ran on real units.")][S.picks.t2],
+    !!S.rolls.prod, S.picks.t2, STAGES[2].options);
+
+  push("Month 6", T3.tlWhat, T3.tlCause(!!S.rolls.use)[S.picks.t3],
+    !!S.rolls.use, S.picks.t3, STAGES[3].options);
+
+  if (S.rolls.scan) {
+    T.push({
+      month: "Month 6", fired: true,
+      what: "The scan step became its own failure.",
+      cause: "Opening a case is a human action because you designed around the patent — and somebody forgot. The timer never started. The control relocated the risk rather than removing it.",
+      nts: ""
+    });
+  }
+
+  if (around()) {
+    T.push({
+      month: "Month 9", fired: S.rolls.pathway === "denovo",
+      what: S.rolls.pathway === "denovo" ? "The 510(k) route wasn't available." : "It stayed a 510(k), with more owed.",
+      cause: "The roll you couldn't have called in month 2. Departing from a predicate doesn't reliably mean more testing — it means different questions, and a reviewer decides what those are.",
+      nts: ""
+    });
+  }
+
+  push("Month 9", "You chose what to do about what you owed.",
+    ["You funded the evidence. The file said what you could show.",
+     "You narrowed the claim to what the evidence supported." + (claimsBig() ? " It cost credibility, because month 1 promised more." : ""),
+     "You submitted as-is. " + (S.rolls.hope ? "Nobody pulled the thread — a good result from a bad bet." : "The reviewer asked, and the months you saved were spent anyway.")][S.picks.payoff],
+    S.picks.payoff === 2 && !S.rolls.hope, S.picks.payoff, PAYOFF_OPTS);
+
+  if (S.picks.post !== undefined) {
+    push("Month 14", "Three complaints landed.",
+      ["Handled routinely. " + (anySignal() ? (signalCount() > 1 ? "Two of them shared a cause you didn't go looking for." : "One of them was your design, and you closed it as a one-off.") : "There was no common cause to find.")
+        , "Investigated. " + (anySignal() ? "The problem was real and you caught it." : "Nothing there, which is what most weeks look like.")
+        , "Halted shipments. " + (anySignal() ? "Defensible, and heavier than the evidence you had." : "No common cause behind any of it.")][S.picks.post],
+      S.picks.post === 0 && anySignal(), S.picks.post, POST_OPTS);
+  } else {
+    T.push({ month: "Month 14", fired: true, what: "You never got here.", cause: "The submission stalled, so there was no launch and no complaint file.", nts: "" });
+  }
+
+  return T;
+}
+
+function luckVsYou() {
+  const luck = [], you = [];
+  if (around()) {
+    luck.push(S.rolls.pathway === "denovo"
+      ? "The route turned out to be De Novo. You were shown 1 in 3 and it landed. That was the dice, not you."
+      : "The route stayed a 510(k). You were shown 2 in 3 and it held.");
+  }
+  if (S.rolls.prod && S.picks.t2 !== 0) luck.push("A production difference reached the field despite a reasonable test plan. The residual landed.");
+  if (S.rolls.use && S.picks.t3 !== 0) luck.push("A use error reached the field despite a design with no hidden mode. The residual landed.");
+  if (S.rolls.scan) luck.push("Someone forgot to scan a patient in. You were told this carried 15% the moment you designed around the patent.");
+  if (S.picks.payoff === 2) luck.push(S.rolls.hope ? "The reviewer didn't pull the thread. 2 in 5, and it went your way." : "The reviewer pulled the thread. 3 in 5, and it didn't.");
+
+  if (S.picks.setup === 0) you.push("You wrote the solution into the need statement.");
+  if (S.picks.setup === 2) you.push("You committed to an outcome claim in month 1 and had to live with it at submission.");
+  if (S.picks.t2 === 0) you.push("You tested prototypes, with 70% printed on the option.");
+  if (S.picks.t3 === 0) you.push(T3.luck);
+  if (S.picks.payoff === 2) you.push("You submitted without the evidence, knowing the odds.");
+  if (S.picks.post === 0 && anySignal()) you.push("The pattern was in the complaint file and you closed it as routine.");
+  if (S.picks.post === 2 && !anySignal()) you.push("You halted shipments with nothing pointing at a common cause.");
+  if (licensed() && S.bud < 35) you.push("Licensing was safe and spent the budget your submission later needed. That trade was visible at the time.");
+
+  return [luck, you];
+}
+
+/* ==================== OUTCOME ==================== */
+function renderOutcome() {
+  const E = resolveEnding();
+  $("outcome-slot").innerHTML =
+    `<div class="card">
+       <div class="outcome-hero">
+         <div class="outcome-eyebrow">${E.eyebrow}</div>
+         <div class="outcome-title ${E.tone}">${E.title}</div>
+         <div class="outcome-body">${E.body}</div>
+       </div>
+     </div>
+     <div id="out-beats"></div>`;
+  showScreen("screen-outcome");
+  runBeats($("out-beats"), [SPLIT_INTRO], "What was luck, and what was you? &rarr;", showSplit);
+}
+
+const SPLIT_INTRO =
+  `<div class="card"><div class="feedback-body">
+     <p>Before the timeline, one separation worth making deliberately.</p>
+     <p>Some of what happened to Fernwall was decided by a roll you could see the odds of and could not control. The rest was visible on the screen at the moment you chose it. Telling those two apart is most of what it means to learn from a case rather than just remember it.</p>
+   </div></div>`;
+
+function showSplit() {
+  const [luck, you] = luckVsYou();
+  const div = document.createElement("div");
+  div.className = "beat";
+  div.innerHTML =
+    `<div class="split-grid">
+       <div class="split-box luck">
+         <div class="split-h">You couldn't have known</div>
+         ${luck.length ? luck.map((l) => `<div class="split-i">${l}</div>`).join("")
+           : `<div class="split-empty">Nothing on your path came down to a roll. Your choices removed the dice.</div>`}
+       </div>
+       <div class="split-box you">
+         <div class="split-h">You should have known</div>
+         ${you.length ? you.map((l) => `<div class="split-i">${l}</div>`).join("")
+           : `<div class="split-empty">Nothing here was hidden from you at the time you chose it.</div>`}
+       </div>
+     </div>`;
+  $("out-beats").appendChild(div);
+  advanceButton($("out-beats"), "See the design history &rarr;", true, showTimeline);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function showTimeline() {
+  const T = timeline();
+  const div = document.createElement("div");
+  div.className = "beat";
+  div.innerHTML =
+    `<div class="card">
+       <div class="card-title">Design history</div>
+       <div class="card-hint" style="margin-top:var(--space-2)">Open a row to see what the other two choices would have set up.</div>
+       <div class="tl">
+         ${T.map((t) => `
+           <div class="tl-item ${t.fired ? "fired" : ""}">
+             <div class="tl-month">${t.month}</div>
+             <div class="tl-what">${t.what}</div>
+             <div class="tl-cause">${t.cause}</div>
+             ${t.nts ? `<details class="nt"><summary>The road not taken</summary><div class="nt-body">${t.nts}</div></details>` : ""}
+           </div>`).join("")}
+       </div>
+     </div>
+     <div class="card" style="margin-top:var(--space-5)">
+       <div class="card-title">What this compressed</div>
+       <div class="aside" style="margin-top:var(--space-3)">
+         <p>Two years of development in fifteen minutes. Every probability here was invented to make the couplings visible; none is an estimate of anything real. Patent disputes, submissions and field corrections all take far longer and involve far more people than one screen can show.</p>
+         <p><b>The habit worth keeping:</b> reading a real device case, ask which earlier decision made the later failure possible.</p>
+       </div>
+       <div class="btn-row">
+         <button class="btn gold" onclick="rerollSame()">Run it again with the same choices</button>
+         <button class="btn" onclick="startGame()">Play again</button>
+       </div>
+       <div class="kbd-hint">Re-running keeps every decision and re-rolls only the dice. Do it twice to see the range you were betting in.</div>
+     </div>`;
+  $("out-beats").appendChild(div);
+  wireTerms(div);
+  div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* ==================== RE-ROLL SAME CHOICES ==================== */
+function rerollSame() {
+  const picks = Object.assign({}, S.picks);
+  S = freshState();
+  S.picks = picks;
+
+  for (let i = 0; i < STAGES.length; i++) {
+    const st = STAGES[i], o = st.options[picks[st.id]];
+    let m = o.m;
+    if (o.mIf && o.mIf.around && picks.t1 === 0) m = o.mIf.around;
+    applyMeters(m);
+    if (o.risk) S.rolls[o.risk.key] = chance(o.risk.p);
+    if (st.id === "t3" && picks.t1 === 0) S.rolls.scan = chance(0.15);
+  }
+  if (picks.t1 === 0) S.rolls.pathway = chance(1 / 3) ? "denovo" : "k510more";
+
+  applyMeters(PAYOFF_OPTS[picks.payoff].m);
+  if (picks.payoff === 2) {
+    S.rolls.hope = chance(0.4);
+    if (!S.rolls.hope) applyMeters({ sch: 14, bud: -12, risk: 2 });
+  }
+
+  if (stalled()) { S.picks.post = undefined; S.ended = true; renderOutcome(); return; }
+
+  if (picks.post === undefined) {
+    // The submission stalled last time, so this choice was never made.
+    // It didn't stall this run, so play it rather than inventing an answer.
+    S.locked = false;
+    buildMeters();
+    renderPostmarket();
+    return;
+  }
+  const po = POST_OPTS[picks.post];
+  const m = Object.assign({}, po.m);
+  if (picks.post === 0 && anySignal()) m.risk = 25;
+  applyMeters(m);
+  S.ended = true;
+  renderOutcome();
+}
+
+/* ==================== NAVIGATION ==================== */
+function startGame() {
+  S = freshState();
+  showScreen("screen-play");
+  buildMeters();
+  renderStage();
+}
+
+function goHome(e) {
+  if (e) e.preventDefault();
+  if (S && !S.ended && (S.i > 0 || S.locked)) {
+    if (!confirm("Leave the run? Your decisions will be lost.")) return;
+  }
+  S = null;
+  hideTip();
+  showScreen("screen-intro");
+}
+
+/* ==================== KEYBOARD ==================== */
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input,textarea")) return;
+  if (["1", "2", "3"].includes(e.key)) {
+    const opts = $("opts");
+    if (opts && $("screen-play").classList.contains("active")) {
+      const btn = opts.children[Number(e.key) - 1];
+      if (btn && !btn.disabled) { btn.click(); e.preventDefault(); }
+    }
+    return;
+  }
+  if (e.key === "Enter" || e.key === " ") {
+    const live = document.querySelector(".screen.active");
+    if (!live) return;
+    const r2 = live.querySelector("#rollbtn2:not([disabled])");
+    const r = live.querySelector("#rollbtn:not([disabled])");
+    const adv = [...live.querySelectorAll(".beat-advance:not([disabled])")].pop();
+    const target = r2 || r || adv;
+    if (target) { target.click(); e.preventDefault(); }
+  }
+});
+
+if (ADVANCED) $("badge").textContent = "Fictional case · advanced";
+
+/* ==================== THEME ==================== */
+(function () {
+  const root = document.documentElement;
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  root.setAttribute("data-theme", mq.matches ? "dark" : "light");
+  mq.addEventListener("change", (ev) => root.setAttribute("data-theme", ev.matches ? "dark" : "light"));
+  document.querySelector("[data-theme-toggle]").addEventListener("click", () => {
+    root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+})();
+</script>
+</body>
+</html>
