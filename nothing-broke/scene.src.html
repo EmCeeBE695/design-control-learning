@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nothing Broke — opening scene</title>
+<style>
+/* Tokens copied from Bedside-to-Market/index.html (light theme; dark for the opening card) */
+@font-face{font-family:'Inter';font-weight:400;src:url(fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:600;src:url(fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:700;src:url(fonts/inter-latin-700-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:800;src:url(fonts/inter-latin-800-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(fonts/jetbrains-mono-latin-500-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:700;src:url(fonts/jetbrains-mono-latin-700-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:800;src:url(fonts/jetbrains-mono-latin-800-normal.woff2)}
+@font-face{font-family:'Caveat';font-weight:700;src:url(fonts/caveat-latin-700-normal.woff2)}
+:root{
+  --color-bg:#f1f5f9; --color-surface:#ffffff; --color-surface-2:#f8fafc;
+  --color-border:#cbd5e1; --color-text:#0f172a; --color-text-muted:#64748b; --color-text-faint:#94a3b8;
+  --color-text-inverse:#ffffff; --color-primary:#0d9488; --color-error:#a12c7b; --color-orange:#da7101;
+  --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0f1112;font-family:var(--font-body);color:var(--color-text)}
+body.idle{cursor:none}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;
+  transform-origin:center center;background:var(--color-bg);overflow:hidden}
+.abs{position:absolute}
+
+/* ---------- opening (dark) ---------- */
+#dark{left:0;top:0;width:1920px;height:1080px;background:#0f1112;display:flex;align-items:center;justify-content:center}
+#openLine{font-size:84px;font-weight:700;letter-spacing:-.01em;color:#d0d8de;text-align:center;line-height:1.2;opacity:0;padding:0 260px;text-wrap:balance}
+
+/* ---------- cuff and limb ---------- */
+#legScene{left:0;top:0;width:1920px;height:1080px;opacity:0}
+#legSvg{position:absolute;left:0;top:0}
+.tag{position:absolute;font-weight:700;opacity:0;white-space:nowrap}
+#cuffTag{left:1090px;top:226px;font-size:38px;color:var(--color-text-muted)}
+#flowTag{left:1090px;top:560px}
+#flowTag .a{font-size:52px;color:var(--color-primary);letter-spacing:-.005em}
+#flowTag .b{font-size:32px;font-weight:600;color:var(--color-text-muted);margin-top:6px}
+
+/* ---------- timeline ---------- */
+#tl{left:0;top:0;width:1920px;height:1080px;opacity:0}
+#card{left:120px;top:60px;width:1680px;height:960px;background:var(--color-surface-2);
+  border:2px solid var(--color-border);border-radius:20px}
+#title{left:168px;top:104px;font-size:24px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-muted)}
+#legend{left:168px;top:150px;display:flex;gap:56px;font-size:26px;color:var(--color-text-muted)}
+.key{display:flex;align-items:center;gap:14px}
+.key b{color:var(--color-text);font-weight:700}
+.sw{width:34px;height:22px;border-radius:5px}
+.sw.up{background:var(--color-primary)}
+.sw.down{border:2px dashed var(--color-border)}
+.lbl{font-size:22px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.num{font-family:var(--font-mono);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.unit{font-family:var(--font-mono);font-weight:500;font-size:34px;color:var(--color-text-muted);margin-left:14px}
+#flowBlock{left:168px;top:222px}
+#flowNum{font-size:150px;color:var(--color-primary);display:inline-block;transform-origin:left center;transition:color .2s}
+#flowBlock .lbl{color:var(--color-primary);margin-bottom:6px}
+#heldPill{left:610px;top:322px;font-size:26px;font-weight:700;color:var(--color-text-muted);
+  border:2px dashed var(--color-border);border-radius:999px;padding:10px 26px;white-space:nowrap;opacity:0;transition:opacity .2s}
+#clockBlock{right:168px;top:222px;text-align:right}
+#clockBlock .lbl{color:var(--color-text-muted);margin-bottom:6px}
+#clockNum{font-size:150px;color:var(--color-text-muted)}
+#bar{left:168px;top:450px;width:1584px;height:92px}
+.seg{position:absolute;top:0;height:92px;border-radius:5px;overflow:hidden;
+  display:none;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:700;font-size:34px}
+.seg.up{background:var(--color-primary)}
+.seg.down{border:2px dashed var(--color-border);background:transparent}
+.seg span{position:absolute;left:0;right:0;text-align:center}
+.brk{position:absolute;top:108px;height:16px;border:3px solid var(--color-error);border-top:none;border-radius:0 0 6px 6px;opacity:0}
+#record{left:168px;top:672px;width:760px;height:296px;background:var(--color-surface);
+  border:2px solid var(--color-border);border-radius:16px;opacity:0;box-shadow:0 4px 12px rgba(15,23,42,.08)}
+#record .hd{position:absolute;left:36px;top:28px;font-size:22px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-muted)}
+#record .rule{position:absolute;left:36px;right:36px;height:2px;background:#e2e8f0}
+#record .fld{position:absolute;left:36px;top:112px;font-size:30px;font-weight:600;color:var(--color-text-muted)}
+#hand{position:absolute;left:36px;top:150px;width:688px;height:120px;font-family:'Caveat',cursive;font-weight:700;
+  font-size:150px;line-height:120px;color:var(--color-orange);transform:rotate(-2.5deg);transform-origin:left bottom;white-space:nowrap;padding-left:12px}
+#handClip{position:absolute;left:0;top:0;height:120px;overflow:hidden;width:0}
+#readingBox{left:1000px;top:672px;width:752px;height:296px}
+.reading{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;display:flex;flex-direction:column;justify-content:center}
+.reading .r-l{font-size:22px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-error);margin-bottom:10px}
+.reading .r-t{font-size:64px;font-weight:700;line-height:1.1}
+.reading .r-v{font-family:var(--font-mono);font-weight:800;color:var(--color-orange);font-size:120px;line-height:1.05;margin-top:6px}
+.reading .r-v.sum{font-size:60px;margin-top:22px;white-space:nowrap}
+.reading .r-v small{font-size:.55em;font-weight:500;color:var(--color-text-muted);margin-left:12px}
+
+/* ---------- ending: one blank, labelled field ---------- */
+#endScene{left:0;top:0;width:1920px;height:1080px;opacity:0}
+#endLabel{left:320px;top:392px;font-size:28px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-muted)}
+#endField{left:320px;top:446px;width:1280px;height:200px;background:var(--color-surface);
+  border:2px solid var(--color-border);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08)}
+#cursor{position:absolute;left:44px;top:50px;width:4px;height:100px;background:var(--color-primary);border-radius:2px;
+  animation:blink 1.1s steps(1,end) infinite}
+@keyframes blink{0%,55%{opacity:1}56%,100%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- cuff and limb -->
+  <div id="legScene" class="abs">
+    <svg id="legSvg" width="1920" height="1080" viewBox="0 0 1920 1080">
+      <defs>
+        <linearGradient id="dg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="140">
+          <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
+        </linearGradient>
+        <mask id="drainMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
+          <rect x="0" y="300" width="1920" height="780" fill="url(#dg)"/>
+        </mask>
+      </defs>
+      <path id="limbWarm" fill="#e6b898" stroke="#d4a283" stroke-width="3"/>
+      <path id="limbPale" fill="#dde4ec" stroke="#cbd5e1" stroke-width="3" mask="url(#drainMask)"/>
+      <ellipse id="kneecap" fill="none" stroke="rgba(15,23,42,.10)" stroke-width="3"/>
+      <rect id="cuff" rx="16" ry="16"/>
+    </svg>
+    <div id="cuffTag" class="tag">cuff</div>
+    <div id="flowTag" class="tag"><div class="a">no blood flow</div><div class="b">below the cuff</div></div>
+    <div id="flowBracket" class="abs" style="left:1046px;top:316px;width:22px;height:700px;border:4px solid var(--color-primary);border-left:none;border-radius:0 8px 8px 0;opacity:0"></div>
+  </div>
+
+  <!-- timeline -->
+  <div id="tl" class="abs">
+    <div id="card" class="abs"></div>
+    <div id="title" class="abs">Dr. Okonjo’s case</div>
+    <div id="legend" class="abs">
+      <span class="key"><span class="sw up"></span><span>cuff <b>up</b> — inflated, blood flow stopped</span></span>
+      <span class="key"><span class="sw down"></span><span>cuff <b>down</b> — deflated, blood flowing again</span></span>
+    </div>
+    <div id="flowBlock" class="abs">
+      <div class="lbl">No blood flow</div>
+      <div><span id="flowNum" class="num">0</span><span class="unit">min</span></div>
+    </div>
+    <div id="heldPill" class="abs">cuff down — count held</div>
+    <div id="clockBlock" class="abs">
+      <div class="lbl">Elapsed</div>
+      <div><span id="clockNum" class="num">0</span><span class="unit">min</span></div>
+    </div>
+    <div id="bar" class="abs"></div>
+    <div id="record" class="abs">
+      <div class="hd">Intraoperative record</div>
+      <div class="rule" style="top:96px"></div>
+      <div class="fld">Tourniquet time</div>
+      <div class="rule" style="top:262px"></div>
+      <div id="hand"><div id="handClip"><span id="handTxt"></span></div></div>
+    </div>
+    <div id="readingBox" class="abs">
+      <div class="reading" id="rd0"><div class="r-l">One reading</div><div class="r-t">last stretch</div><div class="r-v">22<small>min</small></div></div>
+      <div class="reading" id="rd1"><div class="r-l">Another reading</div><div class="r-t">longest stretch</div><div class="r-v">32<small>min</small></div></div>
+      <div class="reading" id="rd2"><div class="r-l">Or</div><div class="r-t">all of it</div><div class="r-v sum">32 + 14 + 22 = 68<small>min</small></div></div>
+    </div>
+  </div>
+
+  <!-- ending -->
+  <div id="endScene" class="abs">
+    <div id="endLabel" class="abs">Need statement</div>
+    <div id="endField" class="abs"><div id="cursor"></div></div>
+  </div>
+
+  <!-- opening (on top, fades away) -->
+  <div id="dark" class="abs"><div id="openLine">A knee, eleven years old, coming out today.</div></div>
+</div>
+
+<script>
+/* ================= Data — same case as the sim's CASE_SEGS ================= */
+const SEGS = [[32,true],[6,false],[14,true],[11,false],[22,true]];
+const TOTAL = 85;
+const RECORD_NUMBER = "22";
+const RATE = 9.5/85;                 // seconds per minute on the bar — one constant rate throughout
+
+/* ================= Beats (one space-bar press each) =================
+   Beat i plays while the picture moves from state i to state i+1.
+    0 opening line            1 cuff appears on the limb     2 cuff pumps up, colour drains
+    3 timeline card           4 cuff up (32)   5 down (6)   6 up (14)   7 down (11)   8 up (22)
+    9 record, number written  10 reading: last stretch   11 longest stretch   12 all of it
+   13 everything clears to the blank field                                                   */
+const DUR = [1.4, 1.5, 3.2, 1.1,
+             32*RATE, 6*RATE, 14*RATE, 11*RATE, 22*RATE+0.5,
+             1.9, 0.5, 0.6, 0.6, 1.8];
+const N = DUR.length;
+const FILL5 = 22*RATE;               // seconds of beat 8 spent filling; the rest is the counter landing
+
+const $ = id => document.getElementById(id);
+const clamp = (x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease = x => 1-Math.pow(1-clamp(x),3);
+const easeIO = x => { x=clamp(x); return x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2; };
+const mix = (a,b,t) => a+(b-a)*t;
+
+/* ---------------- limb drawing ---------------- */
+const CX = 800;
+function spline(pts){
+  let d='M'+pts[0][0]+','+pts[0][1];
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6];
+    const c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    d+=' C'+c1.join(',')+' '+c2.join(',')+' '+p2.join(',');
+  }
+  return d;
+}
+const ys=[-20,120,230,430,560,630,700,790,920,1010,1100];
+const hwL=[150,146,143,130,108,102,94,100,72,52,50];
+const hwR=[150,146,143,132,110,103,95,94,70,52,50];
+const L=ys.map((y,i)=>[CX-hwL[i],y]);
+const R=ys.map((y,i)=>[CX+hwR[i],y]).reverse();
+const limbD = spline(L)+' L'+spline(R).slice(1)+' Z';
+$('limbWarm').setAttribute('d',limbD);
+$('limbPale').setAttribute('d',limbD);
+const kc=$('kneecap'); kc.setAttribute('cx',CX); kc.setAttribute('cy',628); kc.setAttribute('rx',46); kc.setAttribute('ry',54);
+
+/* ---------------- timeline construction ---------------- */
+const BAR_W=1584, GAP=3, usable=BAR_W-GAP*(SEGS.length-1);
+let x=0, start=0; const segEls=[];
+SEGS.forEach(([min,up])=>{
+  const w=usable*min/TOTAL, d=document.createElement('div');
+  d.className='seg '+(up?'up':'down'); d.style.left=x+'px'; d.innerHTML='<span>'+min+'</span>';
+  $('bar').appendChild(d);
+  segEls.push({d,x,w,min,up,start,la:0}); x+=w+GAP; start+=min;
+});
+function mkBrk(x0,x1){const b=document.createElement('div');b.className='brk';b.style.left=x0+'px';b.style.width=(x1-x0)+'px';$('bar').appendChild(b);return b;}
+const BR=[[mkBrk(segEls[4].x,segEls[4].x+segEls[4].w)],
+          [mkBrk(segEls[0].x,segEls[0].x+segEls[0].w)],
+          [0,2,4].map(i=>mkBrk(segEls[i].x,segEls[i].x+segEls[i].w))];
+const IN_READING=[[4],[0],[0,2,4]];
+$('handTxt').textContent=RECORD_NUMBER;
+
+/* ================= the one drawing function =================
+   u = beats completed + progress through the current beat.  Everything on screen is a pure
+   function of u, so stepping forward, back, or jumping to a state always draws the same picture. */
+function render(u){
+  const pb = b => clamp(u-b);              // progress of beat b, 0..1
+  const tau = b => pb(b)*DUR[b];           // seconds into beat b
+
+  /* opening → limb */
+  const light=[0xf1,0xf5,0xf9], dark=[0x0f,0x11,0x12];
+  const bgT=ease(pb(1));
+  document.body.style.background='rgb('+light.map((c,i)=>Math.round(mix(dark[i],c,bgT))).join(',')+')';
+  $('dark').style.opacity=1-ease(pb(1));
+  $('dark').style.display = pb(1)>=1 ? 'none':'flex';
+  $('openLine').style.opacity = ease(pb(0)) * (1-clamp(pb(1)*2.2));
+
+  /* cuff and limb */
+  const legVis = ease(pb(1)) * (1-ease(pb(3)));
+  $('legScene').style.opacity=legVis;
+  const infl = ease(clamp(tau(2)/0.9));            // cuff inflates during the first 0.9 s of beat 2
+  const appear = ease(pb(1));
+  const cuff=$('cuff');
+  const hw = mix(154,174,infl), h = mix(100,118,infl), cy = 250 + (1-appear)*-26;
+  cuff.setAttribute('x',CX-hw); cuff.setAttribute('width',hw*2);
+  cuff.setAttribute('y',cy-h/2); cuff.setAttribute('height',h);
+  cuff.setAttribute('fill','rgba(13,148,136,'+infl+')');
+  cuff.setAttribute('stroke', infl<1 ? 'rgba(148,163,184,'+(1-infl)+')' : 'none');
+  cuff.setAttribute('stroke-width',4); cuff.setAttribute('stroke-dasharray','12 9');
+  const drain = easeIO(clamp((tau(2)-0.7)/2.3));   // colour drains downward from the cuff
+  const edge = mix(230, 1150, drain);
+  const g=$('dg'); g.setAttribute('y1',edge-70); g.setAttribute('y2',edge+70);
+  $('cuffTag').style.opacity = ease(clamp((pb(1)-0.3)/0.7)) * (1-clamp(pb(2)*4));
+  const flowIn = ease(clamp((drain-0.55)/0.45));
+  $('flowTag').style.opacity=flowIn; $('flowBracket').style.opacity=flowIn;
+
+  /* timeline: card, legend, counters, bar */
+  const tlA = ease(pb(3)) * (1-clamp(pb(13)/0.5));
+  $('tl').style.opacity=tlA; $('tl').style.display = tlA<=0?'none':'block';
+  $('tl').style.transform='translateY('+((1-ease(pb(3)))*14)+'px)';
+
+  const f=[pb(4),pb(5),pb(6),pb(7),clamp(tau(8)/FILL5)];
+  let m=0, noflow=0;
+  segEls.forEach((s,i)=>{ m+=s.min*f[i]; if(s.up) noflow+=s.min*f[i]; });
+  const done = m>=TOTAL-1e-6;
+  $('flowNum').textContent = done ? 68 : Math.floor(noflow+1e-6);
+  $('clockNum').textContent = done ? 85 : Math.floor(m+1e-6);
+  /* held: cuff is down from the moment a gap starts until the next up-block starts */
+  const held = (u>5 && u<=6) || (u>7 && u<=8);
+  $('flowNum').style.color = held ? 'var(--color-text-faint)' : 'var(--color-primary)';
+  $('heldPill').style.opacity = held ? 1 : 0;
+  const land=clamp((tau(8)-FILL5)/0.45);
+  $('flowNum').style.transform='scale('+(u>=8 ? 1+0.10*Math.sin(Math.PI*land)*(1-land*0.3) : 1)+')';
+
+  /* readings: opacity of each, with the previous one fading out first */
+  const op=[0,1,2].map(k=>{
+    const inA = k===0 ? pb(10) : clamp((pb(10+k)-0.4)/0.6);
+    const outA = 1-clamp(pb(11+k)*2.5);
+    return inA*outA;
+  });
+  const S=op.reduce((a,b)=>a+b,0);
+  [0,1,2].forEach(k=>{ $('rd'+k).style.opacity=op[k]; BR[k].forEach(b=>b.style.opacity=op[k]); });
+
+  segEls.forEach((s,i)=>{
+    s.d.style.display = f[i]>0 ? 'flex':'none';
+    s.d.style.width = (s.w*f[i])+'px';
+    const la = clamp((f[i]-0.94)/0.06);
+    const W = op.reduce((a,o,k)=>a+(IN_READING[k].includes(i)?o:0),0);
+    const al = 1-0.7*clamp(S-W);
+    if(s.up){
+      s.d.style.background='rgba(13,148,136,'+al+')';
+      s.d.style.color='rgba(255,255,255,'+(la*al)+')';
+    }else{
+      s.d.style.borderColor='rgba(203,213,225,'+al+')';
+      s.d.style.color='rgba(148,163,184,'+(la*al)+')';
+    }
+  });
+
+  /* record card + handwriting */
+  const rc = ease(clamp(tau(9)/0.5));
+  $('record').style.opacity=rc;
+  $('record').style.transform='translateY('+((1-rc)*22)+'px)';
+  $('handClip').style.width=(clamp((tau(9)-0.7)/1.0)*210)+'px';
+
+  /* ending */
+  const endA = ease(clamp((pb(13)-0.5)/0.5));
+  $('endScene').style.opacity=endA; $('endScene').style.display = endA<=0?'none':'block';
+}
+
+/* ================= stepping ================= */
+let k=0, anim=null, raf=0;
+function loop(now){
+  if(!anim){ raf=0; return; }
+  const p=(now-anim.t0)/1000/DUR[anim.k];
+  if(p>=1){ k=anim.k+1; anim=null; render(k); raf=0; return; }
+  render(anim.k+p);
+  raf=requestAnimationFrame(loop);
+}
+function next(){
+  if(anim){ k=anim.k+1; anim=null; render(k); return; }   // press while a beat is playing = finish it
+  if(k>=N) return;
+  anim={k,t0:performance.now()}; if(!raf) raf=requestAnimationFrame(loop);
+}
+function prev(){
+  if(anim){ k=anim.k; anim=null; render(k); return; }     // press while a beat is playing = undo it
+  if(k>0){ k--; render(k); }
+}
+function restart(){ anim=null; k=0; render(0); }
+
+const NEXT=[' ','Enter','ArrowRight','ArrowDown','PageDown'], PREV=['ArrowLeft','ArrowUp','PageUp','Backspace'];
+addEventListener('keydown',e=>{
+  if(e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+  if(NEXT.includes(e.key)){ e.preventDefault(); next(); }
+  else if(PREV.includes(e.key)){ e.preventDefault(); prev(); }
+  else if(e.key==='r'||e.key==='R'){ restart(); }
+  else if(e.key==='f'||e.key==='F'){
+    if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.();
+  }
+});
+
+/* fit 1920×1080 to any window; hide the mouse pointer when idle */
+function fit(){ const s=Math.min(innerWidth/1920, innerHeight/1080); $('stage').style.transform='scale('+s+')'; }
+addEventListener('resize',fit); fit();
+let idleT; function wake(){ document.body.classList.remove('idle'); clearTimeout(idleT); idleT=setTimeout(()=>document.body.classList.add('idle'),2000); }
+addEventListener('mousemove',wake); wake();
+
+/* hooks for automated checking */
+window.__u=render; window.__state=()=>({k,animating:!!anim,N});
+window.__next=next; window.__prev=prev; window.__restart=restart;
+render(0);
+</script>
+</body>
+</html>
