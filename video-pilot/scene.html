@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nothing Broke — timeline pilot</title>
+<style>
+/* Tokens copied from Bedside-to-Market/index.html (light theme) */
+@font-face{font-family:'Inter';font-weight:400;src:url(fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:600;src:url(fonts/inter-latin-600-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:700;src:url(fonts/inter-latin-700-normal.woff2)}
+@font-face{font-family:'Inter';font-weight:800;src:url(fonts/inter-latin-800-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(fonts/jetbrains-mono-latin-500-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:700;src:url(fonts/jetbrains-mono-latin-700-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:800;src:url(fonts/jetbrains-mono-latin-800-normal.woff2)}
+@font-face{font-family:'Caveat';font-weight:700;src:url(fonts/caveat-latin-700-normal.woff2)}
+:root{
+  --color-bg:#f1f5f9; --color-surface:#ffffff; --color-surface-2:#f8fafc;
+  --color-border:#cbd5e1; --color-text:#0f172a; --color-text-muted:#64748b; --color-text-faint:#94a3b8;
+  --color-text-inverse:#ffffff; --color-primary:#0d9488; --color-error:#a12c7b; --color-orange:#da7101;
+  --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--color-bg);font-family:var(--font-body);color:var(--color-text)}
+#stage{position:relative;width:1920px;height:1080px}
+.abs{position:absolute}
+
+#card{left:120px;top:60px;width:1680px;height:960px;background:var(--color-surface-2);
+  border:2px solid var(--color-border);border-radius:20px}
+#title{left:168px;top:104px;font-size:24px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-muted)}
+#legend{left:168px;top:150px;display:flex;gap:56px;font-size:26px;color:var(--color-text-muted)}
+.key{display:flex;align-items:center;gap:14px}
+.key b{color:var(--color-text);font-weight:700}
+.sw{width:34px;height:22px;border-radius:5px}
+.sw.up{background:var(--color-primary)}
+.sw.down{border:2px dashed var(--color-border)}
+
+.lbl{font-size:22px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.num{font-family:var(--font-mono);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.unit{font-family:var(--font-mono);font-weight:500;font-size:34px;color:var(--color-text-muted);margin-left:14px}
+#flowBlock{left:168px;top:222px}
+#flowNum{font-size:150px;color:var(--color-primary);display:inline-block;transform-origin:left center}
+#flowBlock .lbl{color:var(--color-primary);margin-bottom:6px}
+#heldPill{left:610px;top:322px;font-size:26px;font-weight:700;color:var(--color-text-muted);
+  border:2px dashed var(--color-border);border-radius:999px;padding:10px 26px;white-space:nowrap}
+#clockBlock{right:168px;top:222px;text-align:right}
+#clockBlock .lbl{color:var(--color-text-muted);margin-bottom:6px}
+#clockNum{font-size:150px;color:var(--color-text-faint)}
+
+#bar{left:168px;top:450px;width:1584px;height:92px}
+.seg{position:absolute;top:0;height:92px;border-radius:5px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:700;font-size:34px}
+.seg.up{background:var(--color-primary);color:var(--color-text-inverse)}
+.seg.down{border:2px dashed var(--color-border);color:var(--color-text-faint);background:transparent}
+.seg span{position:absolute;left:0;right:0;text-align:center}
+
+.brk{position:absolute;top:108px;height:16px;border:3px solid var(--color-error);border-top:none;
+  border-radius:0 0 6px 6px;opacity:0}
+
+#record{left:168px;top:672px;width:760px;height:296px;background:var(--color-surface);
+  border:2px solid var(--color-border);border-radius:16px;opacity:0;
+  box-shadow:0 4px 12px rgba(15,23,42,.08)}
+#record .hd{position:absolute;left:36px;top:28px;font-size:22px;font-weight:800;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--color-text-muted)}
+#record .rule{position:absolute;left:36px;right:36px;height:2px;background:#e2e8f0}
+#record .fld{position:absolute;left:36px;top:112px;font-size:30px;font-weight:600;color:var(--color-text-muted)}
+#hand{position:absolute;left:36px;top:150px;width:688px;height:120px;font-family:'Caveat',cursive;font-weight:700;
+  font-size:150px;line-height:120px;color:var(--color-orange);transform:rotate(-2.5deg);transform-origin:left bottom;
+  white-space:nowrap;padding-left:12px}
+#handClip{position:absolute;left:0;top:0;height:120px;overflow:hidden;width:0}
+
+#readingBox{left:1000px;top:672px;width:752px;height:296px}
+.reading{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;display:flex;flex-direction:column;justify-content:center}
+.reading .r-l{font-size:22px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--color-error);margin-bottom:10px}
+.reading .r-t{font-size:64px;font-weight:700;line-height:1.1}
+.reading .r-v{font-family:var(--font-mono);font-weight:800;color:var(--color-orange);font-size:120px;line-height:1.05;margin-top:6px}
+.reading .r-v.sum{font-size:60px;margin-top:22px;white-space:nowrap}
+.reading .r-v small{font-size:.55em;font-weight:500;color:var(--color-text-muted);margin-left:12px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="card" class="abs"></div>
+  <div id="title" class="abs">Dr. Okonjo’s case</div>
+  <div id="legend" class="abs">
+    <span class="key"><span class="sw up"></span><span>cuff <b>up</b> — inflated, blood flow stopped</span></span>
+    <span class="key"><span class="sw down"></span><span>cuff <b>down</b> — deflated, blood flowing again</span></span>
+  </div>
+
+  <div id="flowBlock" class="abs">
+    <div class="lbl">No blood flow</div>
+    <div><span id="flowNum" class="num">0</span><span class="unit">min</span></div>
+  </div>
+  <div id="heldPill" class="abs">cuff down — count held</div>
+  <div id="clockBlock" class="abs">
+    <div class="lbl">Elapsed</div>
+    <div><span id="clockNum" class="num">0</span><span class="unit">min</span></div>
+  </div>
+
+  <div id="bar" class="abs"></div>
+
+  <div id="record" class="abs">
+    <div class="hd">Intraoperative record</div>
+    <div class="rule" style="top:96px"></div>
+    <div class="fld">Tourniquet time</div>
+    <div class="rule" style="top:262px"></div>
+    <div id="hand"><div id="handClip"><span id="handTxt"></span></div></div>
+  </div>
+
+  <div id="readingBox" class="abs">
+    <div class="reading" id="rd0"><div class="r-l">One reading</div><div class="r-t">last stretch</div><div class="r-v">22<small>min</small></div></div>
+    <div class="reading" id="rd1"><div class="r-l">Another reading</div><div class="r-t">longest stretch</div><div class="r-v">32<small>min</small></div></div>
+    <div class="reading" id="rd2"><div class="r-l">Or</div><div class="r-t">all of it</div><div class="r-v sum">32 + 14 + 22 = 68<small>min</small></div></div>
+  </div>
+</div>
+
+<script>
+/* ===== Data — same case as the sim's CASE_SEGS ===== */
+const SEGS = [[32,true],[6,false],[14,true],[11,false],[22,true]];
+const TOTAL = 85;
+const RECORD_NUMBER = "32";   // the one number the nurse writes — see note in hand-off message
+
+/* ===== Timing (seconds) ===== */
+const T = {
+  fadeIn: [0.0, 0.6],
+  fillStart: 0.6, fillEnd: 10.1,              // 85 minutes over 9.5 s, one constant rate
+  record: [10.6, 11.2],
+  write: [11.4, 12.4],
+  read: [[12.9,13.9],[13.9,14.9],[14.9,15.9]],
+  END: 16.0
+};
+
+const BAR_W = 1584, GAP = 3;
+const usable = BAR_W - GAP*(SEGS.length-1);
+const $ = id => document.getElementById(id);
+const clamp = (x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease = x => 1-Math.pow(1-clamp(x),3);
+const span = (t,[a,b]) => clamp((t-a)/(b-a));
+
+/* build segments */
+let x = 0, start = 0; const segEls = [];
+SEGS.forEach(([min,up],i)=>{
+  const w = usable*min/TOTAL;
+  const d = document.createElement('div');
+  d.className = 'seg '+(up?'up':'down');
+  d.style.left = x+'px';
+  d.innerHTML = '<span>'+min+'</span>';
+  $('bar').appendChild(d);
+  segEls.push({d, x, w, min, up, start, lab:d.firstChild});
+  x += w+GAP; start += min;
+});
+/* brackets under the bar */
+const brk = [];
+function mkBrk(x0,x1){const b=document.createElement('div');b.className='brk';b.style.left=x0+'px';b.style.width=(x1-x0)+'px';$('bar').appendChild(b);return b;}
+const upIdx = SEGS.map((s,i)=>s[1]?i:-1).filter(i=>i>=0);
+const B_last = [mkBrk(segEls[4].x, segEls[4].x+segEls[4].w)];
+const B_long = [mkBrk(segEls[0].x, segEls[0].x+segEls[0].w)];
+const B_all  = upIdx.map(i=>mkBrk(segEls[i].x, segEls[i].x+segEls[i].w));
+const BR = [B_last,B_long,B_all];
+
+$('handTxt').textContent = RECORD_NUMBER;
+
+function setT(t){
+  /* intro */
+  const a = ease(span(t,T.fadeIn));
+  ['card','title','legend','flowBlock','clockBlock','bar'].forEach(id=>{
+    $(id).style.opacity = a;
+  });
+  $('card').style.transform = 'translateY('+((1-a)*14)+'px)';
+
+  /* minutes elapsed on the bar */
+  const m = TOTAL * clamp((t-T.fillStart)/(T.fillEnd-T.fillStart));
+  let noflow = 0, inGap = false, active = -1;
+  segEls.forEach((s,i)=>{
+    const f = clamp((m-s.start)/s.min);
+    s.d.style.width = (s.w*f)+'px';
+    s.d.style.display = (f>0)?'flex':'none';
+    if (f>0 && f<1) active = i;
+    if (s.up) noflow += s.min*f;
+    /* label fades in just after the block completes (colour alpha, not opacity, to avoid layer banding) */
+    const doneAt = T.fillStart + (s.start+s.min)/TOTAL*(T.fillEnd-T.fillStart);
+    const la = clamp((t-doneAt)/0.25);
+    s.la = la;
+  });
+  /* held state: while a down segment is growing */
+  inGap = active>=0 && !segEls[active].up && m<TOTAL;
+  const flowVal = (m>=TOTAL) ? 68 : Math.floor(noflow+1e-6);
+  const clockVal = (m>=TOTAL) ? 85 : Math.floor(m+1e-6);
+  $('flowNum').textContent = flowVal;
+  $('clockNum').textContent = clockVal;
+  $('flowNum').style.color = inGap ? 'var(--color-text-faint)' : 'var(--color-primary)';
+  $('clockNum').style.color = 'var(--color-text-muted)';
+  $('heldPill').style.opacity = inGap ? 1 : 0;
+
+  /* landing pop on final value */
+  const land = clamp((t-T.fillEnd)/0.45);
+  const pop = (t>=T.fillEnd) ? 1+0.10*Math.sin(Math.PI*land)*(1-land*0.3) : 1;
+  $('flowNum').style.transform = 'scale('+pop+')';
+
+  /* record card */
+  const r = ease(span(t,T.record));
+  $('record').style.opacity = r;
+  $('record').style.transform = 'translateY('+((1-r)*22)+'px)';
+  /* handwriting reveal */
+  const wv = span(t,T.write);
+  $('handClip').style.width = (wv*100)+'%';
+  $('handClip').style.width = (wv*640)+'px';
+
+  /* readings flash in turn */
+  const dim = (id)=>{ $(id).style.opacity = 0; };
+  let activeR = -1;
+  T.read.forEach((rg,i)=>{ if (t>=rg[0] && t<rg[1]) activeR = i; });
+  if (t>=T.read[2][1]) activeR = 2;   // hold on the last reading
+  [0,1,2].forEach(i=>{
+    const rg = T.read[i];
+    let o = 0;
+    if (i===activeR) o = clamp((t-rg[0])/0.18) * (i<2 ? clamp((rg[1]-t)/0.18) : 1);
+    $('rd'+i).style.opacity = o;
+    BR[i].forEach(b=>b.style.opacity = o);
+  });
+  /* dim the segments that are not part of the current reading (colour alpha, not layer opacity) */
+  segEls.forEach((s,i)=>{
+    let al = 1;
+    if (activeR>=0 && t>=T.read[0][0]) {
+      const inRead = (activeR===0) ? i===4 : (activeR===1) ? i===0 : s.up;
+      const keep = inRead ? 1 : 0.3;
+      al = 1 - (1-keep)*clamp((t-T.read[activeR][0])/0.18);
+    }
+    if (s.up) {
+      s.d.style.background = 'rgba(13,148,136,'+al+')';
+      s.d.style.color = 'rgba(255,255,255,'+(s.la*al)+')';
+    } else {
+      s.d.style.borderColor = 'rgba(203,213,225,'+al+')';
+      s.d.style.color = 'rgba(148,163,184,'+(s.la*al)+')';
+    }
+  });
+}
+window.setT = setT;
+window.END = T.END;
+setT(0);
+</script>
+</body>
+</html>
