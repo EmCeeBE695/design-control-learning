@@ -328,7 +328,7 @@ table.fmea tbody td:first-child{font-weight:600;color:var(--color-text)}
     
     <button class="menu-btn" id="menu-btn" onclick="toggleMobileSidebar()" aria-label="Open device menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <div class="topbar-spacer"></div>
-    <span class="topbar-badge">ISO 14971</span>
+    <span class="topbar-badge">FMEA · ISO 14971 context</span>
     <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -352,7 +352,7 @@ table.fmea tbody td:first-child{font-weight:600;color:var(--color-text)}
       </div>
       <div style="padding:var(--space-2) var(--space-4) var(--space-4)">
         <p style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.6">
-          Reports pulled from MAUDE (Manufacturer and User Facility Device Experience). Each adverse event is scored using ISO 14971 principles: Severity × Occurrence × Detectability = RPN.
+          Reports pulled from MAUDE (Manufacturer and User Facility Device Experience). Each failure mode is scored with a conventional FMEA risk priority number: Severity × Occurrence × Detectability = RPN. RPN is common industry practice, not something ISO 14971 prescribes; ISO 14971 asks you to estimate risk from severity and probability of harm, with criteria you define.
         </p>
       </div>
     </aside>
@@ -485,7 +485,7 @@ const DEVICES = [
   { name: "Ventilator", code: "CBK", productCode: "CBK", label: "Ventilators", search: "ventilator" },
 ];
 
-// ==================== SCORING LOGIC (ISO 14971-inspired) ====================
+// ==================== SCORING LOGIC (conventional FMEA RPN; not prescribed by ISO 14971) ====================
 // Severity based on event_type
 function scoreSeverity(eventType) {
   const et = (eventType || '').toLowerCase();
@@ -859,7 +859,7 @@ function openDrawer(idx) {
     <div class="iso-section">
       <div class="iso-section-title">Score Rationale</div>
       <div class="iso-field">
-        <div class="iso-label">Severity Basis (ISO 14971 Table C.2)</div>
+        <div class="iso-label">Severity Basis (illustrative 10-point scale)</div>
         <div class="iso-value">${getSeverityRationale(row.severity, row.eventType)}</div>
       </div>
       <div class="iso-field">
@@ -872,9 +872,9 @@ function openDrawer(idx) {
       </div>
     </div>
 
-    <!-- Risk Controls (ISO 14971 Clause 6) -->
+    <!-- Risk Controls (ISO 14971:2019 §7.1) -->
     <div class="iso-section">
-      <div class="iso-section-title">Suggested Risk Controls (ISO 14971 Cl. 6)</div>
+      <div class="iso-section-title">Suggested Risk Controls (ISO 14971:2019 §7.1 priority order)</div>
       ${getRiskControls(row).map(c => `
         <div class="iso-field">
           <div class="iso-label">${c.type}</div>
@@ -905,10 +905,10 @@ function closeDrawer() {
 
 // ==================== RATIONALE HELPERS ====================
 function getSeverityRationale(score, eventType) {
-  if (score >= 9) return `Score ${score}/10: Death or permanent impairment reported. Highest severity per ISO 14971 Annex C. Regulatory threshold for immediate CAPA.`;
-  if (score >= 7) return `Score ${score}/10: Serious injury requiring medical intervention. Corresponds to ISO 14971 "serious" harm category. Triggers MDR reporting obligation under 21 CFR 803.`;
-  if (score >= 4) return `Score ${score}/10: Device malfunction without direct patient harm in this sample, but potential for escalation. Moderate severity per ISO 14971 scale.`;
-  return `Score ${score}/10: Minor or no patient impact. Low severity category per ISO 14971 Annex C.`;
+  if (score >= 9) return `Score ${score}/10: Death or permanent impairment reported. Highest severity on this scale.`;
+  if (score >= 7) return `Score ${score}/10: Serious injury requiring medical intervention. Serious injury; for the manufacturer, events like this are MDR-reportable under 21 CFR 803.`;
+  if (score >= 4) return `Score ${score}/10: Device malfunction without direct patient harm in this sample, but potential for escalation. Moderate severity on this scale.`;
+  return `Score ${score}/10: Minor or no patient impact. Low severity on this scale.`;
 }
 
 function getOccurrenceRationale(score, count) {
@@ -927,7 +927,7 @@ function getDetectabilityRationale(score, failureMode) {
 
 function getRiskControls(row) {
   const controls = [];
-  if (row.severity >= 8) controls.push({ type: '① Inherent Safety (Design)', action: 'Redesign to eliminate hazard at source. Consider hardware interlocks, fail-safe defaults, and redundant critical circuits per ISO 14971 Clause 6.2.' });
+  if (row.severity >= 8) controls.push({ type: '① Inherent Safety (Design)', action: 'Redesign to eliminate hazard at source. Consider hardware interlocks, fail-safe defaults, and redundant critical circuits per ISO 14971:2019 §7.1.' });
   if (row.occurrence >= 6) controls.push({ type: '② Protective Measures', action: 'Add in-device protection: watchdog timers, over-current protection, software input validation. Align with IEC 62304 (software) or IEC 60601-1 (electrical safety) as applicable.' });
   if (row.detectability >= 6) controls.push({ type: '③ Information for Safety', action: 'Update IFU and labeling per 21 CFR 801. Add warning in labeling for this failure mode. Train users on recognition and response procedure.' });
   if (row.rpn >= 125) controls.push({ type: '④ Post-Market Surveillance', action: 'Establish signal detection threshold in PMS plan (ISO 13485 Clause 8.2.1). Set up automatic MAUDE trend monitoring via openFDA API. Define MDR reporting trigger under 21 CFR 803.' });

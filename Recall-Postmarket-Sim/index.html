@@ -314,7 +314,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
     </a>
     <button class="menu-btn" id="menu-btn" onclick="toggleMobileSidebar()" aria-label="Open scenario menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <div class="topbar-spacer"></div>
-    <span class="topbar-badge">21 CFR 803 · 806 · 7 · 820.100</span>
+    <span class="topbar-badge">21 CFR 803 · 806 · 7 · QMSR</span>
     <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
     <a href="../" class="back-btn" style="margin-left:8px;">&#8592; Learning Hub</a>
   </header>
@@ -343,7 +343,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
         <div class="reg-ref"><b>21 CFR 803</b> — Medical Device Reporting. Deaths &amp; serious injuries: 30 calendar days. Malfunctions likely to cause/contribute to death or serious injury if they recur: 30 days. Events needing remedial action against an unreasonable risk of substantial public-health harm: <b>5 work days</b> (803.53).</div>
         <div class="reg-ref"><b>21 CFR 7</b> — Recalls (voluntary). You initiate and run a health hazard evaluation (7.41); <b>FDA assigns the class</b>. Class I: reasonable probability of serious adverse health consequences or death. II: temporary/reversible, or remote probability of serious. III: not likely to cause adverse health consequences.</div>
         <div class="reg-ref"><b>21 CFR 806</b> — Report corrections &amp; removals made to reduce a risk to health within <b>10 working days</b> of initiating. Non-reportable ones still get records (806.20).</div>
-        <div class="reg-ref"><b>21 CFR 820.100</b> — CAPA: analyze quality data, investigate root cause, act to correct <i>and</i> prevent recurrence, verify effectiveness. Complaints flow in via 820.198.</div>
+        <div class="reg-ref"><b>QMSR / ISO 13485:2016 §8.5.2–8.5.3</b> — CAPA: analyze quality data, investigate root cause, act to correct <i>and</i> prevent recurrence, verify effectiveness. Complaints flow in via complaint handling (ISO 13485 §8.2.2).</div>
       </div>
       <div class="sidebar-divider"></div>
       <div class="sidebar-note" style="color:var(--color-text-faint)">
@@ -365,7 +365,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
           <circle cx="50" cy="34" r="0.8" fill="currentColor"/>
         </svg>
         <div class="empty-title">You are the postmarket surveillance lead.</div>
-        <div class="empty-sub">Your company's cleared glucose meter, <b>VeriGluc Home</b>, has been on the market for 14 months. Complaints arrive over the next 90 simulated days — most are noise, a few are a real safety signal. Triage each report, make the MDR call under 21 CFR 803, decide when to escalate, run the recall decision under 21 CFR 7 &amp; 806, and close the loop with a CAPA under 820.100. Wrong triage lets harm accumulate in the field. Over-reporting burns your team and your credibility. Both are graded.</div>
+        <div class="empty-sub">Your company's cleared glucose meter, <b>VeriGluc Home</b>, has been on the market for 14 months. Complaints arrive over the next 90 simulated days — most are noise, a few are a real safety signal. Triage each report, make the MDR call under 21 CFR 803, decide when to escalate, run the recall decision under 21 CFR 7 &amp; 806, and close the loop with a CAPA (ISO 13485 §8.5.2). Wrong triage lets harm accumulate in the field. Over-reporting burns your team and your credibility. Both are graded.</div>
         <button class="load-btn" onclick="startRun()">Start the 90-day run →</button>
       </div>
 
@@ -400,7 +400,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
               <span class="flow-step" data-loop="triage"><b>1</b> Triage</span><span class="flow-arrow">→</span>
               <span class="flow-step" data-loop="report"><b>2</b> Report (803)</span><span class="flow-arrow">→</span>
               <span class="flow-step" data-loop="recall"><b>3</b> Recall (7/806)</span><span class="flow-arrow">→</span>
-              <span class="flow-step" data-loop="capa"><b>4</b> CAPA (820.100)</span>
+              <span class="flow-step" data-loop="capa"><b>4</b> CAPA (ISO 13485 §8.5)</span>
             </div>
           </div>
           <div id="phase-area"></div>
@@ -410,7 +410,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
           <div class="card-header" style="flex-wrap:wrap">
             <div>
               <div class="card-title">Incoming Reports</div>
-              <div class="card-hint" id="reports-hint">Disposition every report to advance — 820.198 says every complaint gets evaluated</div>
+              <div class="card-hint" id="reports-hint">Disposition every report to advance — every complaint gets evaluated (ISO 13485 §8.2.2)</div>
             </div>
           </div>
           <div id="report-list"></div>
@@ -460,7 +460,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 // ==================== REFERENCE DATA ====================
 // MDR decision options shown for every report (21 CFR 803)
 const MDR_OPTS = [
-  { key:'none', label:'Not MDR-reportable', tag:'Evaluate & document in the complaint file — 21 CFR 820.198' },
+  { key:'none', label:'Not MDR-reportable', tag:'Evaluate & document in the complaint file — ISO 13485 §8.2.2' },
   { key:'mal30', label:'Malfunction MDR — 30 calendar days', tag:'Would be likely to cause/contribute to death or serious injury if it recurred — 803.50' },
   { key:'inj30', label:'Serious injury MDR — 30 calendar days', tag:'Life-threatening, permanent damage, or needed intervention to prevent it — 803.3 / 803.50' },
   { key:'death30', label:'Death MDR — 30 calendar days', tag:'Information reasonably suggests the device may have caused or contributed — 803.50' },
@@ -479,10 +479,10 @@ const REPORTS = [
   text:'A pharmacy returns a meter: the customer "gets E-4 with every strip and gave up." No injury claimed.',
   followup:'Your complaint unit tests the returned meter: it reads control solutions within spec. The E-4 error reproduces only when a strip is inserted upside down — exactly what the IFU says E-4 means.',
   truthSignal:false,
-  triageWhy:'<b>Noise.</b> The device performed to specification; this is a use problem, not a device problem, and it does not match any pattern. It still gets a complaint record and evaluation under 820.198 — "noise" never means "ignore."',
+  triageWhy:'<b>Noise.</b> The device performed to specification; this is a use problem, not a device problem, and it does not match any pattern. It still gets a complaint record and evaluation under complaint handling (ISO 13485 §8.2.2) — "noise" never means "ignore."',
   best:'none',
   mdr:{
-    none:{pts:10, cls:'good', fb:'Correct. The device performed as designed and no one was hurt. Document the evaluation in the complaint file (820.198). If upside-down strips become a <i>pattern</i>, that is use-related risk data for human factors — a different loop.'},
+    none:{pts:10, cls:'good', fb:'Correct. The device performed as designed and no one was hurt. Document the evaluation in the complaint file (ISO 13485 §8.2.2). If upside-down strips become a <i>pattern</i>, that is use-related risk data for human factors — a different loop.'},
     mal30:{pts:3, cls:'mid', burden:true, fb:'Over-filed. E-4 on an upside-down strip is the device working correctly, not a malfunction. Unnecessary MDRs are not free: each one costs investigation time and dilutes the signal FDA (and your own trending) can see.'},
     inj30:{pts:0, cls:'bad', burden:true, fb:'No injury was reported or suggested. This filing misstates the event.'},
     death30:{pts:0, cls:'bad', burden:true, fb:'No death is involved. This filing misstates the event.'},
@@ -498,7 +498,7 @@ const REPORTS = [
   triageWhy:'<b>Noise.</b> Damage from a drop, with the device still performing to spec, is not a failure pattern. Complaint record, evaluation, done.',
   best:'none',
   mdr:{
-    none:{pts:10, cls:'good', fb:'Correct. No malfunction (the device meets spec; the damage came from impact) and no harm. 820.198 record and close.'},
+    none:{pts:10, cls:'good', fb:'Correct. No malfunction (the device meets spec; the damage came from impact) and no harm. Complaint record and close.'},
     mal30:{pts:3, cls:'mid', burden:true, fb:'A cracked case from a counter-height drop is not a device malfunction — the device did not fail to meet its specifications or perform as intended. Over-filing burns hours and blurs your own trend data.'},
     inj30:{pts:0, cls:'bad', burden:true, fb:'No injury occurred or was threatened here.'},
     death30:{pts:0, cls:'bad', burden:true, fb:'No death is involved.'},
@@ -530,7 +530,7 @@ const REPORTS = [
   triageWhy:'<b>Noise</b> — a real quality grumble, but no plausible path to patient harm and no connection to the reading-accuracy thread. Feed it to routine quality trending, not the safety signal file.',
   best:'none',
   mdr:{
-    none:{pts:10, cls:'good', fb:'Correct. No malfunction affecting performance, no harm, no reasonable path to harm. Complaint records, trend in routine quality data (820.100(a) does want you analyzing this stream too — just not as a safety signal).'},
+    none:{pts:10, cls:'good', fb:'Correct. No malfunction affecting performance, no harm, no reasonable path to harm. Complaint records, trend in routine quality data (ISO 13485 §8.4 analysis of data does want you analyzing this stream too — just not as a safety signal).'},
     mal30:{pts:3, cls:'mid', burden:true, fb:'A stiff latch within tolerance is not a reportable malfunction — recurrence would not plausibly cause or contribute to death or serious injury.'},
     inj30:{pts:0, cls:'bad', burden:true, fb:'No injury alleged.'},
     death30:{pts:0, cls:'bad', burden:true, fb:'No death involved.'},
@@ -696,7 +696,7 @@ const RECALL_DECISIONS = [
 
 const CAPA_DECISIONS = [
 {
-  id:'c1', kicker:'Day 65 — 21 CFR 820.100', title:'State the root cause',
+  id:'c1', kicker:'Day 65 — CAPA (ISO 13485 §8.5.2)', title:'State the root cause',
   brief:'The recall is running. Now the CAPA has to name the root cause. The investigation record: v3.2 added a fixed-point overflow guard for a new strip type; the guard clamps any glucose value above 400 mg/dL into the normal display range. The change was classified "minor" under the software change-control SOP, so regression testing covered only 40–250 mg/dL. Verification on the original release (v3.0) had tested the full claimed range of 20–600.',
   opts:[
     { key:'process', label:'Change control classified the v3.2 algorithm change as "minor," so regression testing never covered the full claimed measuring range — the defect shipped untested', tag:'Process-level cause', pts:15, cls:'good',
@@ -724,7 +724,7 @@ const CAPA_DECISIONS = [
   ptsPer:5,
 },
 {
-  id:'c3', kicker:'820.100(a) — closing the loop', title:'When does this CAPA close?',
+  id:'c3', kicker:'ISO 13485 §8.5.2 — closing the loop', title:'When does this CAPA close?',
   brief:'Six weeks later: firmware v3.3 is deployed to 71% of fielded units, the revised SOP is live, and the automated full-range suite runs on every build. The quality manager wants the CAPA off the aging report. When do you close it?',
   opts:[
     { key:'verify', label:'Close only when effectiveness is verified: full-range regression passing on every build, falsely-low-reading complaints at zero over a defined monitoring window, and recall effectiveness checks meeting the strategy’s targets', tag:'Evidence, then closure', pts:15, cls:'good',
@@ -791,7 +791,7 @@ const PHASES = [
   { key:'w1', name:'Surveillance — Wave 2', sub:'Days 15–30' },
   { key:'w2', name:'Surveillance — Wave 3', sub:'Days 31–45' },
   { key:'recall', name:'Recall Decisions', sub:'21 CFR 7 · 806' },
-  { key:'capa', name:'CAPA', sub:'21 CFR 820.100' },
+  { key:'capa', name:'CAPA', sub:'QMSR · ISO 13485 §8.5' },
   { key:'debrief', name:'Debrief', sub:'Day 90' },
 ];
 
@@ -860,7 +860,7 @@ function renderReports(){
   }
   document.getElementById('report-list').innerHTML = html;
   document.getElementById('reports-hint').textContent = (S.phase === 'wave')
-    ? 'Disposition every report to advance — 820.198 says every complaint gets evaluated'
+    ? 'Disposition every report to advance — every complaint gets evaluated (ISO 13485 §8.2.2)'
     : 'Surveillance record — click any report to review your calls';
 }
 
@@ -1114,7 +1114,7 @@ function toRecall(){
 function toCapa(){
   S.phase = 'capa';
   S.day = 65;
-  logAction(65, 'CAPA opened under 820.100 — recall running in parallel');
+  logAction(65, 'CAPA opened (ISO 13485 §8.5.2) — recall running in parallel');
   renderAll();
 }
 
@@ -1161,7 +1161,7 @@ function renderDrawer(){
   // ---------- STEP 1: TRIAGE ----------
   html += `<div class="step-box">
     <div class="step-head"><div class="step-num ${st.triageDone?'done':''}">${st.triageDone?'✓':'1'}</div><div class="step-title">Triage — signal or noise?</div></div>
-    <div class="step-prompt">Does this report belong on the safety <b>signal board</b> (a potential trend toward patient harm), or is it routine complaint <b>noise</b>? Either way it gets a complaint record under 820.198 — triage decides what your trending sees.</div>
+    <div class="step-prompt">Does this report belong on the safety <b>signal board</b> (a potential trend toward patient harm), or is it routine complaint <b>noise</b>? Either way it gets a complaint record (ISO 13485 §8.2.2) — triage decides what your trending sees.</div>
     <div class="chip-row">`;
   for (const [kind, label] of [['signal','Signal — flag to the trend file'],['noise','Noise — routine complaint handling']]){
     let cls = 'chip';
@@ -1281,7 +1281,7 @@ function renderDebrief(){
       <div class="score-row"><span>MDR decisions (803)</span><span class="score-pts">${mdrPts} / ${mdrMax}</span></div>
       <div class="score-row"><span>Day-30 escalation call</span><span class="score-pts">${S.w2.pts} / ${w2Max}</span></div>
       <div class="score-row"><span>Recall decisions (7 / 806)</span><span class="score-pts">${recPts} / ${recMax}</span></div>
-      <div class="score-row"><span>CAPA (820.100)</span><span class="score-pts">${capaPts} / ${capaMax}</span></div>
+      <div class="score-row"><span>CAPA (ISO 13485 §8.5)</span><span class="score-pts">${capaPts} / ${capaMax}</span></div>
       <div class="score-row"><span>Total</span><span class="score-pts">${total} / ${MAX_SCORE} · ${pct}% · <span class="debrief-grade">${grade}</span></span></div>
     </div>
     <div>
@@ -1304,7 +1304,7 @@ function renderDebrief(){
   html += `<div class="rp-section" style="margin-top:var(--space-5)"><div class="rp-section-title">Your run, day by day</div>
     ${S.actionLog.map(a=>`<div class="tl-row"><span class="tl-day">Day ${a.day}</span><span class="tl-what">${a.what}</span></div>`).join('')}</div>`;
 
-  html += `<div class="feedback fb-info" style="margin-top:var(--space-4)"><b>The loop, one more time.</b> Triage decides what your system can see. 803 reporting decides what FDA can see — on clocks of 30 calendar days, or 5 work days once remedial action is on the table. The recall (21 CFR 7, reported under 806 within 10 working days) removes the hazard from the field; FDA assigns the class from your health hazard evaluation. And the CAPA (820.100) is what makes the whole episode <i>not happen again</i> — correction fixes the product, corrective action fixes the cause, preventive action sweeps for the cause elsewhere, and none of it closes without verified effectiveness.</div>
+  html += `<div class="feedback fb-info" style="margin-top:var(--space-4)"><b>The loop, one more time.</b> Triage decides what your system can see. 803 reporting decides what FDA can see — on clocks of 30 calendar days, or 5 work days once remedial action is on the table. The recall (21 CFR 7, reported under 806 within 10 working days) removes the hazard from the field; FDA assigns the class from your health hazard evaluation. And the CAPA (ISO 13485 §8.5) is what makes the whole episode <i>not happen again</i> — correction fixes the product, corrective action fixes the cause, preventive action sweeps for the cause elsewhere, and none of it closes without verified effectiveness.</div>
 
   <div class="card-hint" style="margin-top:var(--space-4);line-height:1.7">Reminder: this is a framework trainer. Real postmarket decisions involve medical reviewers, regulatory counsel, FDA district coordinators, and far messier information — and real timelines, causality assessments, and recall logistics do not fit in a browser tab. Harm counts here are pedagogical estimates, not epidemiology.</div>
 

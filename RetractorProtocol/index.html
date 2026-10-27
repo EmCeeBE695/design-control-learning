@@ -347,7 +347,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <div class="station-badge">Station 1 of 9 — The Brief</div>
 <h1 class="station-title">The Brief</h1>
 <p class="station-context">Your team has developed a cam-locking surgical retractor with a locking elbow that engages under load to hold a retractor blade in position. The predicate device has a reported mean locking force of 10 Nm. You're pursuing 510(k) clearance — which means demonstrating substantial equivalence, not superiority.</p>
-<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>21 CFR 820.30</strong> — Design controls require documented verification and validation. Every performance claim must trace to an objective test.</div></details>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>QMSR / ISO 13485:2016 §7.3.6–7.3.7</strong> — Design controls require documented verification and validation. Every performance claim must trace to an objective test.</div></details>
 <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-4);">What are you trying to prove about your device's locking force?</p>
 <div class="choice-group" id="s1-choices">
   <button class="choice-card" data-correct="true" onclick="selectCard(this,'s1')">
@@ -800,7 +800,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <div class="station-badge">Station 8 of 9 — Defend Your Analysis</div>
 <h1 class="station-title">Defend Your Analysis</h1>
 <p class="station-context">Three questions from an FDA reviewer. Answer each before the next unlocks. Translate your decisions into regulatory language.</p>
-<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>21 CFR 820.72</strong> — Test method documentation must permit re-performance. Statistical rationales must be traceable to source data.</div></details>
+<details class="reg-note"><summary>📋 Reg Note</summary><div class="reg-note-body"><strong>QMSR / ISO 13485:2016 §7.3.6</strong> — Verification plans document methods, acceptance criteria and, as appropriate, statistical techniques with a rationale for sample size.</div></details>
 <div class="reviewer-wrap">
   <div class="reviewer-card-block" id="rc-block-1">
     <div class="rv-hdr"><div class="rv-from">FDA Reviewer Memo — Q1 of 3</div><div class="rv-subj">Please justify your sample size selection.</div></div>
@@ -810,12 +810,12 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
         <button class="choice-card" data-correct="true" onclick="selectCard(this,'rc1')">
           <div class="choice-label">Full Statistical Justification</div>
           <div class="choice-desc">N was calculated using one-tailed z-test with α = 0.05, power = selected %, σ = 1.2 Nm from feasibility (Doc. FAB-2023-04), and μ₀ = lower bound spec</div>
-          <div class="choice-feedback fb-green">✓ Complete answer: α, power, sigma source, spec limit — all traceable. This is what FDA requires under 21 CFR 820.72.</div>
+          <div class="choice-feedback fb-green">✓ Complete answer: α, power, sigma source, spec limit — all traceable. This is the sample-size rationale ISO 13485 §7.3.6 asks for (incorporated by the QMSR).</div>
         </button>
         <button class="choice-card" onclick="selectCard(this,'rc1')">
           <div class="choice-label">Convention</div>
           <div class="choice-desc">N = 15 is standard for this type of device test</div>
-          <div class="choice-feedback fb-amber">⚠ "Convention" is not a statistical rationale. Without a calculation traceable to α, power, σ, and the spec limit, this does not satisfy 21 CFR 820.72.</div>
+          <div class="choice-feedback fb-amber">⚠ "Convention" is not a statistical rationale. Without a calculation traceable to α, power, σ, and the spec limit, this is not the sample-size rationale ISO 13485 §7.3.6 asks for.</div>
         </button>
         <button class="choice-card" onclick="selectCard(this,'rc1')">
           <div class="choice-label">Budget Constraint</div>
