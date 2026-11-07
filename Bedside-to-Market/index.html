@@ -111,7 +111,15 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 
 /* ==================== METERS (in the fixed topbar) ==================== */
 .topmeters{display:flex;gap:var(--space-5);align-items:center}
-.tm{display:flex;flex-direction:column;gap:3px;min-width:70px}
+.tm{position:relative;display:flex;flex-direction:column;gap:3px;min-width:70px}
+.tm[data-level="1"]{animation:tmBlink 1.8s steps(1,end) infinite}
+.tm[data-level="2"]{animation:tmBlink .6s steps(1,end) infinite}
+@keyframes tmBlink{0%,55%{opacity:1}56%,100%{opacity:.2}}
+.tm[data-level="3"]::after{content:"";position:absolute;inset:-8px -6px;pointer-events:none;
+  background:
+    linear-gradient(to top right,transparent calc(50% - 1.5px),var(--color-error) calc(50% - 1.5px),var(--color-error) calc(50% + 1.5px),transparent calc(50% + 1.5px)),
+    linear-gradient(to bottom right,transparent calc(50% - 1.5px),var(--color-error) calc(50% - 1.5px),var(--color-error) calc(50% + 1.5px),transparent calc(50% + 1.5px))}
+@media (prefers-reduced-motion:reduce){.tm[data-level="1"],.tm[data-level="2"]{animation:none}}
 .tm-l{font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--color-text-faint);line-height:1}
 .tm-v{font-size:.76rem;font-weight:700;line-height:1.1;display:flex;align-items:center;gap:4px;white-space:nowrap}
 .tm-arrow{font-size:.62rem;opacity:0;transition:opacity var(--transition)}
@@ -155,10 +163,6 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 .opt-d{display:block;font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6;margin-top:var(--space-2)}
 /* Consequence line: hidden until a choice is locked in, so nobody plays
    "spot the green one" instead of thinking about the decision. */
-.opt-e{display:none;font-size:var(--text-xs);font-weight:700;margin-top:var(--space-2);color:var(--color-primary)}
-.opt-e.shown{display:block;animation:fadeIn .3s ease}
-.opt-e.warn{color:var(--color-orange)}
-.opt-e.risk{color:var(--color-error)}
 .opt-lock{display:block;font-size:var(--text-xs);font-weight:700;color:var(--color-error);margin-top:var(--space-2)}
 
 /* ==================== FEEDBACK ==================== */
@@ -254,7 +258,7 @@ a,button,[role="button"]{transition:color var(--transition),background var(--tra
 /* ==================== ROLL ==================== */
 .roll-card{border:2px dashed var(--color-gold);background:transparent}
 .roll-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap}
-.roll-tag{font-size:var(--text-xs);font-weight:800;letter-spacing:.12em;color:var(--color-gold);border:1.5px solid var(--color-gold);border-radius:var(--radius-full);padding:1px 11px}
+.roll-tag{font-size:var(--text-xs);font-weight:700;letter-spacing:.02em;color:var(--color-gold);border:1.5px solid var(--color-gold);border-radius:var(--radius-full);padding:1px 11px}
 .roll-title{font-size:var(--text-sm);font-weight:700}
 .roll-odds{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-top:var(--space-4)}
 .odd{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4);background:var(--color-surface-2)}
@@ -431,7 +435,7 @@ kbd{font-family:var(--font-mono);font-size:.85em;border:1px solid var(--color-bo
               </div>
               <div class="howto-i">
                 <div class="howto-n">Three dice</div>
-                <div class="howto-t">Odds shown before you commit</div>
+                <div class="howto-t">Luck plays a part</div>
                 <div class="howto-d">A good decision can still turn out badly.</div>
               </div>
               <div class="howto-i">
@@ -550,7 +554,6 @@ const STAGES = [
       {
         t: "Build an automatic tourniquet timer with alarms",
         d: "Concrete, and everyone agrees immediately. The team can start designing on Monday.",
-        e: "Fast start · the solution is already chosen", eClass: "risk",
         m: { sch: 0, bud: -3, risk: 3 },
         fbKind: "risk",
         verdict: "You skipped the question and wrote down an answer.",
@@ -560,7 +563,6 @@ const STAGES = [
       {
         t: "Surgical teams in limb procedures need to know cumulative tourniquet time at any point in a case, so they can act before it passes the surgeon's limit",
         d: "A problem, a population, an outcome you could measure. No device in the sentence.",
-        e: "Three weeks slower · a clean intended use", eClass: "",
         m: { sch: 4, bud: -4, risk: 0 },
         fbKind: "good",
         verdict: "This is the sentence that survives contact with a regulator.",
@@ -570,7 +572,6 @@ const STAGES = [
       {
         t: "Reduce tourniquet-related nerve injuries",
         d: "Ambitious, fundable, and exactly the sentence that ends up on slide three of the pitch deck.",
-        e: "A great story · an outcome you cannot measure", eClass: "risk",
         m: { sch: 0, bud: -3, risk: 2 },
         fbKind: "risk",
         verdict: "You just wrote your marketing claim into your need statement.",
@@ -586,13 +587,13 @@ const STAGES = [
     name: "Intellectual property versus regulatory",
     beats: [
       "<p>Before committing to an architecture, the team runs a <span class='T' data-t='ftop'>patent search</span>. This is ordinary practice and it is done early on purpose: patents are public, and learning in month 2 that somebody already owns your approach is survivable. Learning it in month 30, after tooling and testing, is not.</p>" +
-      "<p>The search comes back with a problem.</p>",
+      "<p><i>The search comes back with a problem.</i></p>",
 
       "<p>Ravelin Orthopaedics holds a patent on the exact step that makes this device work: automatically deciding where one patient's case ends and the next begins.</p>" +
       "<p>Not the cuff. Not the display. Not the alarm. The <i>inference</i> — a device that watches inflations and deflations and concludes on its own that this is still the same case, or that a new patient is on the table. Build something that infers the case boundary and you are doing the patented thing, whatever else your device also does.</p>",
 
       "<p>Which is worse than a purely legal nuisance, because that same approach is what every tourniquet system already on the market resembles.</p>" +
-      "<p>Clearing a device in the US usually means arguing that it is close enough to something already being sold — so the nearer you stay to Ravelin's method, the easier that argument becomes and the sharper your legal exposure gets. Move away from the patent and the legal problem shrinks while the regulatory one grows.</p>" +
+      "<p><b><i>Clearing a device in the US usually means arguing that it is close enough to something already being sold</i></b> — so the nearer you stay to Ravelin's method, the easier that argument becomes and the sharper your legal exposure gets. Move away from the patent and the legal problem shrinks while the regulatory one grows.</p>" +
       "<p>The two risks point in opposite directions. You have to choose where to stand.</p>"
     ],
     revealLabel: "See the options",
@@ -601,7 +602,6 @@ const STAGES = [
       {
         t: "Design around it",
         d: "Don't infer. A person scans the patient's wristband to open a case, and every inflation accumulates against that patient until somebody closes it.",
-        e: "Patent risk gone · nothing already on the market works this way", eClass: "warn",
         m: { sch: 14, bud: -22, risk: -4 },
         fbKind: "warn",
         verdict: "You bought your way out of one problem and into another.",
@@ -612,7 +612,6 @@ const STAGES = [
       {
         t: "Stay close to the predicate",
         d: "Build it the conventional way, the way existing tourniquet systems already work, and accept the exposure.",
-        e: "Cleanest regulatory story · infringement risk stays live", eClass: "risk",
         m: { sch: 2, bud: -6, risk: 2 },
         fbKind: "risk",
         verdict: "The regulatory argument almost writes itself. The legal one doesn't.",
@@ -622,7 +621,6 @@ const STAGES = [
       {
         t: "License the patent from Ravelin",
         d: "Pay for the right to use the patented approach. Both problems disappear in one signature.",
-        e: "Both risks gone · most of your cash goes with them", eClass: "warn",
         m: { sch: 4, bud: -60, risk: -2 },
         fbKind: "warn",
         verdict: "The cleanest decision available, and the most expensive one.",
@@ -649,7 +647,6 @@ const STAGES = [
       {
         t: "Test the lab prototypes now",
         d: "Printed housings, bench supply, hand-soldered displays. Six weeks to data, and the board gets its numbers on time.",
-        e: "Fast and cheap · 70% something changes in production", eClass: "risk",
         m: { sch: 2, bud: -5, risk: 6 },
         risk: { key: "prod", p: 0.70 },
         fbKind: "risk",
@@ -660,7 +657,6 @@ const STAGES = [
       {
         t: "Wait for production-equivalent units",
         d: "Real tooling, supplier parts, the actual assembly process. Four months and real money before you learn anything.",
-        e: "Nothing surprises you later · the board is unhappy", eClass: "",
         m: { sch: 16, bud: -20, risk: -6 },
         risk: { key: "prod", p: 0 },
         fbKind: "good",
@@ -671,7 +667,6 @@ const STAGES = [
       {
         t: "Split the plan",
         d: "Prototypes for functional tests. Production-equivalent units only for the three that could hurt somebody: alert audibility, display legibility, timing accuracy.",
-        e: "Most of the protection · 20% residual surprise", eClass: "warn",
         m: { sch: 8, bud: -12, risk: -2 },
         risk: { key: "prod", p: 0.20 },
         fbKind: "good",
@@ -697,7 +692,7 @@ const T3_DISPLAY = {
     kicker: "Month 6",
     name: "Where the number appears",
     beats: [
-      "<p>Feature freeze is next week. One decision is still open, and nobody has been treating it as a decision: where does the number actually show up?</p>",
+      "<p>Feature freeze is next week. One decision is still open, and nobody has been treating it as a decision: <b><i>where does the number actually show up?</i></b></p>",
 
       "<p>Think about where everyone is standing. The tourniquet pump lives on a cart at the foot of the bed, past the anaesthesia screen. That is where the controller would naturally go, because that is where the hardware already is.</p>" +
       "<p>The surgeon is at the knee, gowned and gloved, hands in the field. For the next hour they will not walk anywhere, turn around, or touch anything that isn't sterile. The circulating nurse can see the cart, and is also fetching trays, charting, and answering the door.</p>",
@@ -711,7 +706,7 @@ const T3_DISPLAY = {
           { l: "Time the leg spent with no blood flow", v: "68 min", k: "actual" },
           { l: "Her limit reached at", v: "60 min", k: "shown" }
         ],
-        caption: "At that mark something has to happen, and someone has to decide it. Whichever option you pick, the device will know. The question is who finds out."
+        caption: "At that mark something has to happen, and someone has to decide it. <i>Whichever option you pick, the device will know. The question is who finds out.</i>"
       })
     ],
     beatsIf: {
@@ -723,7 +718,6 @@ const T3_DISPLAY = {
       {
         t: "On the pump cart",
         d: "Use the screen that is already part of the tourniquet hardware. No new parts, no new tooling, nothing extra to test or manufacture.",
-        e: "75% the number doesn't reach anyone in time", eClass: "risk",
         m: { sch: 2, bud: -5, risk: 14 },
         risk: { key: "use", p: 0.75 },
         fbKind: "risk",
@@ -734,8 +728,6 @@ const T3_DISPLAY = {
       {
         t: "Add a second display in the surgeon's sightline",
         d: "A small repeater screen on a boom arm, positioned where the surgeon already looks. Another part, another supplier, more tooling and more testing.",
-        e: "5% residual · the number is where the decision is", eClass: "",
-        eIf: { around: "Nearly free — the bracket by the field is already tooled", aroundClass: "" },
         mIf: { around: { sch: 5, bud: -7, risk: -8 } },
         m: { sch: 10, bud: -14, risk: -8 },
         risk: { key: "use", p: 0.05 },
@@ -750,7 +742,6 @@ const T3_DISPLAY = {
       {
         t: "Cart display plus an audible callout",
         d: "Keep the single screen, and have the device speak up at the limit and every five minutes after. Cheaper than a second display, and it does not need anyone to be looking.",
-        e: "25% residual · sound reaches the room", eClass: "warn",
         m: { sch: 6, bud: -10, risk: -4 },
         risk: { key: "use", p: 0.25 },
         fbKind: "good",
@@ -773,7 +764,7 @@ const T3_DISPLAY = {
     caption: "The device was right, on time, and eleven minutes of cuff time went by before anyone acted on it. Every unit met every specification you wrote."
   },
   recall: "Every unit examined worked exactly as specified. The alert fired at the limit, on the cart, past the anaesthesia screen, and the people who needed it were looking somewhere else. ",
-  luck: "You put the only display where the person who has to act cannot see it, at a stated 75%.",
+  luck: "You put the only display where the person who has to act cannot see it, which carried about a 75% chance of a use error.",
   stand: [
     "<b>Month 6 — you put the only display on the pump cart.</b> Nobody has evidence that the person who must act on the number can read it, so the <span class='T' data-t='hf'>human factors</span> burden is heavier.",
     "<b>Month 6 — you put a display in the surgeon's sightline.</b> The person who acts on the number can see it, which makes the human factors story short.",
@@ -823,7 +814,6 @@ const T3_HIDDEN = {
       {
         t: "Add auto-resume",
         d: "The panel loves it and it demos beautifully. The ten-minute rule lives inside the software — nobody in the room can see which mode the device is in.",
-        e: "75% a use error reaches the field", eClass: "risk",
         m: { sch: 4, bud: -8, risk: 14 },
         risk: { key: "use", p: 0.75 },
         fbKind: "risk",
@@ -834,8 +824,6 @@ const T3_HIDDEN = {
       {
         t: "Keep it explicit",
         d: "Time accumulates for the case. Resetting takes a deliberate End Case action that records who did it. One extra tap, no hidden modes.",
-        e: "5% residual · one extra tap", eClass: "",
-        eIf: { around: "Nearly free — your device already works this way", aroundClass: "" },
         mIf: { around: { sch: 1, bud: -3, risk: -8 } },
         m: { sch: 3, bud: -6, risk: -8 },
         risk: { key: "use", p: 0.05 },
@@ -850,7 +838,6 @@ const T3_HIDDEN = {
       {
         t: "Add auto-resume, but show the mode",
         d: "A persistent banner reading CONTINUING or NEW CASE, and a prompt at the ten-minute boundary so somebody has to agree with the device.",
-        e: "25% residual · costs time and money", eClass: "warn",
         m: { sch: 9, bud: -14, risk: -4 },
         risk: { key: "use", p: 0.25 },
         fbKind: "good",
@@ -873,7 +860,7 @@ const T3_HIDDEN = {
     caption: "The nurse's note said 71. The screen said 42. Both were honest, and the device met every specification you wrote for it."
   },
   recall: "Every unit examined performed exactly to specification. The ten-minute rule did precisely what it was designed to do, and the room couldn't see it happening. ",
-  luck: "You shipped a mode the user cannot see, at a stated 75%.",
+  luck: "You shipped a mode the user cannot see, which carried about a 75% chance of a use error.",
   stand: [
     "<b>Month 6 — you shipped a hidden mode.</b> A device whose behaviour the user cannot see carries a heavier <span class='T' data-t='hf'>human factors</span> burden, and you have no data about how the room uses it.",
     "<b>Month 6 — you kept the timer explicit.</b> There is no hidden state to explain, which makes the human factors story short.",
@@ -931,16 +918,18 @@ const BANDS = {
   risk: [[25, "Low", "var(--color-primary)"], [55, "Watch", "var(--color-gold)"], [80, "High", "var(--color-orange)"], [999, "Severe", "var(--color-error)"]]
 };
 
+/* Returns [label, colour, level]; level 0 is the healthy band, 3 the last. */
 function band(key, v) {
   const b = BANDS[key];
-  if (key === "bud") { for (const [th, label, col] of b) if (v > th) return [label, col]; return b[b.length - 1].slice(1); }
-  for (const [th, label, col] of b) if (v < th) return [label, col];
-  return b[b.length - 1].slice(1);
+  if (key === "bud") { for (let i = 0; i < b.length; i++) if (v > b[i][0]) return [b[i][1], b[i][2], i]; }
+  else { for (let i = 0; i < b.length; i++) if (v < b[i][0]) return [b[i][1], b[i][2], i]; }
+  const last = b.length - 1;
+  return [b[last][1], b[last][2], last];
 }
 
 function buildMeters() {
   $("meters").innerHTML = METERS.map(([label, key, full]) =>
-    `<div class="tm" title="${full}">
+    `<div class="tm" id="tm-${key}" title="${full}">
        <div class="tm-l">${label}</div>
        <div class="tm-v"><span id="mv-${key}"></span><span class="tm-arrow" id="ma-${key}"></span></div>
        <div class="tm-bar"><div class="tm-fill" id="mf-${key}"></div></div>
@@ -952,7 +941,8 @@ function updateMeters() {
   if (!S || !$("mv-sch")) return;
   METERS.forEach(([, key]) => {
     const val = S[key];
-    const [word, col] = band(key, val);
+    const [word, col, level] = band(key, val);
+    $("tm-" + key).dataset.level = level;   // 1 slow blink, 2 fast blink, 3 crossed out (see .tm CSS)
     const pct = Math.min(100, Math.max(key === "bud" ? 0 : 4, val));
     $("mv-" + key).textContent = word;
     $("mv-" + key).style.color = col;
@@ -1099,26 +1089,20 @@ function showOptions() {
 }
 
 function optHTML(o, k) {
-  let e = o.e, ec = o.eClass || "";
-  if (o.eIf && o.eIf.around && around()) { e = o.eIf.around; ec = o.eIf.aroundClass || ""; }
   return `<button class="opt" data-k="${k}">
     <span class="opt-num">${k + 1}</span>
     <span class="opt-body">
       <span class="opt-t">${o.t}</span>
       <span class="opt-d">${o.d}</span>
-      <span class="opt-e ${ec}">${e}</span>
     </span>
   </button>`;
 }
 
-/* Locks the row and shows every option's consequence line, not just the
-   chosen one — seeing what you passed up is half the lesson. */
+/* Locks the row and dims the options that were not chosen. */
 function revealConsequences(k) {
   Array.from($("opts").children).forEach((btn, j) => {
     btn.disabled = true;
     if (!btn.classList.contains("locked")) btn.classList.add(j === k ? "chosen" : "dimmed");
-    const e = btn.querySelector(".opt-e");
-    if (e) e.classList.add("shown");
   });
 }
 
@@ -1167,7 +1151,7 @@ function standLines() {
   if (around()) {
     L.push("<b>Month 2 — you designed around the patent.</b> Your device asks a human to open the case, which is not how anything already cleared behaves. What you owe now depends on how a reviewer reads that departure, and you don't get to decide.");
   } else if (licensed()) {
-    L.push("<b>Month 2 — you licensed the patent.</b> You built the conventional way, so the <span class='T' data-t='se'>substantial equivalence</span> argument is straightforward. Your bank balance is not.");
+    L.push("<b>Month 2 — you licensed the patent.</b> You built the conventional way, so the <span class='T' data-t='se'>substantial equivalence</span> argument is straightforward.");
   } else {
     L.push("<b>Month 2 — you stayed close to the predicate.</b> The substantial equivalence argument is the easiest one available to you.");
   }
@@ -1203,7 +1187,7 @@ function renderPayoff() {
 
   const openBeat = "<p>The design is frozen, the testing is done, and the submission has to be written. This is the month when the three decisions you have already made stop being independent and start adding up.</p>";
   const standBeat =
-    `<p>Everything you decided is now a single question: what does this submission have to contain?</p>
+    `<p>Everything you decided is now a single question: <i><u>what does this submission have to contain?</u></i></p>
      <div class="owed" style="margin-top:var(--space-4)">
        <div class="owed-h">Where you stand</div>
        ${standLines().map((l) => `<div class="owed-l">${l}</div>`).join("")}
@@ -1219,7 +1203,7 @@ function renderPathwayRoll() {
   div.className = "beat";
   div.innerHTML =
     `<div class="card roll-card">
-       <div class="roll-head"><span class="roll-tag">ROLL</span><span class="roll-title">Which route is even available to you?</span></div>
+       <div class="roll-head"><span class="roll-tag">You decided to roll the dice</span><span class="roll-title">Which route is even available to you?</span></div>
        <div class="feedback-body" style="margin-top:var(--space-3);font-size:var(--text-sm)">
          Your device departs from every available <span class='T' data-t='predicate'>predicate</span>. Whether that raises <i>different questions of safety and effectiveness</i> is a reviewer's judgement, not a number you can compute in advance.
        </div>
@@ -1278,7 +1262,6 @@ const PAYOFF_OPTS = [
   {
     t: "Fund the evidence you owe",
     d: "Pay for the testing, write the file properly, submit something you can defend line by line.",
-    e: "Expensive · defensible", eClass: "",
     m: { sch: 10, bud: -25, risk: -5 },
     verdict: "You bought the only thing that settles a review: evidence.",
     fb: "<p>It cost months and most of what was left, and your submission now says what you can show. That is the whole trade.</p>",
@@ -1287,7 +1270,6 @@ const PAYOFF_OPTS = [
   {
     t: "Narrow the claim",
     d: "Claim what you can support: the device displays cumulative inflation time and alerts at a set interval. Nothing about injury.",
-    e: "Smaller market · smaller burden", eClass: "warn",
     m: { sch: 4, bud: -8, risk: -3 },
     verdict: "You made the claim match the evidence instead of the other way round.",
     fb: "<p>A narrow claim you can support beats a broad one you can't. The commercial team will not enjoy the conversation, and the file is internally consistent.</p>",
@@ -1297,7 +1279,6 @@ const PAYOFF_OPTS = [
   {
     t: "Submit as-is and hope",
     d: "File what you have. Maybe the reviewer doesn't ask the question you can't answer.",
-    e: "2 in 5 clean · otherwise months lost", eClass: "risk",
     m: { sch: 0, bud: -3, risk: 4 },
     verdict: "You put the decision in somebody else's hands.",
     fb: "",
@@ -1364,7 +1345,7 @@ const LAUNCH_BRIDGE =
 function renderHopeRoll() {
   $("feedback-slot").innerHTML =
     `<div class="card roll-card">
-       <div class="roll-head"><span class="roll-tag">ROLL</span><span class="roll-title">Does the reviewer ask?</span></div>
+       <div class="roll-head"><span class="roll-tag">You decided to roll the dice</span><span class="roll-title">Does the reviewer ask?</span></div>
        <div class="roll-odds">
          <div class="odd" id="h-a"><div class="odd-p">2 in 5</div><div class="odd-t">Clean review. Nobody pulls the thread.</div></div>
          <div class="odd" id="h-b"><div class="odd-p">3 in 5</div><div class="odd-t">A request for more information. Months, and money you were counting on.</div></div>
@@ -1435,21 +1416,18 @@ const POST_OPTS = [
   {
     t: "Handle them routinely",
     d: "Log each one, reply to the customer, no design change. This is what a complaint file looks like on an ordinary week.",
-    e: "Correct when all three are noise", eClass: "",
     m: { sch: 0, bud: 0, risk: 0 },
     nt: "Right when nothing in the file points at a common cause, wrong when something does."
   },
   {
     t: "Investigate the pattern",
     d: "Pull the records, look for a common cause, confirm whether there is a trend, and if there is, correct the design and tell users.",
-    e: "Costs money and months · finds a real trend", eClass: "warn",
     m: { sch: 6, bud: -18, risk: -15 },
     nt: "The only option that can find a cause hiding behind unrelated-looking reports."
   },
   {
     t: "Halt shipments",
     d: "Stop everything, notify the field today, and work out what happened afterwards.",
-    e: "Right only if the signal is severe", eClass: "risk",
     m: { sch: 10, bud: -40, risk: -12 },
     nt: "The heaviest response available; without a root cause you can't tell users what to do differently."
   }
@@ -1462,7 +1440,7 @@ function renderPostmarket() {
   $("feedback-slot").innerHTML = "";
 
   const beat =
-    `<p>Two years of decisions, and this is where you find out which of them mattered.</p>
+    `<p><b><i>Two years of decisions, and this is where you find out which of them mattered.</i></b></p>
      <p>Complaints arrive constantly in a device business, and most of them are nothing: shipping damage, a user who wants a different default, a unit that was mishandled. The job is not to react to each one. It is to notice when several of them are the same thing wearing different clothes.</p>
      <p>There are three open in the file this morning.</p>`;
 
@@ -1623,7 +1601,7 @@ function resolveEnding() {
       title: "Cleared — and Lucky",
       body:
         `<p>You tested prototypes, shipped a hidden mode, and nothing came back. The device is on the market and the complaint file is quiet.</p>
-         <p>Look at the odds you were shown. You took a 70% chance and a 75% chance and neither landed. That happens, and it's the most dangerous outcome available to a company, because next time everyone in the room will remember that it worked.</p>`
+         <p>Look at the odds. Testing prototypes carried a 70% chance of a production surprise, and the hidden mode a 75% chance of a use error. Neither landed. That happens, and it's the most dangerous outcome available to a company, because next time everyone in the room will remember that it worked.</p>`
     };
   }
 
@@ -1714,11 +1692,11 @@ function luckVsYou() {
   if (S.rolls.prod && S.picks.t2 !== 0) luck.push("A production difference reached the field despite a reasonable test plan. The residual landed.");
   if (S.rolls.use && S.picks.t3 !== 0) luck.push("A use error reached the field despite a design with no hidden mode. The residual landed.");
   if (S.rolls.scan) luck.push("Someone forgot to scan a patient in. You were told this carried 15% the moment you designed around the patent.");
-  if (S.picks.payoff === 2) luck.push(S.rolls.hope ? "The reviewer didn't pull the thread. 2 in 5, and it went your way." : "The reviewer pulled the thread. 3 in 5, and it didn't.");
+  if (S.picks.payoff === 2) luck.push(S.rolls.hope ? "You hoped the reviewer wouldn't ask. That was a 2 in 5 chance, and they didn't." : "You hoped the reviewer wouldn't ask. That was a 2 in 5 chance, and the reviewer asked.");
 
   if (S.picks.setup === 0) you.push("You wrote the solution into the need statement.");
   if (S.picks.setup === 2) you.push("You committed to an outcome claim in month 1 and had to live with it at submission.");
-  if (S.picks.t2 === 0) you.push("You tested prototypes, with 70% printed on the option.");
+  if (S.picks.t2 === 0) you.push("You tested prototypes, which carried a 70% chance of a production surprise.");
   if (S.picks.t3 === 0) you.push(T3.luck);
   if (S.picks.payoff === 2) you.push("You submitted without the evidence, knowing the odds.");
   if (S.picks.post === 0 && anySignal()) you.push("The pattern was in the complaint file and you closed it as routine.");
@@ -1746,8 +1724,8 @@ function renderOutcome() {
 
 const SPLIT_INTRO =
   `<div class="card"><div class="feedback-body">
-     <p>Before the timeline, one separation worth making deliberately.</p>
-     <p>Some of what happened to Fernwall was decided by a roll you could see the odds of and could not control. The rest was visible on the screen at the moment you chose it. Telling those two apart is most of what it means to learn from a case rather than just remember it.</p>
+     <p><b><i>Before the timeline, one separation worth making deliberately.</i></b></p>
+     <p>Some of what happened to Fernwall was decided by a roll of the dice you could not control. The rest was visible on the screen at the moment you chose it. Telling those two apart is most of what it means to learn from a case rather than just remember it.</p>
    </div></div>`;
 
 function showSplit() {
@@ -1759,7 +1737,7 @@ function showSplit() {
        <div class="split-box luck">
          <div class="split-h">You couldn't have known</div>
          ${luck.length ? luck.map((l) => `<div class="split-i">${l}</div>`).join("")
-           : `<div class="split-empty">Nothing on your path came down to a roll. Your choices removed the dice.</div>`}
+           : `<div class="split-empty">No luck involved: every choice you made removed the dice, so nothing on your path was left to chance.</div>`}
        </div>
        <div class="split-box you">
          <div class="split-h">You should have known</div>
@@ -1921,9 +1899,7 @@ if (ADVANCED) $("badge").textContent = "Fictional case · advanced";
 /* ==================== THEME ==================== */
 (function () {
   const root = document.documentElement;
-  const mq = window.matchMedia("(prefers-color-scheme: dark)");
-  root.setAttribute("data-theme", mq.matches ? "dark" : "light");
-  mq.addEventListener("change", (ev) => root.setAttribute("data-theme", ev.matches ? "dark" : "light"));
+  root.setAttribute("data-theme", "light");   // always opens bright; the moon button switches to dark
   document.querySelector("[data-theme-toggle]").addEventListener("click", () => {
     root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
   });
